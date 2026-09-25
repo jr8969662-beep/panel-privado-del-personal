@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Comisaría - Formularios de Trámites</title>
+<style>
+  :root{
+    --azul:#1a3a6b; --azul-claro:#2c5aa0; --gris:#f4f6f9; --borde:#d7dde5; --texto:#1f2937;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI', Arial, sans-serif; background:var(--gris); margin:0; color:var(--texto);
+  }
+  header{
+    background:var(--azul); color:#fff; padding:20px 24px;
+  }
+  header h1{margin:0; font-size:1.3rem;}
+  header p{margin:4px 0 0; font-size:0.85rem; opacity:0.85;}
+  main{max-width:760px; margin:24px auto; padding:0 16px;}
+
+  .tarjetas{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:28px;}
+  .tarjeta{
+    background:#fff; border:1px solid var(--borde); border-radius:10px; padding:18px;
+    cursor:pointer; text-align:left; font-size:0.95rem; transition:box-shadow .15s, border-color .15s;
+  }
+  .tarjeta:hover{border-color:var(--azul-claro); box-shadow:0 2px 8px rgba(26,58,107,0.12);}
+  .tarjeta.activa{border-color:var(--azul); background:#eef3fa;}
+  .tarjeta b{display:block; margin-bottom:6px; color:var(--azul);}
+
+  form{
+    background:#fff; border:1px solid var(--borde); border-radius:10px; padding:22px; display:none;
+  }
+  form.activo{display:block;}
+  form h2{margin-top:0; color:var(--azul); font-size:1.1rem;}
+  form h3.seccion{font-size:0.85rem; color:var(--azul-claro); text-transform:uppercase; letter-spacing:.03em; margin:24px 0 4px; border-top:1px solid var(--borde); padding-top:16px;}
+  label{display:block; margin:14px 0 6px; font-size:0.88rem; font-weight:600;}
+  input, select, textarea{
+    width:100%; padding:9px 10px; border:1px solid var(--borde); border-radius:6px; font-size:0.9rem; font-family:inherit;
+  }
+  textarea{resize:vertical; min-height:70px;}
+  .fila{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .btns{margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;}
+  button{
+    padding:10px 18px; border:none; border-radius:6px; font-size:0.9rem; cursor:pointer;
+  }
+  .btn-primario{background:var(--azul); color:#fff;}
+  .btn-secundario{background:#e5e9ef; color:var(--texto);}
+  .nota{font-size:0.78rem; color:#6b7280; margin-top:10px;}
+
+  /* Captura de foto de DNI */
+  .captura-foto{
+    border:1px dashed var(--borde); border-radius:8px; padding:14px; margin-top:8px; background:#fafbfc;
+  }
+  .captura-visor{position:relative; width:100%; max-width:280px;}
+  .captura-visor video, .captura-visor img{
+    width:100%; border-radius:6px; background:#000; display:block;
+  }
+  .captura-visor video[hidden], .captura-visor img[hidden]{display:none;}
+  .captura-botones{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .captura-botones button{padding:7px 12px; font-size:0.82rem;}
+  .captura-estado{font-size:0.78rem; color:#6b7280; margin-top:6px;}
+  .captura-estado.ok{color:#1a7f3c; font-weight:600;}
+  .btn-quitar-testigo{background:none; color:#b91c1c; text-decoration:underline; padding:4px 0; font-size:0.8rem;}
+  .bloque-testigo[data-activo="false"] .campos-testigo{display:none;}
+
+  /* Vista de documento generado */
+  #documento{display:none; background:#fff; border:1px solid var(--borde); border-radius:10px; padding:30px;}
+  #documento.activo{display:block;}
+  #documento h2{text-align:center; color:var(--azul); font-size:1.05rem; margin-bottom:4px;}
+  #documento .subt{text-align:center; font-size:0.8rem; color:#6b7280; margin-bottom:24px;}
+  #documento dl{margin:0;}
+  #documento dt{font-size:0.78rem; color:#6b7280; margin-top:12px;}
+  #documento dd{margin:2px 0 0; font-size:0.95rem;}
+  #documento dd img{max-width:220px; border:1px solid var(--borde); border-radius:6px; display:block; margin-top:4px;}
+  #documento .firma{margin-top:50px; display:flex; justify-content:space-between; font-size:0.8rem; flex-wrap:wrap; gap:16px;}
+  #documento .firma div{border-top:1px solid #333; padding-top:6px; width:30%; text-align:center; min-width:150px;}
+
+  @media print{
+    header, .tarjetas, form, .no-print{display:none !important;}
+    #documento{display:block !important; border:none; box-shadow:none;}
+    body{background:#fff;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mi Comisaría</h1>
+  <p>Solicitud de certificados - Policía de Salta</p>
+</header>
+
+<main>
+
+  <div class="tarjetas" id="tarjetas">
+    <button class="tarjeta" data-tramite="residencia">
+      <b>Certificado de Residencia</b>
+      Acredita el domicilio donde vive la persona solicitante.
+    </button>
+    <button class="tarjeta" data-tramite="convivencia">
+      <b>Certificado de Convivencia</b>
+      Acredita que dos o más personas conviven en un mismo domicilio.
+    </button>
+    <button class="tarjeta" data-tramite="carencia">
+      <b>Certificado de Carencia de Recursos</b>
+      Acredita la situación de falta de recursos económicos.
+    </button>
+  </div>
+
+  <!-- Formulario: Residencia -->
+  <form id="form-residencia">
+    <h2>Certificado de Residencia</h2>
+
+    <label>Nombre completo</label>
+    <input type="text" name="nombre" required>
+
+    <div class="fila">
+      <div>
+        <label>DNI</label>
+        <input type="text" name="dni" pattern="[0-9]{7,8}" required>
+      </div>
+      <div>
+        <label>Fecha de nacimiento</label>
+        <input type="date" name="fechaNacimiento" required>
+      </div>
+    </div>
+
+    <label>Domicilio actual (calle, número, barrio)</label>
+    <input type="text" name="domicilio" required>
+
+    <div class="fila">
+      <div>
+        <label>Localidad</label>
+        <input type="text" name="localidad" required>
+      </div>
+      <div>
+        <label>Tiempo de residencia en el domicilio</label>
+        <input type="text" name="tiempoResidencia" placeholder="Ej: 3 años" required>
+      </div>
+    </div>
+
+    <label>Barrio / zona</label>
+    <select name="zona" class="select-zona" required>
+      <option value="">Seleccionar</option>
+    </select>
+
+    <label>Motivo del trámite</label>
+    <textarea name="motivo" required></textarea>
+
+    <label>Foto del DNI (solicitante)</label>
+    <div class="captura-foto" data-target="res-solicitante">
+      <div class="captura-visor">
+        <video autoplay playsinline muted></video>
+        <img hidden alt="Foto del DNI capturada">
+      </div>
+      <canvas hidden></canvas>
+      <input type="hidden" name="foto_solicitante" value="">
+      <div class="captura-botones">
+        <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+        <button type="button" class="btn-primario btn-capturar" hidden>Tomar foto</button>
+        <button type="button" class="btn-secundario btn-repetir" hidden>Repetir foto</button>
+      </div>
+      <p class="captura-estado">Sin foto capturada</p>
+    </div>
+
+    <h3 class="seccion">Testigos (opcional, hasta 2)</h3>
+    <div class="bloque-testigo" data-testigo="1" data-activo="true">
+      <div class="fila campos-testigo">
+        <div>
+          <label>Nombre del testigo 1</label>
+          <input type="text" name="testigo1Nombre">
+        </div>
+        <div>
+          <label>DNI del testigo 1</label>
+          <input type="text" name="testigo1Dni" pattern="[0-9]{7,8}">
+        </div>
+      </div>
+      <label class="campos-testigo">Foto del DNI (testigo 1)</label>
+      <div class="captura-foto campos-testigo" data-target="res-testigo1">
+        <div class="captura-visor">
+          <video autoplay playsinline muted></video>
+          <img hidden alt="Foto del DNI capturada">
+        </div>
+        <canvas hidden></canvas>
+        <input type="hidden" name="foto_testigo1" value="">
+        <div class="captura-botones">
+          <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+          <button type="button" class="btn-primario btn-capturar" hidden>Tomar foto</button>
+          <button type="button" class="btn-secundario btn-repetir" hidden>Repetir foto</button>
+        </div>
+        <p class="captura-estado">Sin foto capturada</p>
+      </div>
+    </div>
+
+    <button type="button" class="btn-secundario btn-agregar-testigo">+ Agregar segundo testigo</button>
+    <div class="bloque-testigo" data-testigo="2" data-activo="false">
+      <div class="fila campos-testigo">
+        <div>
+          <label>Nombre del testigo 2</label>
+          <input type="text" name="testigo2Nombre" disabled>
+        </div>
+        <div>
+          <label>DNI del testigo 2</label>
+          <input type="text" name="testigo2Dni" pattern="[0-9]{7,8}" disabled>
+        </div>
+      </div>
+      <label class="campos-testigo">Foto del DNI (testigo 2)</label>
+      <div class="captura-foto campos-testigo" data-target="res-testigo2">
+        <div class="captura-visor">
+          <video autoplay playsinline muted></video>
+          <img hidden alt="Foto del DNI capturada">
+        </div>
+        <canvas hidden></canvas>
+        <input type="hidden" name="foto_testigo2" value="" disabled>
+        <div class="captura-botones">
+          <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+          <button type="button" class="btn-primario btn-capturar" hidden>Tomar foto</button>
+          <button type="button" class="btn-secundario btn-repetir" hidden>Repetir foto</button>
+        </div>
+        <p class="captura-estado">Sin foto capturada</p>
+      </div>
+      <button type="button" class="btn-quitar-testigo">Quitar testigo 2</button>
+    </div>
+
+    <div class="btns">
+      <button type="submit" class="btn-primario">Generar certificado</button>
+      <button type="button" class="btn-secundario volver">Volver</button>
+    </div>
+    <p class="nota">Las fotos se toman con la cámara del dispositivo y se usan solo para generar este documento; no se suben a ningún servidor.</p>
+  </form>
+
+  <!-- Formulario: Convivencia -->
+  <form id="form-convivencia">
+    <h2>Certificado de Convivencia</h2>
+
+    <h3 class="seccion" style="border-top:none; margin-top:0; padding-top:0;">Solicitante</h3>
+    <div class="fila">
+      <div>
+        <label>Nombre completo</label>
+        <input type="text" name="nombreSolicitante" required>
+      </div>
+      <div>
+        <label>DNI</label>
+        <input type="text" name="dniSolicitante" pattern="[0-9]{7,8}" required>
+      </div>
+    </div>
+    <label>Foto del DNI (solicitante)</label>
+    <div class="captura-foto" data-target="con-solicitante">
+      <div class="captura-visor">
+        <video autoplay playsinline muted></video>
+        <img hidden alt="Foto del DNI capturada">
+      </div>
+      <canvas hidden></canvas>
+      <input type="hidden" name="foto_solicitante" value="">
+      <div class="captura-botones">
+        <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+        <button type="button" class="btn-primario btn-capturar" hidden>Tomar foto</button>
+        <button type="button" class="btn-secundario btn-repetir" hidden>Repetir foto</button>
+      </div>
+      <p class="captura-estado">Sin foto capturada</p>
+    </div>
+
+    <h3 class="seccion">Conviviente</h3>
+    <div class="fila">
+      <div>
+        <label>Nombre completo</label>
+        <input type="text" name="nombreConviviente" required>
+      </div>
+      <div>
+        <label>DNI</label>
+        <input type="text" name="dniConviviente" pattern="[0-9]{7,8}" required>
+      </div>
+    </div>
+
+    <label>Domicilio en común (calle, número, barrio, localidad)</label>
+    <input type="text" name="domicilioComun" required>
+
+    <label>Tiempo de convivencia</label>
+    <input type="text" name="tiempoConvivencia" placeholder="Ej: 2 años" required>
+
+    <label>Barrio / zona</label>
+    <select name="zona" class="select-zona" required>
+      <option value="">Seleccionar</option>
+    </select>
+
+    <label>Motivo del trámite</label>
+    <textarea name="motivo" required></textarea>
+
+    <h3 class="seccion">Testigos (opcional, hasta 2)</h3>
+    <div class="bloque-testigo" data-testigo="1" data-activo="true">
+      <div class="fila campos-testigo">
+        <div>
+          <label>Nombre del testigo 1</label>
+          <input type="text" name="testigo1Nombre">
+        </div>
+        <div>
+          <label>DNI del testigo 1</label>
+          <input type="text" name="testigo1Dni" pattern="[0-9]{7,8}">
+        </div>
+      </div>
+      <label class="campos-testigo">Foto del DNI (testigo 1)</label>
+      <div class="captura-foto campos-testigo" data-target="con-testigo1">
+        <div class="captura-visor">
+          <video autoplay playsinline muted></video>
+          <img hidden alt="Foto del DNI capturada">
+        </div>
+        <canvas hidden></canvas>
+        <input type="hidden" name="foto_testigo1" value="">
+        <div class="captura-botones">
+          <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+          <button type="button" class="btn-primario btn-capturar" hidden>Tomar foto</button>
+          <button type="button" class="btn-secundario btn-repetir" hidden>Repetir foto</button>
+        </div>
+        <p class="captura-estado">Sin foto capturada</p>
+      </div>
+    </div>
+
+    <button type="button" class="btn-secundario btn-agregar-testigo">+ Agregar segundo testigo</button>
+    <div class="bloque-testigo" data-testigo="2" data-activo="false">
+      <div class="fila campos-testigo">
+        <div>
+          <label>Nombre del testigo 2</label>
+          <input type="text" name="testigo2Nombre" disabled>
+        </div>
+        <div>
+          <label>DNI del testigo 2</label>
+          <input type="text" name="testigo2Dni" pattern="[0-9]{7,8}" disabled>
+        </div>
+      </div>
+      <label class="campos-testigo">Foto del DNI (testigo 2)</label>
+      <div class="captura-foto campos-testigo" data-target="con-testigo2">
+        <div class="captura-visor">
+          <video autoplay playsinline muted></video>
+          <img hidden alt="Foto del DNI capturada">
+        </div>
+        <canvas hidden></canvas>
+        <input type="hidden" name="foto_testigo2" value="" disabled>
+        <div class="captura-botones">
+          <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+          <button type="button" class="btn-primario btn-capturar" hidden>Tomar foto</button>
+          <button type="button" class="btn-secundario btn-repetir" hidden>Repetir foto</button>
+        </div>
+        <p class="captura-estado">Sin foto capturada</p>
+      </div>
+      <button type="button" class="btn-quitar-testigo">Quitar testigo 2</button>
+    </div>
+
+    <div class="btns">
+      <button type="submit" class="btn-primario">Generar certificado</button>
+      <button type="button" class="btn-secundario volver">Volver</button>
+    </div>
+    <p class="nota">Las fotos se toman con la cámara del dispositivo y se usan solo para generar este documento; no se suben a ningún servidor.</p>
+  </form>
+
+  <!-- Formulario: Carencia de recursos -->
+  <form id="form-carencia">
+    <h2>Certificado de Carencia de Recursos</h2>
+
+    <label>Nombre completo</label>
+    <input type="text" name="nombre" required>
+
+    <div class="fila">
+      <div>
+        <label>DNI</label>
+        <input type="text" name="dni" pattern="[0-9]{7,8}" required>
+      </div>
+      <div>
+        <label>Estado civil</label>
+        <select name="estadoCivil" required>
+          <option value="">Seleccionar</option>
+          <option>Soltero/a</option>
+          <option>Casado/a</option>
+          <option>Divorciado/a</option>
+          <option>Viudo/a</option>
+          <option>Unión convivencial</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Domicilio</label>
+    <input type="text" name="domicilio" required>
+
+    <div class="fila">
+      <div>
+        <label>Situación laboral actual</label>
+        <select name="situacionLaboral" required>
+          <option value="">Seleccionar</option>
+          <option>Desempleado/a</option>
+          <option>Changas / trabajo informal</option>
+          <option>Empleado/a</option>
+          <option>Jubilado/a - pensionado/a</option>
+        </select>
+      </div>
+      <div>
+        <label>Personas a cargo</label>
+        <input type="number" name="personasACargo" min="0" value="0" required>
+      </div>
+    </div>
+
+    <label>Barrio / zona</label>
+    <select name="zona" class="select-zona" required>
+      <option value="">Seleccionar</option>
+    </select>
+
+    <label>Motivo del trámite</label>
+    <textarea name="motivo" required></textarea>
+
+    <label>Foto del DNI (solicitante)</label>
+    <div class="captura-foto" data-target="car-solicitante">
+      <div class="captura-visor">
+        <video autoplay playsinline muted></video>
+        <img hidden alt="Foto del DNI capturada">
+      </div>
+      <canvas hidden></canvas>
+      <input type="hidden" name="foto_solicitante" value="">
+      <div class="captura-botones">
+        <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+        <button type="button" class="btn-primario btn-capturar" hidden>Tomar foto</button>
+        <button type="button" class="btn-secundario btn-repetir" hidden>Repetir foto</button>
+      </div>
+      <p class="captura-estado">Sin foto capturada</p>
+    </div>
+
+    <h3 class="seccion">Testigos (opcional, hasta 2)</h3>
+    <div class="bloque-testigo" data-testigo="1" data-activo="true">
+      <div class="fila campos-testigo">
+        <div>
+          <label>Nombre del testigo 1</label>
+          <input type="text" name="testigo1Nombre">
+        </div>
+        <div>
+          <label>DNI del testigo 1</label>
+          <input type="text" name="testigo1Dni" pattern="[0-9]{7,8}">
+        </div>
+      </div>
+      <label class="campos-testigo">Foto del DNI (testigo 1)</label>
+      <div class="captura-foto campos-testigo" data-target="car-testigo1">
+        <div class="captura-visor">
+          <video autoplay playsinline muted></video>
+          <img hidden alt="Foto del DNI capturada">
+        </div>
+        <canvas hidden></canvas>
+        <input type="hidden" name="foto_testigo1" value="">
+        <div class="captura-botones">
+          <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+          <button type="button" class="btn-primario btn-capturar" hidden>Tomar foto</button>
+          <button type="button" class="btn-secundario btn-repetir" hidden>Repetir foto</button>
+        </div>
+        <p class="captura-estado">Sin foto capturada</p>
+      </div>
+    </div>
+
+    <button type="button" class="btn-secundario btn-agregar-testigo">+ Agregar segundo testigo</button>
+    <div class="bloque-testigo" data-testigo="2" data-activo="false">
+      <div class="fila campos-testigo">
+        <div>
+          <label>Nombre del testigo 2</label>
+          <input type="text" name="testigo2Nombre" disabled>
+        </div>
+        <div>
+          <label>DNI del testigo 2</label>
+          <input type="text" name="testigo2Dni" pattern="[0-9]{7,8}" disabled>
+        </div>
+      </div>
+      <label class="campos-testigo">Foto del DNI (testigo 2)</label>
+      <div class="captura-foto campos-testigo" data-target="car-testigo2">
+        <div class="captura-visor">
+          <video autoplay playsinline muted></video>
+          <img hidden alt="Foto del DNI capturada">
+        </div>
+        <canvas hidden></canvas>
+        <input type="hidden" name="foto_testigo2" value="" disabled>
+        <div class="captura-botones">
+          <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+          <button type="button" class="btn-primario btn-capturar" hidden>Tomar foto</button>
+          <button type="button" class="btn-secundario btn-repetir" hidden>Repetir foto</button>
+        </div>
+        <p class="captura-estado">Sin foto capturada</p>
+      </div>
+      <button type="button" class="btn-quitar-testigo">Quitar testigo 2</button>
+    </div>
+
+    <div class="btns">
+      <button type="submit" class="btn-primario">Generar certificado</button>
+      <button type="button" class="btn-secundario volver">Volver</button>
+    </div>
+    <p class="nota">Las fotos se toman con la cámara del dispositivo y se usan solo para generar este documento; no se suben a ningún servidor.</p>
+  </form>
+
+  <!-- Documento generado -->
+  <div id="documento">
+    <h2 id="doc-titulo">Certificado</h2>
+    <p class="subt">Policía de Salta</p>
+    <p class="subt" style="margin-top:-16px;">Tu trámite ya fue enviado a la comisaría correspondiente.</p>
+    <dl id="doc-contenido"></dl>
+    <div class="firma">
+      <div>Firma del solicitante</div>
+      <div>Firma testigos</div>
+      <div>Firma y sello - Autoridad policial</div>
+    </div>
+    <div class="btns no-print" style="margin-top:30px;">
+      <button class="btn-primario" onclick="window.print()">Imprimir / Guardar como PDF</button>
+      <button class="btn-secundario" id="doc-volver">Volver al inicio</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- Firebase (backend: guarda las solicitudes, incluidas las fotos comprimidas) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="comisarias-config.js"></script>
+
+<script>
+const tarjetas = document.querySelectorAll('.tarjeta');
+const forms = {
+  residencia: document.getElementById('form-residencia'),
+  convivencia: document.getElementById('form-convivencia'),
+  carencia: document.getElementById('form-carencia'),
+};
+const tarjetasEl = document.getElementById('tarjetas');
+const documento = document.getElementById('documento');
+
+const etiquetas = {
+  nombre: 'Nombre completo', dni: 'DNI', fechaNacimiento: 'Fecha de nacimiento',
+  domicilio: 'Domicilio', localidad: 'Localidad', tiempoResidencia: 'Tiempo de residencia',
+  motivo: 'Motivo del trámite', nombreSolicitante: 'Nombre del solicitante',
+  dniSolicitante: 'DNI del solicitante', nombreConviviente: 'Nombre del conviviente',
+  dniConviviente: 'DNI del conviviente', domicilioComun: 'Domicilio en común',
+  tiempoConvivencia: 'Tiempo de convivencia', estadoCivil: 'Estado civil',
+  situacionLaboral: 'Situación laboral', personasACargo: 'Personas a cargo',
+  testigo1Nombre: 'Nombre del testigo 1', testigo1Dni: 'DNI del testigo 1',
+  testigo2Nombre: 'Nombre del testigo 2', testigo2Dni: 'DNI del testigo 2',
+  foto_solicitante: 'Foto del DNI - Solicitante',
+  foto_testigo1: 'Foto del DNI - Testigo 1',
+  foto_testigo2: 'Foto del DNI - Testigo 2',
+  zona: 'Barrio / zona',
+};
+
+/* --- Cargar las zonas del archivo comisarias-config.js en los <select> --- */
+document.querySelectorAll('.select-zona').forEach(select => {
+  CONFIG_COMISARIAS.zonas.forEach(z => {
+    const opt = document.createElement('option');
+    opt.value = z.zona;
+    opt.textContent = z.zona;
+    select.appendChild(opt);
+  });
+});
+
+const titulos = {
+  residencia: 'Certificado de Residencia',
+  convivencia: 'Certificado de Convivencia',
+  carencia: 'Certificado de Carencia de Recursos',
+};
+
+tarjetas.forEach(t => {
+  t.addEventListener('click', () => {
+    const tramite = t.dataset.tramite;
+    tarjetas.forEach(x => x.classList.remove('activa'));
+    t.classList.add('activa');
+    Object.values(forms).forEach(f => f.classList.remove('activo'));
+    forms[tramite].classList.add('activo');
+    tarjetasEl.style.display = 'none';
+  });
+});
+
+document.querySelectorAll('.volver').forEach(btn => {
+  btn.addEventListener('click', () => {
+    Object.values(forms).forEach(f => f.classList.remove('activo'));
+    tarjetasEl.style.display = 'grid';
+  });
+});
+
+document.getElementById('doc-volver').addEventListener('click', () => {
+  documento.classList.remove('activo');
+  tarjetasEl.style.display = 'grid';
+});
+
+/* --- Testigo 2: mostrar / ocultar --- */
+document.querySelectorAll('.btn-agregar-testigo').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const bloque2 = btn.nextElementSibling;
+    bloque2.dataset.activo = 'true';
+    bloque2.querySelectorAll('input').forEach(i => i.disabled = false);
+    btn.hidden = true;
+  });
+});
+document.querySelectorAll('.btn-quitar-testigo').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const bloque2 = btn.closest('.bloque-testigo');
+    bloque2.dataset.activo = 'false';
+    bloque2.querySelectorAll('input').forEach(i => { i.disabled = true; if (i.type !== 'hidden') i.value = ''; else i.value=''; });
+    const agregarBtn = bloque2.previousElementSibling;
+    if (agregarBtn && agregarBtn.classList.contains('btn-agregar-testigo')) agregarBtn.hidden = false;
+    // reset captura visual del testigo 2
+    const captura = bloque2.querySelector('.captura-foto');
+    resetCaptura(captura);
+  });
+});
+
+/* --- Captura de foto del DNI --- */
+function resetCaptura(captura){
+  const video = captura.querySelector('video');
+  const img = captura.querySelector('img');
+  const estado = captura.querySelector('.captura-estado');
+  const hiddenInput = captura.querySelector('input[type=hidden]');
+  const btnCamara = captura.querySelector('.btn-camara');
+  const btnCapturar = captura.querySelector('.btn-capturar');
+  const btnRepetir = captura.querySelector('.btn-repetir');
+  if (video.srcObject) {
+    video.srcObject.getTracks().forEach(t => t.stop());
+    video.srcObject = null;
+  }
+  video.hidden = true;
+  img.hidden = true;
+  img.src = '';
+  hiddenInput.value = '';
+  estado.textContent = 'Sin foto capturada';
+  estado.classList.remove('ok');
+  btnCamara.hidden = false;
+  btnCapturar.hidden = true;
+  btnRepetir.hidden = true;
+}
+
+document.querySelectorAll('.captura-foto').forEach(captura => {
+  const video = captura.querySelector('video');
+  const canvas = captura.querySelector('canvas');
+  const img = captura.querySelector('img');
+  const estado = captura.querySelector('.captura-estado');
+  const hiddenInput = captura.querySelector('input[type=hidden]');
+  const btnCamara = captura.querySelector('.btn-camara');
+  const btnCapturar = captura.querySelector('.btn-capturar');
+  const btnRepetir = captura.querySelector('.btn-repetir');
+
+  btnCamara.addEventListener('click', async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      estado.textContent = 'Este navegador no permite acceder a la cámara.';
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      video.srcObject = stream;
+      video.hidden = false;
+      img.hidden = true;
+      btnCamara.hidden = true;
+      btnCapturar.hidden = false;
+      btnRepetir.hidden = true;
+      estado.textContent = 'Encuadrá el DNI y tocá "Tomar foto".';
+      estado.classList.remove('ok');
+    } catch (err) {
+      estado.textContent = 'No se pudo acceder a la cámara (revisá los permisos).';
+    }
+  });
+
+  btnCapturar.addEventListener('click', () => {
+    // reducimos el tamaño de la foto para que ocupe poco espacio en Firestore
+    const anchoMax = 700;
+    const escala = Math.min(1, anchoMax / video.videoWidth);
+    canvas.width = video.videoWidth * escala;
+    canvas.height = video.videoHeight * escala;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+    hiddenInput.value = dataUrl;
+    img.src = dataUrl;
+    img.hidden = false;
+    video.hidden = true;
+    if (video.srcObject) {
+      video.srcObject.getTracks().forEach(t => t.stop());
+      video.srcObject = null;
+    }
+    btnCapturar.hidden = true;
+    btnRepetir.hidden = false;
+    estado.textContent = 'Foto capturada.';
+    estado.classList.add('ok');
+  });
+
+  btnRepetir.addEventListener('click', () => {
+    resetCaptura(captura);
+  });
+});
+
+/* --- Generar documento y guardar en Firestore al enviar (las fotos van comprimidas dentro del mismo documento, sin usar Storage) --- */
+Object.entries(forms).forEach(([tramite, form]) => {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btnEnviar = form.querySelector('button[type=submit]');
+    const textoOriginal = btnEnviar.textContent;
+    btnEnviar.disabled = true;
+    btnEnviar.textContent = 'Enviando...';
+
+    const datos = new FormData(form);
+    const registro = {}; // lo que se guarda en Firestore
+    const contenido = document.getElementById('doc-contenido');
+    contenido.innerHTML = '';
+
+    const idSolicitud = `${tramite}-${Date.now()}`;
+
+    try {
+      for (const [campo, valor] of datos.entries()) {
+        if (!valor) continue;
+        registro[campo] = valor;
+
+        const dt = document.createElement('dt');
+        dt.textContent = etiquetas[campo] || campo;
+        const dd = document.createElement('dd');
+        if (campo.startsWith('foto_')) {
+          const img = document.createElement('img');
+          img.src = valor;
+          dd.appendChild(img);
+        } else {
+          dd.textContent = valor;
+        }
+        contenido.appendChild(dt);
+        contenido.appendChild(dd);
+      }
+
+      const asignacion = asignarComisaria(registro.zona || '');
+      registro.tramite = tramite;
+      registro.tramiteTitulo = titulos[tramite];
+      registro.comisariaAsignada = asignacion.comisaria;
+      registro.estado = 'pendiente';
+      registro.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+
+      await db.collection('solicitudes').doc(idSolicitud).set(registro);
+
+      const dt = document.createElement('dt');
+      dt.textContent = 'Comisaría asignada';
+      const dd = document.createElement('dd');
+      dd.textContent = asignacion.comisaria;
+      contenido.appendChild(dt);
+      contenido.appendChild(dd);
+
+      document.getElementById('doc-titulo').textContent = titulos[tramite];
+      form.classList.remove('activo');
+      documento.classList.add('activo');
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      alert('No se pudo enviar el trámite. Revisá tu conexión e intentá de nuevo.');
+    } finally {
+      btnEnviar.disabled = false;
+      btnEnviar.textContent = textoOriginal;
+    }
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Comisaría - Panel del personal</title>
+<style>
+  :root{ --azul:#1a3a6b; --azul-claro:#2c5aa0; --gris:#f4f6f9; --borde:#d7dde5; --texto:#1f2937; }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', Arial, sans-serif; background:var(--gris); margin:0; color:var(--texto);}
+  header{background:var(--azul); color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center;}
+  header h1{margin:0; font-size:1.2rem;}
+  #btn-salir{display:none; background:#fff; color:var(--azul); border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-size:0.85rem;}
+  main{max-width:900px; margin:0 auto; padding:24px 16px;}
+
+  /* Login */
+  #vista-login{max-width:340px; margin:60px auto 0; background:#fff; border:1px solid var(--borde); border-radius:10px; padding:26px;}
+  #vista-login h2{margin-top:0; font-size:1.05rem; color:var(--azul);}
+  #vista-login label{display:block; font-size:0.85rem; font-weight:600; margin:14px 0 6px;}
+  #vista-login input{width:100%; padding:9px 10px; border:1px solid var(--borde); border-radius:6px; font-size:0.9rem;}
+  #vista-login button{margin-top:18px; width:100%; padding:10px; background:var(--azul); color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;}
+  #error-login{color:#b91c1c; font-size:0.82rem; margin-top:10px; display:none;}
+
+  /* Dashboard */
+  #vista-panel{display:none;}
+  .filtros{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+  .filtros select, .filtros input{padding:8px 10px; border:1px solid var(--borde); border-radius:6px; font-size:0.85rem;}
+
+  table{width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden;}
+  th, td{padding:10px 12px; text-align:left; font-size:0.85rem; border-bottom:1px solid var(--borde);}
+  th{background:#eef1f5; color:var(--azul);}
+  tr.fila-solicitud{cursor:pointer;}
+  tr.fila-solicitud:hover{background:#f8fafc;}
+  .etiqueta{padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:600;}
+  .etiqueta.pendiente{background:#fff3cd; color:#8a6400;}
+  .etiqueta.procesado{background:#d1f5e0; color:#146c43;}
+
+  /* Detalle */
+  #detalle{display:none; background:#fff; border:1px solid var(--borde); border-radius:10px; padding:24px; margin-top:18px;}
+  #detalle dt{font-size:0.75rem; color:#6b7280; margin-top:10px;}
+  #detalle dd{margin:2px 0 0; font-size:0.92rem;}
+  #detalle dd img{max-width:220px; border:1px solid var(--borde); border-radius:6px; margin-top:4px; display:block;}
+  #detalle .btns{margin-top:20px; display:flex; gap:10px;}
+  #detalle button{padding:9px 16px; border:none; border-radius:6px; cursor:pointer; font-size:0.85rem;}
+  #btn-procesar{background:var(--azul); color:#fff;}
+  #btn-cerrar-detalle{background:#e5e9ef; color:var(--texto);}
+  .vacio{padding:30px; text-align:center; color:#6b7280; font-size:0.9rem;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mi Comisaría - Panel del personal</h1>
+  <button id="btn-salir">Salir</button>
+</header>
+
+<main>
+
+  <!-- LOGIN -->
+  <div id="vista-login">
+    <h2>Ingreso del personal</h2>
+    <label>Usuario (email)</label>
+    <input type="email" id="login-email" autocomplete="username">
+    <label>Contraseña</label>
+    <input type="password" id="login-pass" autocomplete="current-password">
+    <button id="btn-entrar">Ingresar</button>
+    <p id="error-login"></p>
+  </div>
+
+  <!-- PANEL -->
+  <div id="vista-panel">
+    <div class="filtros">
+      <select id="filtro-estado">
+        <option value="">Todos los estados</option>
+        <option value="pendiente">Pendientes</option>
+        <option value="procesado">Procesados</option>
+      </select>
+      <select id="filtro-comisaria">
+        <option value="">Todas las comisarías</option>
+      </select>
+      <select id="filtro-tramite">
+        <option value="">Todos los trámites</option>
+        <option value="residencia">Residencia</option>
+        <option value="convivencia">Convivencia</option>
+        <option value="carencia">Carencia de recursos</option>
+      </select>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Trámite</th>
+          <th>Solicitante</th>
+          <th>Comisaría asignada</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-solicitudes"></tbody>
+    </table>
+    <p class="vacio" id="mensaje-vacio" style="display:none;">No hay solicitudes con estos filtros.</p>
+
+    <div id="detalle">
+      <h3 id="detalle-titulo"></h3>
+      <dl id="detalle-contenido"></dl>
+      <div class="btns">
+        <button id="btn-procesar">Marcar como procesado</button>
+        <button id="btn-cerrar-detalle">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="comisarias-config.js"></script>
+
+<script>
+const vistaLogin = document.getElementById('vista-login');
+const vistaPanel = document.getElementById('vista-panel');
+const btnSalir = document.getElementById('btn-salir');
+const errorLogin = document.getElementById('error-login');
+
+// --- Login ---
+document.getElementById('btn-entrar').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  errorLogin.style.display = 'none';
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch (err) {
+    errorLogin.textContent = 'Usuario o contraseña incorrectos.';
+    errorLogin.style.display = 'block';
+  }
+});
+
+btnSalir.addEventListener('click', () => auth.signOut());
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    vistaLogin.style.display = 'none';
+    vistaPanel.style.display = 'block';
+    btnSalir.style.display = 'inline-block';
+    cargarSolicitudes();
+  } else {
+    vistaLogin.style.display = 'block';
+    vistaPanel.style.display = 'none';
+    btnSalir.style.display = 'none';
+  }
+});
+
+// --- Cargar filtro de comisarías desde la configuración ---
+const filtroComisaria = document.getElementById('filtro-comisaria');
+CONFIG_COMISARIAS.zonas.forEach(z => {
+  const opt = document.createElement('option');
+  opt.value = z.comisaria;
+  opt.textContent = z.comisaria;
+  filtroComisaria.appendChild(opt);
+});
+
+const etiquetasDetalle = {
+  nombre: 'Nombre completo', dni: 'DNI', fechaNacimiento: 'Fecha de nacimiento',
+  domicilio: 'Domicilio', localidad: 'Localidad', tiempoResidencia: 'Tiempo de residencia',
+  motivo: 'Motivo del trámite', nombreSolicitante: 'Nombre del solicitante',
+  dniSolicitante: 'DNI del solicitante', nombreConviviente: 'Nombre del conviviente',
+  dniConviviente: 'DNI del conviviente', domicilioComun: 'Domicilio en común',
+  tiempoConvivencia: 'Tiempo de convivencia', estadoCivil: 'Estado civil',
+  situacionLaboral: 'Situación laboral', personasACargo: 'Personas a cargo',
+  testigo1Nombre: 'Nombre del testigo 1', testigo1Dni: 'DNI del testigo 1',
+  testigo2Nombre: 'Nombre del testigo 2', testigo2Dni: 'DNI del testigo 2',
+  foto_solicitante: 'Foto del DNI - Solicitante',
+  foto_testigo1: 'Foto del DNI - Testigo 1',
+  foto_testigo2: 'Foto del DNI - Testigo 2',
+  zona: 'Barrio / zona', comisariaAsignada: 'Comisaría asignada',
+};
+
+let solicitudesCache = [];
+
+function cargarSolicitudes() {
+  db.collection('solicitudes').orderBy('fechaCreacion', 'desc')
+    .onSnapshot(snapshot => {
+      solicitudesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderTabla();
+    }, err => console.error(err));
+}
+
+function renderTabla() {
+  const estado = document.getElementById('filtro-estado').value;
+  const comisaria = document.getElementById('filtro-comisaria').value;
+  const tramite = document.getElementById('filtro-tramite').value;
+
+  const filtradas = solicitudesCache.filter(s =>
+    (!estado || s.estado === estado) &&
+    (!comisaria || s.comisariaAsignada === comisaria) &&
+    (!tramite || s.tramite === tramite)
+  );
+
+  const tbody = document.getElementById('tabla-solicitudes');
+  tbody.innerHTML = '';
+  document.getElementById('mensaje-vacio').style.display = filtradas.length ? 'none' : 'block';
+
+  filtradas.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.className = 'fila-solicitud';
+    const fecha = s.fechaCreacion && s.fechaCreacion.toDate ? s.fechaCreacion.toDate().toLocaleString('es-AR') : '-';
+    const nombreSolicitante = s.nombre || s.nombreSolicitante || '-';
+    tr.innerHTML = `
+      <td>${fecha}</td>
+      <td>${s.tramiteTitulo || s.tramite || '-'}</td>
+      <td>${nombreSolicitante}</td>
+      <td>${s.comisariaAsignada || '-'}</td>
+      <td><span class="etiqueta ${s.estado}">${s.estado === 'procesado' ? 'Procesado' : 'Pendiente'}</span></td>
+    `;
+    tr.addEventListener('click', () => mostrarDetalle(s));
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('filtro-estado').addEventListener('change', renderTabla);
+filtroComisaria.addEventListener('change', renderTabla);
+document.getElementById('filtro-tramite').addEventListener('change', renderTabla);
+
+let solicitudAbierta = null;
+
+function mostrarDetalle(s) {
+  solicitudAbierta = s;
+  document.getElementById('detalle-titulo').textContent = s.tramiteTitulo || s.tramite;
+  const cont = document.getElementById('detalle-contenido');
+  cont.innerHTML = '';
+  Object.entries(s).forEach(([campo, valor]) => {
+    if (['id', 'tramite', 'tramiteTitulo', 'estado', 'fechaCreacion'].includes(campo) || !valor) return;
+    const dt = document.createElement('dt');
+    dt.textContent = etiquetasDetalle[campo] || campo;
+    const dd = document.createElement('dd');
+    if (campo.startsWith('foto_')) {
+      const img = document.createElement('img');
+      img.src = valor;
+      dd.appendChild(img);
+    } else {
+      dd.textContent = valor;
+    }
+    cont.appendChild(dt);
+    cont.appendChild(dd);
+  });
+  document.getElementById('btn-procesar').textContent =
+    s.estado === 'procesado' ? 'Marcar como pendiente' : 'Marcar como procesado';
+  document.getElementById('detalle').style.display = 'block';
+  document.getElementById('detalle').scrollIntoView({ behavior: 'smooth' });
+}
+
+document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
+  document.getElementById('detalle').style.display = 'none';
+});
+
+document.getElementById('btn-procesar').addEventListener('click', async () => {
+  if (!solicitudAbierta) return;
+  const nuevoEstado = solicitudAbierta.estado === 'procesado' ? 'pendiente' : 'procesado';
+  await db.collection('solicitudes').doc(solicitudAbierta.id).update({ estado: nuevoEstado });
+  document.getElementById('detalle').style.display = 'none';
+});
+</script>
+
+</body>
+</html>
