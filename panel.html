@@ -84,6 +84,7 @@
         <option value="convivencia">Convivencia</option>
         <option value="carencia">Carencia de recursos</option>
       </select>
+      <button id="btn-actualizar" type="button">Actualizar</button>
     </div>
 
     <table>
@@ -112,10 +113,8 @@
 
 </main>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="comisarias-config.js"></script>
 
 <script>
@@ -129,18 +128,17 @@ document.getElementById('btn-entrar').addEventListener('click', async () => {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
   errorLogin.style.display = 'none';
-  try {
-    await auth.signInWithEmailAndPassword(email, pass);
-  } catch (err) {
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+  if (error) {
     errorLogin.textContent = 'Usuario o contraseña incorrectos.';
     errorLogin.style.display = 'block';
   }
 });
 
-btnSalir.addEventListener('click', () => auth.signOut());
+btnSalir.addEventListener('click', () => supabaseClient.auth.signOut());
 
-auth.onAuthStateChanged(user => {
-  if (user) {
+function mostrarSesion(sesionActiva) {
+  if (sesionActiva) {
     vistaLogin.style.display = 'none';
     vistaPanel.style.display = 'block';
     btnSalir.style.display = 'inline-block';
@@ -150,7 +148,10 @@ auth.onAuthStateChanged(user => {
     vistaPanel.style.display = 'none';
     btnSalir.style.display = 'none';
   }
-});
+}
+
+supabaseClient.auth.getSession().then(({ data: { session } }) => mostrarSesion(!!session));
+supabaseClient.auth.onAuthStateChange((_event, session) => mostrarSesion(!!session));
 
 // --- Cargar filtro de comisarías desde la configuración ---
 const filtroComisaria = document.getElementById('filtro-comisaria');
@@ -174,18 +175,28 @@ const etiquetasDetalle = {
   foto_solicitante: 'Foto del DNI - Solicitante',
   foto_testigo1: 'Foto del DNI - Testigo 1',
   foto_testigo2: 'Foto del DNI - Testigo 2',
-  zona: 'Barrio / zona', comisariaAsignada: 'Comisaría asignada',
+  zona: 'Barrio / zona',
 };
 
 let solicitudesCache = [];
 
-function cargarSolicitudes() {
-  db.collection('solicitudes').orderBy('fechaCreacion', 'desc')
-    .onSnapshot(snapshot => {
-      solicitudesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderTabla();
-    }, err => console.error(err));
+async function cargarSolicitudes() {
+  const { data, error } = await supabaseClient
+    .from('solicitudes')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  solicitudesCache = data || [];
+  renderTabla();
 }
+
+document.getElementById('btn-actualizar').addEventListener('click', cargarSolicitudes);
+
+// Actualización en vivo (requiere tener "solicitudes" agregada a la publicación Realtime en Supabase)
+supabaseClient
+  .channel('solicitudes-cambios')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes' }, cargarSolicitudes)
+  .subscribe();
 
 function renderTabla() {
   const estado = document.getElementById('filtro-estado').value;
@@ -194,7 +205,7 @@ function renderTabla() {
 
   const filtradas = solicitudesCache.filter(s =>
     (!estado || s.estado === estado) &&
-    (!comisaria || s.comisariaAsignada === comisaria) &&
+    (!comisaria || s.comisaria_asignada === comisaria) &&
     (!tramite || s.tramite === tramite)
   );
 
@@ -205,13 +216,14 @@ function renderTabla() {
   filtradas.forEach(s => {
     const tr = document.createElement('tr');
     tr.className = 'fila-solicitud';
-    const fecha = s.fechaCreacion && s.fechaCreacion.toDate ? s.fechaCreacion.toDate().toLocaleString('es-AR') : '-';
-    const nombreSolicitante = s.nombre || s.nombreSolicitante || '-';
+    const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
+    const d = s.datos || {};
+    const nombreSolicitante = d.nombre || d.nombreSolicitante || '-';
     tr.innerHTML = `
       <td>${fecha}</td>
-      <td>${s.tramiteTitulo || s.tramite || '-'}</td>
+      <td>${s.tramite_titulo || s.tramite || '-'}</td>
       <td>${nombreSolicitante}</td>
-      <td>${s.comisariaAsignada || '-'}</td>
+      <td>${s.comisaria_asignada || '-'}</td>
       <td><span class="etiqueta ${s.estado}">${s.estado === 'procesado' ? 'Procesado' : 'Pendiente'}</span></td>
     `;
     tr.addEventListener('click', () => mostrarDetalle(s));
@@ -227,11 +239,19 @@ let solicitudAbierta = null;
 
 function mostrarDetalle(s) {
   solicitudAbierta = s;
-  document.getElementById('detalle-titulo').textContent = s.tramiteTitulo || s.tramite;
+  document.getElementById('detalle-titulo').textContent = s.tramite_titulo || s.tramite;
   const cont = document.getElementById('detalle-contenido');
   cont.innerHTML = '';
-  Object.entries(s).forEach(([campo, valor]) => {
-    if (['id', 'tramite', 'tramiteTitulo', 'estado', 'fechaCreacion'].includes(campo) || !valor) return;
+
+  const dt0 = document.createElement('dt');
+  dt0.textContent = 'Comisaría asignada';
+  const dd0 = document.createElement('dd');
+  dd0.textContent = s.comisaria_asignada || '-';
+  cont.appendChild(dt0);
+  cont.appendChild(dd0);
+
+  Object.entries(s.datos || {}).forEach(([campo, valor]) => {
+    if (!valor) return;
     const dt = document.createElement('dt');
     dt.textContent = etiquetasDetalle[campo] || campo;
     const dd = document.createElement('dd');
@@ -245,6 +265,7 @@ function mostrarDetalle(s) {
     cont.appendChild(dt);
     cont.appendChild(dd);
   });
+
   document.getElementById('btn-procesar').textContent =
     s.estado === 'procesado' ? 'Marcar como pendiente' : 'Marcar como procesado';
   document.getElementById('detalle').style.display = 'block';
@@ -258,7 +279,8 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
 document.getElementById('btn-procesar').addEventListener('click', async () => {
   if (!solicitudAbierta) return;
   const nuevoEstado = solicitudAbierta.estado === 'procesado' ? 'pendiente' : 'procesado';
-  await db.collection('solicitudes').doc(solicitudAbierta.id).update({ estado: nuevoEstado });
+  const { error } = await supabaseClient.from('solicitudes').update({ estado: nuevoEstado }).eq('id', solicitudAbierta.id);
+  if (error) console.error(error);
   document.getElementById('detalle').style.display = 'none';
 });
 </script>

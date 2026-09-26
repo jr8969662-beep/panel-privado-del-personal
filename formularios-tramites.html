@@ -506,10 +506,9 @@
 
 </main>
 
-<!-- Firebase (backend: guarda las solicitudes, incluidas las fotos comprimidas) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<!-- Supabase (backend: guarda las solicitudes, incluidas las fotos comprimidas) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="comisarias-config.js"></script>
 
 <script>
@@ -690,11 +689,9 @@ Object.entries(forms).forEach(([tramite, form]) => {
     btnEnviar.textContent = 'Enviando...';
 
     const datos = new FormData(form);
-    const registro = {}; // lo que se guarda en Firestore
+    const registro = {}; // campos del formulario (incluye las fotos comprimidas)
     const contenido = document.getElementById('doc-contenido');
     contenido.innerHTML = '';
-
-    const idSolicitud = `${tramite}-${Date.now()}`;
 
     try {
       for (const [campo, valor] of datos.entries()) {
@@ -716,13 +713,16 @@ Object.entries(forms).forEach(([tramite, form]) => {
       }
 
       const asignacion = asignarComisaria(registro.zona || '');
-      registro.tramite = tramite;
-      registro.tramiteTitulo = titulos[tramite];
-      registro.comisariaAsignada = asignacion.comisaria;
-      registro.estado = 'pendiente';
-      registro.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
 
-      await db.collection('solicitudes').doc(idSolicitud).set(registro);
+      const { error } = await supabaseClient.from('solicitudes').insert([{
+        tramite: tramite,
+        tramite_titulo: titulos[tramite],
+        comisaria_asignada: asignacion.comisaria,
+        estado: 'pendiente',
+        datos: registro,
+      }]);
+
+      if (error) throw error;
 
       const dt = document.createElement('dt');
       dt.textContent = 'Comisaría asignada';
