@@ -153,12 +153,12 @@ function mostrarSesion(sesionActiva) {
 supabaseClient.auth.getSession().then(({ data: { session } }) => mostrarSesion(!!session));
 supabaseClient.auth.onAuthStateChange((_event, session) => mostrarSesion(!!session));
 
-// --- Cargar filtro de comisarías desde la configuración ---
+// --- Cargar filtro de comisarías desde la configuración (dependencias reales) ---
 const filtroComisaria = document.getElementById('filtro-comisaria');
-CONFIG_COMISARIAS.zonas.forEach(z => {
+DEPENDENCIAS_POLICIALES.forEach(dep => {
   const opt = document.createElement('option');
-  opt.value = z.comisaria;
-  opt.textContent = z.comisaria;
+  opt.value = dep.nombre;
+  opt.textContent = dep.nombre;
   filtroComisaria.appendChild(opt);
 });
 
@@ -175,7 +175,6 @@ const etiquetasDetalle = {
   foto_solicitante: 'Foto del DNI - Solicitante',
   foto_testigo1: 'Foto del DNI - Testigo 1',
   foto_testigo2: 'Foto del DNI - Testigo 2',
-  zona: 'Barrio / zona',
 };
 
 let solicitudesCache = [];

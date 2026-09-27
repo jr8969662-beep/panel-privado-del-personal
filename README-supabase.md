@@ -75,17 +75,26 @@ Estos son los archivos del proyecto (ya no se usa nada de Firebase):
 - `formularios-tramites.html` (formulario público)
 - `panel.html` (panel privado del personal)
 - `supabase-config.js` (tus credenciales)
-- `comisarias-config.js` (la lista de zonas → comisaría)
+- `comisarias-config.js` (dependencias policiales reales + detección automática por domicilio)
 
-## 7. Ajustar las comisarías reales
-Abrí `comisarias-config.js` y reemplazá los nombres de comisaría y los barrios de cada zona
-por los datos reales de jurisdicción de la Policía de Salta. La lista que viene por defecto
-es aproximada, a modo de ejemplo.
+## 7. Cómo funciona la asignación automática de comisaría
+`comisarias-config.js` tiene la ubicación real (latitud/longitud) de 69 dependencias de la
+Policía de Salta (comisarías, sub comisarías, destacamentos y puestos), tomadas del mapa
+oficial "DEPENDENCIAS POLICIA PROVINCIA DE SALTA". Cuando alguien completa un formulario:
+1. Se toma el domicilio que escribió.
+2. Se convierte ese texto en coordenadas con un servicio gratuito (Nominatim/OpenStreetMap).
+3. Se calcula cuál dependencia está más cerca de esas coordenadas, y esa es la que se asigna.
+
+Esto es una **aproximación por cercanía geográfica**, no la jurisdicción oficial exacta (que
+depende de límites de barrio definidos por la Policía). Si el personal ve que en algún caso
+la asignación no es la correcta, puede reasignarla manualmente hablando con la persona.
+Si la dirección escrita no se puede ubicar, el trámite igual se guarda, marcado como
+"No se pudo determinar automáticamente" para que el personal lo asigne a mano.
 
 ## Cómo queda el flujo
-1. La persona completa un formulario, elige su barrio/zona y saca las fotos de DNI necesarias.
+1. La persona completa un formulario con su domicilio y saca las fotos de DNI necesarias.
 2. Al enviar, se crea una fila en la tabla `solicitudes` de Supabase, con `estado: "pendiente"`
-   y la comisaría que le corresponde según la zona elegida.
+   y la comisaría más cercana detectada automáticamente.
 3. El personal entra a `panel.html` con su usuario y contraseña, ve la lista de solicitudes
    (puede filtrar por comisaría, trámite o estado) y marca cada una como "procesado" cuando
    corresponda.

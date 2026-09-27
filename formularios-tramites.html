@@ -139,11 +139,6 @@
       </div>
     </div>
 
-    <label>Barrio / zona</label>
-    <select name="zona" class="select-zona" required>
-      <option value="">Seleccionar</option>
-    </select>
-
     <label>Motivo del trámite</label>
     <textarea name="motivo" required></textarea>
 
@@ -278,11 +273,6 @@
     <label>Tiempo de convivencia</label>
     <input type="text" name="tiempoConvivencia" placeholder="Ej: 2 años" required>
 
-    <label>Barrio / zona</label>
-    <select name="zona" class="select-zona" required>
-      <option value="">Seleccionar</option>
-    </select>
-
     <label>Motivo del trámite</label>
     <textarea name="motivo" required></textarea>
 
@@ -396,11 +386,6 @@
         <input type="number" name="personasACargo" min="0" value="0" required>
       </div>
     </div>
-
-    <label>Barrio / zona</label>
-    <select name="zona" class="select-zona" required>
-      <option value="">Seleccionar</option>
-    </select>
 
     <label>Motivo del trámite</label>
     <textarea name="motivo" required></textarea>
@@ -534,18 +519,14 @@ const etiquetas = {
   foto_solicitante: 'Foto del DNI - Solicitante',
   foto_testigo1: 'Foto del DNI - Testigo 1',
   foto_testigo2: 'Foto del DNI - Testigo 2',
-  zona: 'Barrio / zona',
 };
 
-/* --- Cargar las zonas del archivo comisarias-config.js en los <select> --- */
-document.querySelectorAll('.select-zona').forEach(select => {
-  CONFIG_COMISARIAS.zonas.forEach(z => {
-    const opt = document.createElement('option');
-    opt.value = z.zona;
-    opt.textContent = z.zona;
-    select.appendChild(opt);
-  });
-});
+/* Nombre del campo de domicilio que corresponde a cada trámite (para geocodificar) */
+const CAMPO_DOMICILIO = {
+  residencia: 'domicilio',
+  convivencia: 'domicilioComun',
+  carencia: 'domicilio',
+};
 
 const titulos = {
   residencia: 'Certificado de Residencia',
@@ -712,12 +693,18 @@ Object.entries(forms).forEach(([tramite, form]) => {
         contenido.appendChild(dd);
       }
 
-      const asignacion = asignarComisaria(registro.zona || '');
+      // Detectar automáticamente la comisaría según el domicilio escrito
+      btnEnviar.textContent = 'Ubicando domicilio...';
+      const campoDomicilio = CAMPO_DOMICILIO[tramite];
+      const asignacion = await asignarComisariaPorDireccion(registro[campoDomicilio]);
+      btnEnviar.textContent = 'Enviando...';
+
+      const comisariaAsignada = asignacion ? asignacion.comisaria : 'No se pudo determinar automáticamente (a asignar por el personal)';
 
       const { error } = await supabaseClient.from('solicitudes').insert([{
         tramite: tramite,
         tramite_titulo: titulos[tramite],
-        comisaria_asignada: asignacion.comisaria,
+        comisaria_asignada: comisariaAsignada,
         estado: 'pendiente',
         datos: registro,
       }]);
@@ -727,7 +714,7 @@ Object.entries(forms).forEach(([tramite, form]) => {
       const dt = document.createElement('dt');
       dt.textContent = 'Comisaría asignada';
       const dd = document.createElement('dd');
-      dd.textContent = asignacion.comisaria;
+      dd.textContent = comisariaAsignada;
       contenido.appendChild(dt);
       contenido.appendChild(dd);
 
