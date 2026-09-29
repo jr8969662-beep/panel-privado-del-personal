@@ -129,88 +129,214 @@
     flex:1;
   }
 
-  /* Login */
+  /* ============================================================
+     LOGIN MEJORADO
+     ============================================================ */
   #vista-login{
-    max-width:360px;
-    margin:60px auto 0;
-    background:rgba(255,255,255,0.95);
-    backdrop-filter:blur(10px);
-    border:1px solid rgba(201,169,97,0.4);
+    max-width:420px;
+    margin:50px auto 0;
+    background:rgba(13,42,77,0.75);
+    backdrop-filter:blur(14px);
+    border:1px solid rgba(201,169,97,0.5);
     border-top:3px solid var(--dorado);
-    border-radius:12px;
-    padding:30px 26px;
-    box-shadow:var(--sombra-fuerte);
+    border-radius:16px;
+    padding:40px 34px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 80px rgba(201,169,97,0.15);
     text-align:center;
+    animation:loginFadeIn 0.6s ease-out;
+    position:relative;
+    overflow:hidden;
+  }
+  #vista-login::before{
+    content:'';
+    position:absolute;
+    top:-50%; right:-30%;
+    width:300px; height:300px;
+    background:radial-gradient(circle, rgba(201,169,97,0.12) 0%, transparent 70%);
+    border-radius:50%;
+    pointer-events:none;
+  }
+  @keyframes loginFadeIn{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
   }
   #vista-login .login-logo{
-    width:80px; height:80px;
-    margin:0 auto 16px;
+    width:100px;
+    height:100px;
+    margin:0 auto 20px;
     background-image:url('logo-policia.png.jpeg');
     background-size:contain;
     background-repeat:no-repeat;
     background-position:center;
+    filter:drop-shadow(0 4px 20px rgba(201,169,97,0.5));
+    animation:logoPulse 3s ease-in-out infinite;
+  }
+  @keyframes logoPulse{
+    0%,100%{filter:drop-shadow(0 4px 20px rgba(201,169,97,0.5));}
+    50%{filter:drop-shadow(0 4px 28px rgba(201,169,97,0.8));}
   }
   #vista-login h2{
-    margin:0 0 6px;
-    font-size:1.15rem;
-    color:var(--azul-oscuro);
+    margin:0 0 8px;
+    font-size:1.5rem;
+    color:var(--dorado-brilloso);
     font-weight:700;
+    letter-spacing:0.02em;
+    text-shadow:0 2px 6px rgba(0,0,0,0.4);
   }
   #vista-login .login-sub{
-    margin:0 0 20px;
-    font-size:0.82rem;
-    color:#6b7280;
+    margin:0 0 28px;
+    font-size:0.85rem;
+    color:rgba(255,255,255,0.75);
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    font-weight:600;
+  }
+  #vista-login .login-separador{
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--dorado), transparent);
+    margin:0 0 24px;
+    opacity:0.5;
   }
   #vista-login label{
     display:block;
     font-size:0.85rem;
     font-weight:600;
-    margin:14px 0 6px;
+    margin:18px 0 8px;
     text-align:left;
-    color:#1f2937;
+    color:var(--dorado-claro);
+    letter-spacing:0.02em;
   }
-  #vista-login input{
+  #vista-login .input-wrapper{
+    position:relative;
+  }
+  #vista-login input[type="email"],
+  #vista-login input[type="password"],
+  #vista-login input[type="text"]{
     width:100%;
-    padding:10px 12px;
-    border:1px solid #d7dde5;
-    border-radius:6px;
-    font-size:0.9rem;
+    padding:13px 46px 13px 14px;
+    border:1px solid rgba(201,169,97,0.35);
+    border-radius:8px;
+    font-size:0.95rem;
     font-family:inherit;
-    transition:border-color 0.2s;
-    background:#fff;
-    color:#1f2937;
+    transition:all 0.2s;
+    background:rgba(0,0,0,0.35);
+    color:#fff;
+  }
+  #vista-login input::placeholder{
+    color:rgba(255,255,255,0.35);
   }
   #vista-login input:focus{
     outline:none;
-    border-color:var(--azul-claro);
-    box-shadow:0 0 0 3px rgba(44,90,160,0.1);
+    border-color:var(--dorado);
+    box-shadow:0 0 0 3px rgba(201,169,97,0.25);
+    background:rgba(0,0,0,0.5);
   }
-  #vista-login button{
-    margin-top:20px;
-    width:100%;
-    padding:11px;
-    background:linear-gradient(135deg, var(--azul) 0%, var(--azul-claro) 100%);
-    color:#fff;
+  #vista-login .toggle-password{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    background:transparent;
     border:none;
-    border-radius:6px;
+    color:var(--dorado-claro);
     cursor:pointer;
-    font-size:0.9rem;
-    font-weight:600;
+    font-size:1.2rem;
+    padding:6px 10px;
+    border-radius:6px;
     transition:all 0.2s;
+    line-height:1;
   }
-  #vista-login button:hover{
-    transform:translateY(-1px);
-    box-shadow:var(--sombra-media);
+  #vista-login .toggle-password:hover{
+    color:var(--dorado-brilloso);
+    background:rgba(201,169,97,0.15);
+  }
+  #vista-login .login-extras{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:16px 0 0;
+    font-size:0.82rem;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  #vista-login .login-extras label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:0;
+    font-size:0.82rem;
+    color:rgba(255,255,255,0.8);
+    cursor:pointer;
+    font-weight:500;
+    text-align:left;
+  }
+  #vista-login .login-extras input[type="checkbox"]{
+    width:16px;
+    height:16px;
+    accent-color:var(--dorado);
+    cursor:pointer;
+    margin:0;
+    padding:0;
+  }
+  #vista-login .link-recuperar{
+    color:var(--dorado-claro);
+    text-decoration:none;
+    font-weight:500;
+    transition:all 0.2s;
+    border-bottom:1px solid transparent;
+  }
+  #vista-login .link-recuperar:hover{
+    color:var(--dorado-brilloso);
+    border-bottom-color:var(--dorado-brilloso);
+  }
+  #vista-login button[type="submit"]{
+    margin-top:26px;
+    width:100%;
+    padding:14px;
+    background:linear-gradient(135deg, var(--dorado) 0%, var(--dorado-brilloso) 50%, var(--dorado) 100%);
+    color:var(--azul-oscuro);
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:1rem;
+    font-weight:700;
+    transition:all 0.25s;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    box-shadow:0 4px 16px rgba(201,169,97,0.3);
+  }
+  #vista-login button[type="submit"]:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(201,169,97,0.5);
+  }
+  #vista-login button[type="submit"]:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
   }
   #error-login{
-    color:#b91c1c;
-    font-size:0.82rem;
-    margin-top:12px;
+    color:#fca5a5;
+    font-size:0.85rem;
+    margin-top:18px;
     display:none;
-    background:#fee2e2;
-    padding:8px 12px;
-    border-radius:6px;
+    background:rgba(185,28,28,0.25);
+    border:1px solid rgba(252,165,165,0.4);
+    padding:10px 14px;
+    border-radius:8px;
+    text-align:left;
   }
+  #error-login.activo{display:block;}
+  #caps-warning{
+    color:#fcd34d;
+    font-size:0.78rem;
+    margin-top:8px;
+    display:none;
+    background:rgba(202,138,4,0.2);
+    border:1px solid rgba(252,211,77,0.4);
+    padding:8px 12px;
+    border-radius:8px;
+    text-align:left;
+  }
+  #caps-warning.activo{display:block;}
 
   /* Panel */
   #vista-panel{display:none;}
@@ -404,7 +530,6 @@
     border-bottom:1px solid rgba(255,255,255,0.15);
   }
 
-  /* Título de sección (Solicitante, Testigo 1, etc.) */
   .detalle-seccion-titulo{
     font-size:0.9rem;
     color:var(--dorado-claro);
@@ -424,7 +549,6 @@
     background:linear-gradient(90deg, var(--dorado), transparent);
   }
 
-  /* Lista de campos EN COLUMNA (uno debajo del otro) */
   .detalle-lista{
     display:flex;
     flex-direction:column;
@@ -474,7 +598,6 @@
     box-shadow:var(--sombra-media);
   }
 
-  /* Separador dorado entre secciones */
   .detalle-separador{
     height:1px;
     background:linear-gradient(90deg, transparent, var(--dorado), var(--dorado-claro), var(--dorado), transparent);
@@ -525,7 +648,6 @@
     opacity:0.5;
   }
 
-  /* Modal para ver foto grande */
   #modal-foto{
     display:none;
     position:fixed;
@@ -561,6 +683,9 @@
     header .header-texto h1{font-size:0.92rem;}
     header .header-texto p{font-size:0.68rem;}
     main{margin:16px auto; padding:0 10px 20px;}
+    #vista-login{padding:30px 22px; margin-top:30px;}
+    #vista-login .login-logo{width:80px; height:80px;}
+    #vista-login h2{font-size:1.25rem;}
     .tarjeta-resumen{padding:14px 16px;}
     .tarjeta-resumen .numero{font-size:1.3rem;}
     .filtros{padding:10px;}
@@ -590,13 +715,31 @@
   <!-- LOGIN -->
   <div id="vista-login">
     <div class="login-logo"></div>
-    <h2>Ingreso del personal</h2>
-    <p class="login-sub">Acceso restringido · Policía de Salta</p>
-    <label>Usuario (email)</label>
-    <input type="email" id="login-email" autocomplete="username" placeholder="tu@email.com">
-    <label>Contraseña</label>
-    <input type="password" id="login-pass" autocomplete="current-password" placeholder="••••••••">
-    <button id="btn-entrar">Ingresar</button>
+    <h2>Panel del Personal</h2>
+    <p class="login-sub">Acceso restringido</p>
+    <div class="login-separador"></div>
+
+    <label for="login-email">Usuario (email)</label>
+    <div class="input-wrapper">
+      <input type="email" id="login-email" autocomplete="username" placeholder="tu@email.com">
+    </div>
+
+    <label for="login-pass">Contraseña</label>
+    <div class="input-wrapper">
+      <input type="password" id="login-pass" autocomplete="current-password" placeholder="••••••••">
+      <button type="button" class="toggle-password" id="toggle-password" title="Mostrar/ocultar contraseña" aria-label="Mostrar contraseña">👁️</button>
+    </div>
+    <div id="caps-warning">⚠️ Bloq Mayús está activado</div>
+
+    <div class="login-extras">
+      <label>
+        <input type="checkbox" id="recordar-email">
+        Recordar mi email
+      </label>
+      <a href="#" class="link-recuperar" id="link-recuperar">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <button type="submit" id="btn-entrar">Ingresar</button>
     <p id="error-login"></p>
   </div>
 
@@ -697,27 +840,118 @@ const vistaLogin = document.getElementById('vista-login');
 const vistaPanel = document.getElementById('vista-panel');
 const btnSalir = document.getElementById('btn-salir');
 const errorLogin = document.getElementById('error-login');
+const inputEmail = document.getElementById('login-email');
+const inputPass = document.getElementById('login-pass');
+const btnEntrar = document.getElementById('btn-entrar');
+const capsWarning = document.getElementById('caps-warning');
+const togglePass = document.getElementById('toggle-password');
+const recordarEmail = document.getElementById('recordar-email');
+const linkRecuperar = document.getElementById('link-recuperar');
 
-document.getElementById('btn-entrar').addEventListener('click', async () => {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  errorLogin.style.display = 'none';
+/* ============================================================
+   RECORDAR EMAIL
+   ============================================================ */
+const EMAIL_GUARDADO = localStorage.getItem('panel_email_recordado');
+if (EMAIL_GUARDADO) {
+  inputEmail.value = EMAIL_GUARDADO;
+  recordarEmail.checked = true;
+  setTimeout(() => inputPass.focus(), 100);
+}
 
+/* ============================================================
+   MOSTRAR/OCULTAR CONTRASEÑA
+   ============================================================ */
+togglePass.addEventListener('click', () => {
+  const esPass = inputPass.type === 'password';
+  inputPass.type = esPass ? 'text' : 'password';
+  togglePass.textContent = esPass ? '🙈' : '👁️';
+  togglePass.title = esPass ? 'Ocultar contraseña' : 'Mostrar contraseña';
+  inputPass.focus();
+});
+
+/* ============================================================
+   CAPS LOCK WARNING
+   ============================================================ */
+function checkCapsLock(e) {
+  if (e.getModifierState) {
+    const capsOn = e.getModifierState('CapsLock');
+    if (capsOn) {
+      capsWarning.classList.add('activo');
+    } else {
+      capsWarning.classList.remove('activo');
+    }
+  }
+}
+inputPass.addEventListener('keydown', checkCapsLock);
+inputPass.addEventListener('keyup', checkCapsLock);
+inputPass.addEventListener('blur', () => capsWarning.classList.remove('activo'));
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+async function intentarLogin() {
+  const email = inputEmail.value.trim();
+  const pass = inputPass.value;
+  errorLogin.classList.remove('activo');
+  errorLogin.textContent = '';
+
+  // Validaciones
   if (!email || !pass) {
     errorLogin.textContent = 'Completá usuario y contraseña.';
-    errorLogin.style.display = 'block';
+    errorLogin.classList.add('activo');
+    return;
+  }
+  if (!email.includes('@') || !email.includes('.')) {
+    errorLogin.textContent = 'El email no es válido.';
+    errorLogin.classList.add('activo');
+    return;
+  }
+  if (pass.length < 6) {
+    errorLogin.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+    errorLogin.classList.add('activo');
     return;
   }
 
+  // Deshabilitar botón mientras se procesa
+  btnEntrar.disabled = true;
+  const textoOriginal = btnEntrar.textContent;
+  btnEntrar.textContent = 'Verificando...';
+
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+
+  btnEntrar.disabled = false;
+  btnEntrar.textContent = textoOriginal;
+
   if (error) {
-    errorLogin.textContent = 'Usuario o contraseña incorrectos.';
-    errorLogin.style.display = 'block';
+    let mensaje = 'Usuario o contraseña incorrectos.';
+    if (error.message && error.message.toLowerCase().includes('email')) {
+      mensaje = 'El email no está registrado o es inválido.';
+    }
+    errorLogin.textContent = mensaje;
+    errorLogin.classList.add('activo');
+    return;
   }
+
+  // Guardar email si eligió "recordar"
+  if (recordarEmail.checked) {
+    localStorage.setItem('panel_email_recordado', email);
+  } else {
+    localStorage.removeItem('panel_email_recordado');
+  }
+}
+
+btnEntrar.addEventListener('click', intentarLogin);
+
+inputEmail.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') inputPass.focus();
+});
+inputPass.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') intentarLogin();
 });
 
-document.getElementById('login-pass').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') document.getElementById('btn-entrar').click();
+linkRecuperar.addEventListener('click', (e) => {
+  e.preventDefault();
+  alert('Para recuperar tu contraseña, contactá al administrador del sistema:\n\nadmin@salta.gob.ar');
 });
 
 btnSalir.addEventListener('click', () => supabaseClient.auth.signOut());
@@ -732,6 +966,10 @@ function mostrarSesion(sesionActiva) {
     vistaLogin.style.display = 'block';
     vistaPanel.style.display = 'none';
     btnSalir.style.display = 'none';
+    // Limpiar el campo de contraseña por seguridad
+    inputPass.value = '';
+    inputPass.type = 'password';
+    togglePass.textContent = '👁️';
   }
 }
 
@@ -855,10 +1093,6 @@ document.getElementById('filtro-busqueda').addEventListener('input', renderTabla
 
 let solicitudAbierta = null;
 
-/* ============================================================
-   HELPERS PARA ARMAR EL DETALLE
-   ============================================================ */
-
 function crearSeccion(titulo, campos) {
   const seccion = document.createElement('div');
   seccion.className = 'detalle-seccion';
@@ -922,9 +1156,6 @@ function crearItemEstado(estado) {
   return item;
 }
 
-/* ============================================================
-   MOSTRAR DETALLE
-   ============================================================ */
 function mostrarDetalle(s) {
   solicitudAbierta = s;
   document.getElementById('detalle-titulo').textContent = s.tramite_titulo || s.tramite;
@@ -937,24 +1168,18 @@ function mostrarDetalle(s) {
   const d = s.datos || {};
   const et = etiquetasDetalle;
 
-  /* --- SECCIÓN SOLICITANTE (y conviviente si aplica) --- */
   const camposSol = [];
-
-  // Comisaría
   camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
 
-  // Nombre (distintos nombres según trámite)
   const nombreSol = d.nombre || d.nombreSolicitante || '';
   const dniSol = d.dni || d.dniSolicitante || '';
   if (nombreSol) camposSol.push([et.nombre, nombreSol]);
   if (dniSol) camposSol.push([et.dni, dniSol]);
   if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
 
-  // Conviviente (solo en convivencia)
   if (d.nombreConviviente) camposSol.push([et.nombreConviviente, d.nombreConviviente]);
   if (d.dniConviviente) camposSol.push([et.dniConviviente, d.dniConviviente]);
 
-  // Otros campos del solicitante
   if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
   if (d.domicilioComun) camposSol.push([et.domicilioComun, d.domicilioComun]);
   if (d.localidad) camposSol.push([et.localidad, d.localidad]);
@@ -965,19 +1190,15 @@ function mostrarDetalle(s) {
   if (d.personasACargo) camposSol.push([et.personasACargo, d.personasACargo]);
   if (d.motivo) camposSol.push([et.motivo, d.motivo]);
 
-  // Foto del solicitante
   const fotoSol = d.foto_solicitante || d.fotoSolicitante;
   if (fotoSol) camposSol.push([et.foto_solicitante, fotoSol, true]);
 
-  // Estado (al final de la sección solicitante)
   const seccionSol = crearSeccion('👤 Solicitante', camposSol);
-  // Insertar el estado en la sección
   const listaSol = seccionSol.querySelector('.detalle-lista');
   listaSol.appendChild(crearItemEstado(s.estado));
 
   cont.appendChild(seccionSol);
 
-  /* --- TESTIGO 1 --- */
   const camposT1 = [];
   if (d.testigo1Nombre) camposT1.push([et.testigo1Nombre, d.testigo1Nombre]);
   if (d.testigo1Dni) camposT1.push([et.testigo1Dni, d.testigo1Dni]);
@@ -988,7 +1209,6 @@ function mostrarDetalle(s) {
     cont.appendChild(crearSeccion('👤 Testigo 1', camposT1));
   }
 
-  /* --- TESTIGO 2 --- */
   const camposT2 = [];
   if (d.testigo2Nombre) camposT2.push([et.testigo2Nombre, d.testigo2Nombre]);
   if (d.testigo2Dni) camposT2.push([et.testigo2Dni, d.testigo2Dni]);
@@ -1007,9 +1227,6 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
   document.getElementById('detalle').style.display = 'none';
 });
 
-/* ============================================================
-   CAMBIOS DE ESTADO
-   ============================================================ */
 async function cambiarEstado(nuevoEstado) {
   if (!solicitudAbierta) return;
 
@@ -1037,9 +1254,6 @@ document.getElementById('btn-validar').addEventListener('click', () => cambiarEs
 document.getElementById('btn-denegar').addEventListener('click', () => cambiarEstado('denegado'));
 document.getElementById('btn-pendiente').addEventListener('click', () => cambiarEstado('pendiente'));
 
-/* ============================================================
-   IMPRIMIR
-   ============================================================ */
 document.getElementById('btn-imprimir').addEventListener('click', () => {
   if (!solicitudAbierta) return;
   const s = solicitudAbierta;
@@ -1097,9 +1311,6 @@ document.getElementById('btn-imprimir').addEventListener('click', () => {
   setTimeout(() => ventana.print(), 500);
 });
 
-/* ============================================================
-   EXPORTAR A CSV
-   ============================================================ */
 document.getElementById('btn-exportar').addEventListener('click', () => {
   const estado = document.getElementById('filtro-estado').value;
   const comisaria = document.getElementById('filtro-comisaria').value;
@@ -1153,9 +1364,6 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
-/* ============================================================
-   MODAL FOTO GRANDE
-   ============================================================ */
 function abrirFotoGrande(src) {
   document.getElementById('foto-grande').src = src;
   document.getElementById('modal-foto').classList.add('activo');
