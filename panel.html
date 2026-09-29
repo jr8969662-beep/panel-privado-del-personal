@@ -14,17 +14,8 @@
     --dorado-claro:#e6c988;
     --dorado-brilloso:#f0d78c;
     --verde:#15803d;
-    --verde-claro:#dcfce7;
     --rojo:#b91c1c;
-    --rojo-claro:#fee2e2;
     --amarillo:#ca8a04;
-    --amarillo-claro:#fef3c7;
-    --gris:#f4f6f9;
-    --gris-claro:#fafbfc;
-    --borde:#d7dde5;
-    --texto:#1f2937;
-    --texto-suave:#6b7280;
-    --blanco:#ffffff;
     --sombra-suave:0 2px 8px rgba(13,42,77,0.08);
     --sombra-media:0 4px 16px rgba(13,42,77,0.12);
     --sombra-fuerte:0 8px 32px rgba(13,42,77,0.16);
@@ -35,7 +26,7 @@
     font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
     background:var(--azul-fondo);
     margin:0;
-    color:var(--texto);
+    color:#fff;
     position:relative;
     overflow-x:hidden;
     min-height:100vh;
@@ -53,7 +44,7 @@
     background-size:contain;
     background-repeat:no-repeat;
     background-position:center;
-    opacity:0.10;
+    opacity:0.25;
     pointer-events:none;
     z-index:0;
   }
@@ -142,8 +133,9 @@
   #vista-login{
     max-width:360px;
     margin:60px auto 0;
-    background:#fff;
-    border:1px solid var(--borde);
+    background:rgba(255,255,255,0.95);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(201,169,97,0.4);
     border-top:3px solid var(--dorado);
     border-radius:12px;
     padding:30px 26px;
@@ -167,7 +159,7 @@
   #vista-login .login-sub{
     margin:0 0 20px;
     font-size:0.82rem;
-    color:var(--texto-suave);
+    color:#6b7280;
   }
   #vista-login label{
     display:block;
@@ -175,16 +167,18 @@
     font-weight:600;
     margin:14px 0 6px;
     text-align:left;
-    color:var(--texto);
+    color:#1f2937;
   }
   #vista-login input{
     width:100%;
     padding:10px 12px;
-    border:1px solid var(--borde);
+    border:1px solid #d7dde5;
     border-radius:6px;
     font-size:0.9rem;
     font-family:inherit;
     transition:border-color 0.2s;
+    background:#fff;
+    color:#1f2937;
   }
   #vista-login input:focus{
     outline:none;
@@ -209,11 +203,11 @@
     box-shadow:var(--sombra-media);
   }
   #error-login{
-    color:var(--rojo);
+    color:#b91c1c;
     font-size:0.82rem;
     margin-top:12px;
     display:none;
-    background:var(--rojo-claro);
+    background:#fee2e2;
     padding:8px 12px;
     border-radius:6px;
   }
@@ -229,19 +223,21 @@
     margin-bottom:20px;
   }
   .tarjeta-resumen{
-    background:#fff;
-    border:1px solid var(--borde);
+    background:rgba(255,255,255,0.12);
+    backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.2);
     border-radius:10px;
     padding:18px 20px;
     box-shadow:var(--sombra-suave);
     display:flex;
     align-items:center;
     gap:14px;
-    transition:transform 0.2s, box-shadow 0.2s;
+    transition:transform 0.2s, box-shadow 0.2s, background 0.2s;
   }
   .tarjeta-resumen:hover{
     transform:translateY(-2px);
     box-shadow:var(--sombra-media);
+    background:rgba(255,255,255,0.18);
   }
   .tarjeta-resumen .icono{
     width:46px; height:46px;
@@ -251,10 +247,8 @@
     justify-content:center;
     font-size:1.4rem;
     flex-shrink:0;
+    background:rgba(255,255,255,0.15);
   }
-  .tarjeta-resumen.pendiente .icono{background:var(--amarillo-claro);}
-  .tarjeta-resumen.procesado .icono{background:var(--verde-claro);}
-  .tarjeta-resumen.denegado .icono{background:var(--rojo-claro);}
   .tarjeta-resumen .info{
     display:flex;
     flex-direction:column;
@@ -263,12 +257,13 @@
   .tarjeta-resumen .numero{
     font-size:1.6rem;
     font-weight:700;
-    color:var(--azul-oscuro);
+    color:#fff;
     line-height:1;
+    text-shadow:0 2px 4px rgba(0,0,0,0.3);
   }
   .tarjeta-resumen .label{
     font-size:0.75rem;
-    color:var(--texto-suave);
+    color:var(--dorado-claro);
     text-transform:uppercase;
     letter-spacing:0.05em;
     font-weight:600;
@@ -280,26 +275,34 @@
     gap:10px;
     margin-bottom:16px;
     flex-wrap:wrap;
-    background:#fff;
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(8px);
     padding:14px;
     border-radius:10px;
     box-shadow:var(--sombra-suave);
-    border:1px solid var(--borde);
+    border:1px solid rgba(255,255,255,0.15);
   }
   .filtros input,
   .filtros select{
     padding:9px 12px;
-    border:1px solid var(--borde);
+    border:1px solid rgba(255,255,255,0.2);
     border-radius:6px;
     font-size:0.85rem;
     font-family:inherit;
+    background:rgba(0,0,0,0.2);
+    color:#fff;
     transition:border-color 0.2s;
   }
+  .filtros input::placeholder{color:rgba(255,255,255,0.6);}
   .filtros input:focus,
   .filtros select:focus{
     outline:none;
-    border-color:var(--azul-claro);
-    box-shadow:0 0 0 3px rgba(44,90,160,0.1);
+    border-color:var(--dorado);
+    box-shadow:0 0 0 3px rgba(201,169,97,0.2);
+  }
+  .filtros select option{
+    background:var(--azul-oscuro);
+    color:#fff;
   }
   #filtro-busqueda{
     flex:1;
@@ -317,6 +320,7 @@
   #btn-actualizar{
     background:var(--azul);
     color:#fff;
+    border:1px solid rgba(255,255,255,0.2);
   }
   #btn-actualizar:hover{
     background:var(--azul-claro);
@@ -329,13 +333,13 @@
     background:var(--dorado-claro);
   }
 
-  /* Tabla */
+  /* Tabla TRANSPARENTE */
   .tabla-wrapper{
-    background:#fff;
+    background:transparent;
     border-radius:10px;
-    box-shadow:var(--sombra-suave);
-    border:1px solid var(--borde);
+    border:1px solid rgba(255,255,255,0.2);
     overflow:hidden;
+    backdrop-filter:blur(2px);
   }
   table{
     width:100%;
@@ -345,19 +349,22 @@
     padding:12px 14px;
     text-align:left;
     font-size:0.85rem;
-    border-bottom:1px solid var(--borde);
+    border-bottom:1px solid rgba(255,255,255,0.12);
+    color:#fff;
   }
   th{
-    background:#eef1f5;
-    color:var(--azul-oscuro);
+    background:rgba(201,169,97,0.15);
+    color:var(--dorado-claro);
     font-weight:700;
     font-size:0.78rem;
     text-transform:uppercase;
     letter-spacing:0.03em;
+    border-bottom:2px solid rgba(201,169,97,0.4);
   }
-  tr.fila-solicitud{cursor:pointer; transition:background 0.15s;}
-  tr.fila-solicitud:hover{background:#f8fafc;}
+  tr.fila-solicitud{cursor:pointer; transition:background 0.15s; color:#fff;}
+  tr.fila-solicitud:hover{background:rgba(255,255,255,0.1);}
   tr.fila-solicitud:last-child td{border-bottom:none;}
+  tr.fila-solicitud td{color:#e0e7f1;}
 
   .etiqueta{
     padding:4px 10px;
@@ -368,15 +375,16 @@
     letter-spacing:0.03em;
     display:inline-block;
   }
-  .etiqueta.pendiente{background:var(--amarillo-claro); color:#8a6400;}
-  .etiqueta.procesado{background:var(--verde-claro); color:var(--verde);}
-  .etiqueta.denegado{background:var(--rojo-claro); color:var(--rojo);}
+  .etiqueta.pendiente{background:rgba(202,138,4,0.3); color:#fcd34d; border:1px solid rgba(252,211,77,0.5);}
+  .etiqueta.procesado{background:rgba(21,128,61,0.3); color:#86efac; border:1px solid rgba(134,239,172,0.5);}
+  .etiqueta.denegado{background:rgba(185,28,28,0.3); color:#fca5a5; border:1px solid rgba(252,165,165,0.5);}
 
-  /* Detalle */
+  /* Detalle TRANSPARENTE */
   #detalle{
     display:none;
-    background:#fff;
-    border:1px solid var(--borde);
+    background:rgba(13,42,77,0.6);
+    backdrop-filter:blur(8px);
+    border:1px solid rgba(201,169,97,0.4);
     border-top:3px solid var(--dorado);
     border-radius:10px;
     padding:26px;
@@ -385,15 +393,15 @@
   }
   #detalle h3{
     margin:0 0 4px;
-    color:var(--azul-oscuro);
+    color:var(--dorado-claro);
     font-size:1.1rem;
   }
   #detalle .detalle-fecha{
     font-size:0.8rem;
-    color:var(--texto-suave);
+    color:rgba(255,255,255,0.7);
     margin-bottom:16px;
     padding-bottom:16px;
-    border-bottom:1px solid var(--borde);
+    border-bottom:1px solid rgba(255,255,255,0.2);
   }
   #detalle dl{
     margin:0;
@@ -403,7 +411,7 @@
   }
   #detalle dt{
     font-size:0.72rem;
-    color:var(--texto-suave);
+    color:var(--dorado-claro);
     text-transform:uppercase;
     letter-spacing:0.03em;
     font-weight:600;
@@ -412,12 +420,12 @@
   #detalle dd{
     margin:2px 0 8px;
     font-size:0.9rem;
-    color:var(--texto);
+    color:#fff;
   }
   #detalle dd img{
     max-width:100%;
     max-height:280px;
-    border:1px solid var(--borde);
+    border:1px solid rgba(255,255,255,0.3);
     border-radius:8px;
     margin-top:4px;
     display:block;
@@ -435,7 +443,7 @@
     gap:10px;
     flex-wrap:wrap;
     padding-top:18px;
-    border-top:1px solid var(--borde);
+    border-top:1px solid rgba(255,255,255,0.2);
   }
   #detalle button{
     padding:10px 18px;
@@ -449,27 +457,27 @@
     align-items:center;
     gap:6px;
   }
-  #btn-validar{background:var(--verde); color:#fff;}
+  #btn-validar{background:#15803d; color:#fff;}
   #btn-validar:hover{background:#166534;}
-  #btn-denegar{background:var(--rojo); color:#fff;}
+  #btn-denegar{background:#b91c1c; color:#fff;}
   #btn-denegar:hover{background:#991b1b;}
-  #btn-pendiente{background:var(--amarillo); color:#fff;}
+  #btn-pendiente{background:#ca8a04; color:#fff;}
   #btn-pendiente:hover{background:#a16207;}
-  #btn-imprimir{background:var(--azul); color:#fff;}
+  #btn-imprimir{background:var(--azul); color:#fff; border:1px solid rgba(255,255,255,0.2);}
   #btn-imprimir:hover{background:var(--azul-claro);}
-  #btn-cerrar-detalle{background:#e5e9ef; color:var(--texto);}
-  #btn-cerrar-detalle:hover{background:#d1d5db;}
+  #btn-cerrar-detalle{background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.2);}
+  #btn-cerrar-detalle:hover{background:rgba(255,255,255,0.25);}
 
   .vacio{
     padding:40px 20px;
     text-align:center;
-    color:var(--texto-suave);
+    color:rgba(255,255,255,0.7);
     font-size:0.9rem;
   }
   .vacio .vacio-icono{
     font-size:3rem;
     margin-bottom:12px;
-    opacity:0.4;
+    opacity:0.5;
   }
 
   /* Modal para ver foto grande */
@@ -477,7 +485,7 @@
     display:none;
     position:fixed;
     top:0; left:0; right:0; bottom:0;
-    background:rgba(0,0,0,0.9);
+    background:rgba(0,0,0,0.95);
     z-index:9999;
     padding:20px;
     align-items:center;
@@ -645,7 +653,6 @@ const vistaPanel = document.getElementById('vista-panel');
 const btnSalir = document.getElementById('btn-salir');
 const errorLogin = document.getElementById('error-login');
 
-// --- Login ---
 document.getElementById('btn-entrar').addEventListener('click', async () => {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
@@ -664,7 +671,6 @@ document.getElementById('btn-entrar').addEventListener('click', async () => {
   }
 });
 
-// Enter en la contraseña para entrar
 document.getElementById('login-pass').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') document.getElementById('btn-entrar').click();
 });
@@ -687,7 +693,6 @@ function mostrarSesion(sesionActiva) {
 supabaseClient.auth.getSession().then(({ data: { session } }) => mostrarSesion(!!session));
 supabaseClient.auth.onAuthStateChange((_event, session) => mostrarSesion(!!session));
 
-// --- Cargar filtro de comisarías ---
 const filtroComisaria = document.getElementById('filtro-comisaria');
 DEPENDENCIAS_POLICIALES.forEach(dep => {
   const opt = document.createElement('option');
@@ -735,13 +740,11 @@ function actualizarContadores() {
 
 document.getElementById('btn-actualizar').addEventListener('click', cargarSolicitudes);
 
-// Actualización en vivo
 supabaseClient
   .channel('solicitudes-cambios')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes' }, cargarSolicitudes)
   .subscribe();
 
-// --- Búsqueda y filtros ---
 function normalizarTexto(t) {
   return String(t || '')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -785,7 +788,6 @@ function renderTabla() {
     const tr = document.createElement('tr');
     tr.className = 'fila-solicitud';
     const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
-    const d = s.datos || {};
     const nombreSolicitante = obtenerNombreSolicitud(s) || '-';
     const estadoTexto = s.estado === 'procesado' ? 'Procesado' :
                         s.estado === 'denegado' ? 'Denegado' : 'Pendiente';
@@ -859,7 +861,6 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
   document.getElementById('detalle').style.display = 'none';
 });
 
-// --- Cambios de estado ---
 async function cambiarEstado(nuevoEstado) {
   if (!solicitudAbierta) return;
 
@@ -887,7 +888,6 @@ document.getElementById('btn-validar').addEventListener('click', () => cambiarEs
 document.getElementById('btn-denegar').addEventListener('click', () => cambiarEstado('denegado'));
 document.getElementById('btn-pendiente').addEventListener('click', () => cambiarEstado('pendiente'));
 
-// --- Imprimir ---
 document.getElementById('btn-imprimir').addEventListener('click', () => {
   if (!solicitudAbierta) return;
   const s = solicitudAbierta;
@@ -904,7 +904,6 @@ document.getElementById('btn-imprimir').addEventListener('click', () => {
       body{font-family:Arial,sans-serif; padding:30px; max-width:800px; margin:0 auto; color:#1f2937;}
       h1{text-align:center; color:#0d2a4d; font-size:1.3rem; margin-bottom:4px; border-bottom:2px solid #c9a961; padding-bottom:12px;}
       .subt{text-align:center; color:#6b7280; font-size:0.85rem; margin-bottom:24px;}
-      .estado{text-align:center; margin:16px 0;}
       dl{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
       dt{font-size:0.72rem; color:#6b7280; text-transform:uppercase; letter-spacing:0.03em; font-weight:600;}
       dd{margin:2px 0 0; font-size:0.9rem;}
@@ -946,7 +945,6 @@ document.getElementById('btn-imprimir').addEventListener('click', () => {
   setTimeout(() => ventana.print(), 500);
 });
 
-// --- Exportar a CSV ---
 document.getElementById('btn-exportar').addEventListener('click', () => {
   const estado = document.getElementById('filtro-estado').value;
   const comisaria = document.getElementById('filtro-comisaria').value;
@@ -970,10 +968,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
     return;
   }
 
-  const filas = [
-    ['Fecha', 'Trámite', 'Solicitante', 'DNI', 'Comisaría', 'Estado']
-  ];
-
+  const filas = [['Fecha', 'Trámite', 'Solicitante', 'DNI', 'Comisaría', 'Estado']];
   filtradas.forEach(s => {
     filas.push([
       s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-',
@@ -998,7 +993,6 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
-// --- Modal de foto grande ---
 function abrirFotoGrande(src) {
   document.getElementById('foto-grande').src = src;
   document.getElementById('modal-foto').classList.add('activo');
