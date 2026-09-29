@@ -407,7 +407,16 @@
     margin:0;
     display:grid;
     grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-    gap:12px 20px;
+    gap:16px 20px;
+  }
+  #detalle dl > div{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    padding:10px 14px;
+    background:rgba(255,255,255,0.05);
+    border-radius:8px;
+    border-left:3px solid var(--dorado);
   }
   #detalle dt{
     font-size:0.72rem;
@@ -415,12 +424,14 @@
     text-transform:uppercase;
     letter-spacing:0.03em;
     font-weight:600;
-    margin-top:0;
+    margin:0;
   }
   #detalle dd{
-    margin:2px 0 8px;
-    font-size:0.9rem;
+    margin:0;
+    font-size:0.92rem;
     color:#fff;
+    font-weight:500;
+    word-break:break-word;
   }
   #detalle dd img{
     max-width:100%;
@@ -522,6 +533,7 @@
     th, td{padding:10px 8px; font-size:0.78rem;}
     th:nth-child(1), td:nth-child(1){display:none;}
     #detalle{padding:18px;}
+    #detalle dl{grid-template-columns:1fr;}
     #detalle .btns{flex-direction:column;}
     #detalle button{width:100%; justify-content:center;}
   }
@@ -819,24 +831,32 @@ function mostrarDetalle(s) {
   const cont = document.getElementById('detalle-contenido');
   cont.innerHTML = '';
 
+  // Comisaría asignada
+  const wrapper0 = document.createElement('div');
   const dt0 = document.createElement('dt');
   dt0.textContent = 'Comisaría asignada';
   const dd0 = document.createElement('dd');
   dd0.textContent = s.comisaria_asignada || '-';
-  cont.appendChild(dt0);
-  cont.appendChild(dd0);
+  wrapper0.appendChild(dt0);
+  wrapper0.appendChild(dd0);
+  cont.appendChild(wrapper0);
 
+  // Estado actual
+  const wrapperE = document.createElement('div');
   const dtE = document.createElement('dt');
   dtE.textContent = 'Estado actual';
   const ddE = document.createElement('dd');
   const estadoTexto = s.estado === 'procesado' ? 'Procesado' :
                       s.estado === 'denegado' ? 'Denegado' : 'Pendiente';
   ddE.innerHTML = `<span class="etiqueta ${s.estado}">${estadoTexto}</span>`;
-  cont.appendChild(dtE);
-  cont.appendChild(ddE);
+  wrapperE.appendChild(dtE);
+  wrapperE.appendChild(ddE);
+  cont.appendChild(wrapperE);
 
+  // Resto de los campos
   Object.entries(s.datos || {}).forEach(([campo, valor]) => {
     if (!valor) return;
+    const wrapper = document.createElement('div');
     const dt = document.createElement('dt');
     dt.textContent = etiquetasDetalle[campo] || campo;
     const dd = document.createElement('dd');
@@ -849,8 +869,9 @@ function mostrarDetalle(s) {
     } else {
       dd.textContent = valor;
     }
-    cont.appendChild(dt);
-    cont.appendChild(dd);
+    wrapper.appendChild(dt);
+    wrapper.appendChild(dd);
+    cont.appendChild(wrapper);
   });
 
   document.getElementById('detalle').style.display = 'block';
