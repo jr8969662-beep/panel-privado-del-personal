@@ -382,8 +382,8 @@
   /* Detalle TRANSPARENTE */
   #detalle{
     display:none;
-    background:rgba(13,42,77,0.6);
-    backdrop-filter:blur(8px);
+    background:rgba(13,42,77,0.75);
+    backdrop-filter:blur(10px);
     border:1px solid rgba(201,169,97,0.4);
     border-top:3px solid var(--dorado);
     border-radius:10px;
@@ -394,58 +394,92 @@
   #detalle h3{
     margin:0 0 4px;
     color:var(--dorado-claro);
-    font-size:1.1rem;
+    font-size:1.15rem;
   }
   #detalle .detalle-fecha{
     font-size:0.8rem;
     color:rgba(255,255,255,0.7);
-    margin-bottom:16px;
+    margin-bottom:20px;
     padding-bottom:16px;
-    border-bottom:1px solid rgba(255,255,255,0.2);
+    border-bottom:1px solid rgba(255,255,255,0.15);
   }
-  #detalle dl{
-    margin:0;
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-    gap:16px 20px;
+
+  /* Título de sección (Solicitante, Testigo 1, etc.) */
+  .detalle-seccion-titulo{
+    font-size:0.9rem;
+    color:var(--dorado-claro);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    font-weight:700;
+    margin:0 0 16px;
+    padding-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:10px;
   }
-  #detalle dl > div{
+  .detalle-seccion-titulo::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background:linear-gradient(90deg, var(--dorado), transparent);
+  }
+
+  /* Lista de campos EN COLUMNA (uno debajo del otro) */
+  .detalle-lista{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .detalle-item{
     display:flex;
     flex-direction:column;
     gap:4px;
-    padding:10px 14px;
-    background:rgba(255,255,255,0.05);
+    padding:12px 16px;
+    background:rgba(255,255,255,0.06);
     border-radius:8px;
     border-left:3px solid var(--dorado);
   }
-  #detalle dt{
+
+  .detalle-item dt{
     font-size:0.72rem;
     color:var(--dorado-claro);
     text-transform:uppercase;
-    letter-spacing:0.03em;
-    font-weight:600;
+    letter-spacing:0.04em;
+    font-weight:700;
     margin:0;
   }
-  #detalle dd{
+
+  .detalle-item dd{
     margin:0;
-    font-size:0.92rem;
+    font-size:0.95rem;
     color:#fff;
     font-weight:500;
     word-break:break-word;
+    line-height:1.4;
   }
-  #detalle dd img{
+
+  .detalle-item dd img{
     max-width:100%;
-    max-height:280px;
+    max-height:320px;
     border:1px solid rgba(255,255,255,0.3);
     border-radius:8px;
-    margin-top:4px;
+    margin-top:6px;
     display:block;
     cursor:pointer;
     transition:transform 0.2s;
   }
-  #detalle dd img:hover{
+  .detalle-item dd img:hover{
     transform:scale(1.02);
     box-shadow:var(--sombra-media);
+  }
+
+  /* Separador dorado entre secciones */
+  .detalle-separador{
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--dorado), var(--dorado-claro), var(--dorado), transparent);
+    margin:24px 0;
+    opacity:0.8;
   }
 
   #detalle .btns{
@@ -533,7 +567,6 @@
     th, td{padding:10px 8px; font-size:0.78rem;}
     th:nth-child(1), td:nth-child(1){display:none;}
     #detalle{padding:18px;}
-    #detalle dl{grid-template-columns:1fr;}
     #detalle .btns{flex-direction:column;}
     #detalle button{width:100%; justify-content:center;}
   }
@@ -637,7 +670,7 @@
     <div id="detalle">
       <h3 id="detalle-titulo"></h3>
       <p class="detalle-fecha" id="detalle-fecha"></p>
-      <dl id="detalle-contenido"></dl>
+      <div id="detalle-contenido"></div>
       <div class="btns">
         <button id="btn-validar">✓ Validar</button>
         <button id="btn-denegar">✕ Denegar</button>
@@ -822,6 +855,76 @@ document.getElementById('filtro-busqueda').addEventListener('input', renderTabla
 
 let solicitudAbierta = null;
 
+/* ============================================================
+   HELPERS PARA ARMAR EL DETALLE
+   ============================================================ */
+
+function crearSeccion(titulo, campos) {
+  const seccion = document.createElement('div');
+  seccion.className = 'detalle-seccion';
+
+  const h = document.createElement('h4');
+  h.className = 'detalle-seccion-titulo';
+  h.innerHTML = titulo;
+  seccion.appendChild(h);
+
+  const lista = document.createElement('div');
+  lista.className = 'detalle-lista';
+
+  campos.forEach(([label, valor, esFoto]) => {
+    if (valor === undefined || valor === null || valor === '') return;
+    const item = document.createElement('div');
+    item.className = 'detalle-item';
+
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+
+    const dd = document.createElement('dd');
+    if (esFoto) {
+      const img = document.createElement('img');
+      img.src = valor;
+      img.alt = label;
+      img.addEventListener('click', () => abrirFotoGrande(valor));
+      dd.appendChild(img);
+    } else {
+      dd.textContent = valor;
+    }
+
+    item.appendChild(dt);
+    item.appendChild(dd);
+    lista.appendChild(item);
+  });
+
+  seccion.appendChild(lista);
+  return seccion;
+}
+
+function crearSeparador() {
+  const sep = document.createElement('div');
+  sep.className = 'detalle-separador';
+  return sep;
+}
+
+function crearItemEstado(estado) {
+  const item = document.createElement('div');
+  item.className = 'detalle-item';
+
+  const dt = document.createElement('dt');
+  dt.textContent = 'Estado actual';
+
+  const dd = document.createElement('dd');
+  const estadoTexto = estado === 'procesado' ? 'Procesado' :
+                      estado === 'denegado' ? 'Denegado' : 'Pendiente';
+  dd.innerHTML = `<span class="etiqueta ${estado}">${estadoTexto}</span>`;
+
+  item.appendChild(dt);
+  item.appendChild(dd);
+  return item;
+}
+
+/* ============================================================
+   MOSTRAR DETALLE
+   ============================================================ */
 function mostrarDetalle(s) {
   solicitudAbierta = s;
   document.getElementById('detalle-titulo').textContent = s.tramite_titulo || s.tramite;
@@ -831,48 +934,70 @@ function mostrarDetalle(s) {
   const cont = document.getElementById('detalle-contenido');
   cont.innerHTML = '';
 
-  // Comisaría asignada
-  const wrapper0 = document.createElement('div');
-  const dt0 = document.createElement('dt');
-  dt0.textContent = 'Comisaría asignada';
-  const dd0 = document.createElement('dd');
-  dd0.textContent = s.comisaria_asignada || '-';
-  wrapper0.appendChild(dt0);
-  wrapper0.appendChild(dd0);
-  cont.appendChild(wrapper0);
+  const d = s.datos || {};
+  const et = etiquetasDetalle;
 
-  // Estado actual
-  const wrapperE = document.createElement('div');
-  const dtE = document.createElement('dt');
-  dtE.textContent = 'Estado actual';
-  const ddE = document.createElement('dd');
-  const estadoTexto = s.estado === 'procesado' ? 'Procesado' :
-                      s.estado === 'denegado' ? 'Denegado' : 'Pendiente';
-  ddE.innerHTML = `<span class="etiqueta ${s.estado}">${estadoTexto}</span>`;
-  wrapperE.appendChild(dtE);
-  wrapperE.appendChild(ddE);
-  cont.appendChild(wrapperE);
+  /* --- SECCIÓN SOLICITANTE (y conviviente si aplica) --- */
+  const camposSol = [];
 
-  // Resto de los campos
-  Object.entries(s.datos || {}).forEach(([campo, valor]) => {
-    if (!valor) return;
-    const wrapper = document.createElement('div');
-    const dt = document.createElement('dt');
-    dt.textContent = etiquetasDetalle[campo] || campo;
-    const dd = document.createElement('dd');
-    if (campo.startsWith('foto_')) {
-      const img = document.createElement('img');
-      img.src = valor;
-      img.alt = etiquetasDetalle[campo] || campo;
-      img.addEventListener('click', () => abrirFotoGrande(valor));
-      dd.appendChild(img);
-    } else {
-      dd.textContent = valor;
-    }
-    wrapper.appendChild(dt);
-    wrapper.appendChild(dd);
-    cont.appendChild(wrapper);
-  });
+  // Comisaría
+  camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
+
+  // Nombre (distintos nombres según trámite)
+  const nombreSol = d.nombre || d.nombreSolicitante || '';
+  const dniSol = d.dni || d.dniSolicitante || '';
+  if (nombreSol) camposSol.push([et.nombre, nombreSol]);
+  if (dniSol) camposSol.push([et.dni, dniSol]);
+  if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
+
+  // Conviviente (solo en convivencia)
+  if (d.nombreConviviente) camposSol.push([et.nombreConviviente, d.nombreConviviente]);
+  if (d.dniConviviente) camposSol.push([et.dniConviviente, d.dniConviviente]);
+
+  // Otros campos del solicitante
+  if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
+  if (d.domicilioComun) camposSol.push([et.domicilioComun, d.domicilioComun]);
+  if (d.localidad) camposSol.push([et.localidad, d.localidad]);
+  if (d.tiempoResidencia) camposSol.push([et.tiempoResidencia, d.tiempoResidencia]);
+  if (d.tiempoConvivencia) camposSol.push([et.tiempoConvivencia, d.tiempoConvivencia]);
+  if (d.estadoCivil) camposSol.push([et.estadoCivil, d.estadoCivil]);
+  if (d.situacionLaboral) camposSol.push([et.situacionLaboral, d.situacionLaboral]);
+  if (d.personasACargo) camposSol.push([et.personasACargo, d.personasACargo]);
+  if (d.motivo) camposSol.push([et.motivo, d.motivo]);
+
+  // Foto del solicitante
+  const fotoSol = d.foto_solicitante || d.fotoSolicitante;
+  if (fotoSol) camposSol.push([et.foto_solicitante, fotoSol, true]);
+
+  // Estado (al final de la sección solicitante)
+  const seccionSol = crearSeccion('👤 Solicitante', camposSol);
+  // Insertar el estado en la sección
+  const listaSol = seccionSol.querySelector('.detalle-lista');
+  listaSol.appendChild(crearItemEstado(s.estado));
+
+  cont.appendChild(seccionSol);
+
+  /* --- TESTIGO 1 --- */
+  const camposT1 = [];
+  if (d.testigo1Nombre) camposT1.push([et.testigo1Nombre, d.testigo1Nombre]);
+  if (d.testigo1Dni) camposT1.push([et.testigo1Dni, d.testigo1Dni]);
+  if (d.foto_testigo1) camposT1.push([et.foto_testigo1, d.foto_testigo1, true]);
+
+  if (camposT1.length) {
+    cont.appendChild(crearSeparador());
+    cont.appendChild(crearSeccion('👤 Testigo 1', camposT1));
+  }
+
+  /* --- TESTIGO 2 --- */
+  const camposT2 = [];
+  if (d.testigo2Nombre) camposT2.push([et.testigo2Nombre, d.testigo2Nombre]);
+  if (d.testigo2Dni) camposT2.push([et.testigo2Dni, d.testigo2Dni]);
+  if (d.foto_testigo2) camposT2.push([et.foto_testigo2, d.foto_testigo2, true]);
+
+  if (camposT2.length) {
+    cont.appendChild(crearSeparador());
+    cont.appendChild(crearSeccion('👤 Testigo 2', camposT2));
+  }
 
   document.getElementById('detalle').style.display = 'block';
   document.getElementById('detalle').scrollIntoView({ behavior: 'smooth' });
@@ -882,6 +1007,9 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
   document.getElementById('detalle').style.display = 'none';
 });
 
+/* ============================================================
+   CAMBIOS DE ESTADO
+   ============================================================ */
 async function cambiarEstado(nuevoEstado) {
   if (!solicitudAbierta) return;
 
@@ -909,6 +1037,9 @@ document.getElementById('btn-validar').addEventListener('click', () => cambiarEs
 document.getElementById('btn-denegar').addEventListener('click', () => cambiarEstado('denegado'));
 document.getElementById('btn-pendiente').addEventListener('click', () => cambiarEstado('pendiente'));
 
+/* ============================================================
+   IMPRIMIR
+   ============================================================ */
 document.getElementById('btn-imprimir').addEventListener('click', () => {
   if (!solicitudAbierta) return;
   const s = solicitudAbierta;
@@ -966,6 +1097,9 @@ document.getElementById('btn-imprimir').addEventListener('click', () => {
   setTimeout(() => ventana.print(), 500);
 });
 
+/* ============================================================
+   EXPORTAR A CSV
+   ============================================================ */
 document.getElementById('btn-exportar').addEventListener('click', () => {
   const estado = document.getElementById('filtro-estado').value;
   const comisaria = document.getElementById('filtro-comisaria').value;
@@ -1019,6 +1153,9 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
+/* ============================================================
+   MODAL FOTO GRANDE
+   ============================================================ */
 function abrirFotoGrande(src) {
   document.getElementById('foto-grande').src = src;
   document.getElementById('modal-foto').classList.add('activo');
