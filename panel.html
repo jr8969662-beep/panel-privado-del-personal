@@ -107,35 +107,35 @@
     padding:8px 12px;border-radius:8px;text-align:left;}
   #caps-warning.activo{display:block;}
 
-  @keyframes vibracion {0%,100%{transform:translateX(0);}10%,30%,50%,70%,90%{transform:translateX(-8px);}20%,40%,60%,80%{transform:translateX(8px);}}
-  #vista-login.vibrar { animation: vibracion 0.5s ease-in-out; }
-  .spinner {display:inline-block;width:16px;height:16px;border:2px solid rgba(13,42,77,0.3);
+  @keyframes vibracion{0%,100%{transform:translateX(0);}10%,30%,50%,70%,90%{transform:translateX(-8px);}20%,40%,60%,80%{transform:translateX(8px);}}
+  #vista-login.vibrar{animation:vibracion 0.5s ease-in-out;}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(13,42,77,0.3);
     border-top-color:var(--azul-oscuro);border-radius:50%;animation:girar 0.7s linear infinite;
     margin-right:8px;vertical-align:middle;}
-  @keyframes girar { to { transform: rotate(360deg); } }
-  .ultimo-acceso {font-size:0.75rem;color:rgba(255,255,255,0.55);margin-top:18px;
+  @keyframes girar{to{transform:rotate(360deg);}}
+  .ultimo-acceso{font-size:0.75rem;color:rgba(255,255,255,0.55);margin-top:18px;
     padding:10px 12px;background:rgba(0,0,0,0.25);border-radius:8px;
     border-left:3px solid rgba(201,169,97,0.5);text-align:left;display:none;}
-  .ultimo-acceso.activo { display: block; }
-  .ultimo-acceso strong { color: var(--dorado-claro); }
-  #banner-bienvenida {display:none;margin:0 0 18px;padding:14px 18px;
+  .ultimo-acceso.activo{display:block;}
+  .ultimo-acceso strong{color:var(--dorado-claro);}
+  #banner-bienvenida{display:none;margin:0 0 18px;padding:14px 18px;
     background:rgba(21,128,61,0.25);border:1px solid rgba(134,239,172,0.5);
     border-left:4px solid #86efac;border-radius:10px;color:#fff;font-size:0.92rem;
     animation:slideIn 0.4s ease-out;}
-  #banner-bienvenida.activo { display: block; }
-  #banner-bienvenida strong { color: #86efac; }
-  #aviso-bloqueo {display:none;margin-top:14px;padding:12px 16px;
+  #banner-bienvenida.activo{display:block;}
+  #banner-bienvenida strong{color:#86efac;}
+  #aviso-bloqueo{display:none;margin-top:14px;padding:12px 16px;
     background:rgba(185,28,28,0.25);border:1px solid rgba(252,165,165,0.5);
     border-left:4px solid #fca5a5;border-radius:8px;color:#fff;font-size:0.85rem;text-align:left;}
-  #aviso-bloqueo.activo { display: block; }
-  #aviso-bloqueo strong { color: #fca5a5; }
-  #aviso-inactividad {display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);
+  #aviso-bloqueo.activo{display:block;}
+  #aviso-bloqueo strong{color:#fca5a5;}
+  #aviso-inactividad{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);
     background:rgba(202,138,4,0.95);color:#fff;padding:14px 22px;border-radius:10px;
     border-left:4px solid #fcd34d;box-shadow:0 8px 24px rgba(0,0,0,0.4);
     z-index:10001;font-size:0.9rem;font-weight:600;backdrop-filter:blur(8px);
     animation:slideIn 0.3s ease-out;}
-  #aviso-inactividad.activo { display: block; }
-  #aviso-inactividad button {background:rgba(255,255,255,0.2);color:#fff;
+  #aviso-inactividad.activo{display:block;}
+  #aviso-inactividad button{background:rgba(255,255,255,0.2);color:#fff;
     border:1px solid rgba(255,255,255,0.4);padding:5px 12px;border-radius:6px;
     margin-left:12px;cursor:pointer;font-size:0.82rem;font-weight:600;font-family:inherit;}
 
@@ -216,6 +216,7 @@
     cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;font-family:inherit;}
   .paginacion button:hover:not(:disabled){background:rgba(255,255,255,0.2);border-color:var(--dorado);}
   .paginacion button:disabled{opacity:0.4;cursor:not-allowed;}
+
   #detalle{display:none;background:rgba(13,42,77,0.75);backdrop-filter:blur(10px);
     border:1px solid rgba(201,169,97,0.4);border-top:3px solid var(--dorado);
     border-radius:10px;padding:26px;margin-top:20px;box-shadow:var(--sombra-media);}
@@ -259,8 +260,10 @@
   #btn-cerrar-detalle:hover{background:rgba(255,255,255,0.25);}
   #btn-urgente{background:rgba(185,28,28,0.7);color:#fff;border:1px solid rgba(252,165,165,0.5);}
   #btn-urgente:hover{background:rgba(185,28,28,0.9);}
+
   .vacio{padding:40px 20px;text-align:center;color:rgba(255,255,255,0.7);font-size:0.9rem;}
   .vacio .vacio-icono{font-size:3rem;margin-bottom:12px;opacity:0.5;}
+
   #modal-foto{display:none;position:fixed;top:0;left:0;right:0;bottom:0;
     background:rgba(0,0,0,0.95);z-index:9999;padding:20px;
     align-items:center;justify-content:center;}
@@ -269,6 +272,7 @@
   #modal-foto .cerrar-modal{position:absolute;top:20px;right:20px;
     background:rgba(255,255,255,0.9);color:#000;border:none;width:44px;height:44px;
     border-radius:50%;cursor:pointer;font-size:1.4rem;font-weight:700;}
+
   #toast-container{position:fixed;top:20px;right:20px;z-index:10000;
     display:flex;flex-direction:column;gap:10px;max-width:340px;}
   .toast{background:rgba(21,128,61,0.95);color:#fff;padding:14px 18px;
@@ -279,6 +283,7 @@
   .toast.error{background:rgba(185,28,28,0.95);border-left-color:#fca5a5;}
   .toast .toast-titulo{font-weight:700;display:block;margin-bottom:4px;}
   @keyframes slideIn{from{transform:translateX(400px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
     z-index:9998;align-items:center;justify-content:center;padding:20px;}
   .modal-overlay.activo{display:flex;}
@@ -296,6 +301,42 @@
   .modal-caja .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
   .modal-caja .modal-btns button{padding:10px 18px;border:none;border-radius:6px;
     cursor:pointer;font-size:0.88rem;font-weight:600;transition:all 0.2s;font-family:inherit;}
+
+  /* CERTIFICADOS OFICIALES (para vista previa) */
+  .certificado-oficial{background:#fff;color:#1f2937;padding:40px 50px;
+    font-family:'Times New Roman', Georgia, serif;line-height:1.8;
+    text-align:justify;max-width:850px;margin:0 auto;
+    border:1px solid #c9a961;border-radius:8px;}
+  .cert-header{text-align:center;margin-bottom:26px;
+    border-bottom:2px solid #0d2a4d;padding-bottom:14px;}
+  .cert-escudo{display:inline-block;width:70px;height:70px;
+    background-image:url('logo-policia.png.jpeg');background-size:contain;
+    background-repeat:no-repeat;background-position:center;margin-bottom:6px;}
+  .cert-titulo{font-family:'Segoe UI', Arial, sans-serif;font-weight:bold;color:#0d2a4d;}
+  .cert-titulo .cert-linea1{font-size:0.88rem;letter-spacing:0.15em;}
+  .cert-titulo .cert-linea2{font-size:1.1rem;letter-spacing:0.3em;color:#c9a961;
+    margin:4px 0;font-family:'Times New Roman', serif;}
+  .cert-titulo .cert-nombre{font-size:1.15rem;letter-spacing:0.12em;margin-top:10px;
+    padding-top:10px;border-top:1px solid #c9a961;text-decoration:underline;
+    text-underline-offset:4px;}
+  .cert-texto{font-size:1rem;margin:18px 0;text-align:justify;color:#1f2937;}
+  .cert-texto strong{font-weight:bold;text-transform:uppercase;}
+  .cert-lista-convivientes{margin:16px 0 16px 30px;padding:0;list-style:none;}
+  .cert-lista-convivientes li{font-size:1rem;margin:6px 0;color:#1f2937;
+    font-weight:bold;text-transform:uppercase;}
+  .cert-lista-convivientes li .parentesco{font-weight:normal;text-transform:none;
+    font-style:italic;color:#4b5563;margin-left:6px;}
+  .cert-firmas{margin-top:70px;display:flex;justify-content:space-around;
+    gap:20px;flex-wrap:wrap;}
+  .cert-firma{text-align:center;font-size:0.85rem;color:#1f2937;width:180px;}
+  .cert-firma-espacio{height:60px;border-bottom:1px solid #1f2937;margin-bottom:6px;}
+  .cert-firmas-tres{margin-top:70px;display:flex;justify-content:space-between;
+    gap:15px;flex-wrap:wrap;}
+  .cert-firmas-tres .cert-firma{flex:1;min-width:130px;}
+  .cert-firmas-una{margin-top:70px;display:flex;justify-content:center;}
+  .cert-firmas-una .cert-firma{width:220px;}
+  .cert-lugar-fecha{text-align:right;font-size:0.95rem;margin:24px 0 18px;
+    color:#1f2937;font-style:italic;}
 
   @media (max-width: 700px){
     header{padding:14px 16px;}
@@ -367,9 +408,7 @@
 
     <button type="submit" id="btn-entrar">Ingresar</button>
     <p id="error-login"></p>
-
     <div id="aviso-bloqueo"></div>
-
     <div class="ultimo-acceso" id="ultimo-acceso">
       <strong>Último ingreso:</strong> <span id="ultimo-acceso-texto">—</span>
     </div>
@@ -389,45 +428,27 @@
     <div class="resumen">
       <div class="tarjeta-resumen pendiente">
         <div class="icono">🟡</div>
-        <div class="info">
-          <span class="numero" id="count-pendientes">0</span>
-          <span class="label">Pendientes</span>
-        </div>
+        <div class="info"><span class="numero" id="count-pendientes">0</span><span class="label">Pendientes</span></div>
       </div>
       <div class="tarjeta-resumen procesado">
         <div class="icono">🟢</div>
-        <div class="info">
-          <span class="numero" id="count-procesados">0</span>
-          <span class="label">Procesados</span>
-        </div>
+        <div class="info"><span class="numero" id="count-procesados">0</span><span class="label">Procesados</span></div>
       </div>
       <div class="tarjeta-resumen denegado">
         <div class="icono">🔴</div>
-        <div class="info">
-          <span class="numero" id="count-denegados">0</span>
-          <span class="label">Denegados</span>
-        </div>
+        <div class="info"><span class="numero" id="count-denegados">0</span><span class="label">Denegados</span></div>
       </div>
       <div class="tarjeta-resumen">
         <div class="icono">📅</div>
-        <div class="info">
-          <span class="numero" id="count-hoy">0</span>
-          <span class="label">Recibidos hoy</span>
-        </div>
+        <div class="info"><span class="numero" id="count-hoy">0</span><span class="label">Recibidos hoy</span></div>
       </div>
       <div class="tarjeta-resumen">
         <div class="icono">📊</div>
-        <div class="info">
-          <span class="numero" id="count-semana">0</span>
-          <span class="label">Esta semana</span>
-        </div>
+        <div class="info"><span class="numero" id="count-semana">0</span><span class="label">Esta semana</span></div>
       </div>
       <div class="tarjeta-resumen">
         <div class="icono">⚠️</div>
-        <div class="info">
-          <span class="numero" id="count-urgentes">0</span>
-          <span class="label">Urgentes</span>
-        </div>
+        <div class="info"><span class="numero" id="count-urgentes">0</span><span class="label">Urgentes</span></div>
       </div>
     </div>
 
@@ -447,10 +468,8 @@
         <option value="rango">Rango personalizado</option>
       </select>
       <div class="rango-fechas" id="rango-fechas" style="display:none;">
-        <label>Desde</label>
-        <input type="date" id="fecha-desde">
-        <label>Hasta</label>
-        <input type="date" id="fecha-hasta">
+        <label>Desde</label><input type="date" id="fecha-desde">
+        <label>Hasta</label><input type="date" id="fecha-hasta">
       </div>
       <select id="filtro-tipo-dependencia" title="Filtrar por tipo de dependencia">
         <option value="">Todas las dependencias</option>
@@ -461,9 +480,7 @@
         <option value="Puesto">📌 Puestos Policiales</option>
         <option value="Base Operativa">🎯 Bases Operativas</option>
       </select>
-      <select id="filtro-comisaria">
-        <option value="">Todas las comisarías</option>
-      </select>
+      <select id="filtro-comisaria"><option value="">Todas las comisarías</option></select>
       <select id="filtro-tramite">
         <option value="">Todos los trámites</option>
         <option value="residencia">Residencia</option>
@@ -495,8 +512,7 @@
         <tbody id="tabla-solicitudes"></tbody>
       </table>
       <p class="vacio" id="mensaje-vacio" style="display:none;">
-        <span class="vacio-icono">📭</span><br>
-        No hay solicitudes con estos filtros.
+        <span class="vacio-icono">📭</span><br>No hay solicitudes con estos filtros.
       </p>
     </div>
 
@@ -550,17 +566,12 @@
 <div class="modal-overlay" id="modal-auditoria">
   <div class="modal-caja" style="max-width:780px;">
     <h3>📋 Historial de accesos</h3>
-    <p style="font-size:0.82rem;color:rgba(255,255,255,0.7);margin:0 0 16px;">
-      Últimos 100 ingresos del personal al panel.
-    </p>
+    <p style="font-size:0.82rem;color:rgba(255,255,255,0.7);margin:0 0 16px;">Últimos 100 ingresos del personal al panel.</p>
     <div style="max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid rgba(201,169,97,0.3);">
       <table style="width:100%;">
         <thead style="position:sticky;top:0;background:var(--azul-oscuro);z-index:1;">
           <tr>
-            <th>Fecha y hora</th>
-            <th>Email</th>
-            <th>Tipo</th>
-            <th>Dispositivo</th>
+            <th>Fecha y hora</th><th>Email</th><th>Tipo</th><th>Dispositivo</th>
           </tr>
         </thead>
         <tbody id="tabla-auditoria">
@@ -604,8 +615,9 @@ let usuarioActual = null;
 let solicitudesCache = [];
 let idsConocidos = new Set();
 let primeraCarga = true;
-
-/* TOASTS */
+  /* ============================================================
+   TOASTS
+   ============================================================ */
 function mostrarToast(titulo, mensaje, tipo = 'success', duracion = 5000) {
   const toast = document.createElement('div');
   toast.className = 'toast' + (tipo !== 'success' ? ' ' + tipo : '');
@@ -647,7 +659,9 @@ inputPass.addEventListener('keydown', checkCapsLock);
 inputPass.addEventListener('keyup', checkCapsLock);
 inputPass.addEventListener('blur', () => capsWarning.classList.remove('activo'));
 
-/* LOGIN MEJORADO */
+/* ============================================================
+   LOGIN MEJORADO
+   ============================================================ */
 const LOGIN_KEY = 'panel_login_control';
 const ULTIMO_ACCESO_KEY = 'panel_ultimo_acceso';
 const MAX_INTENTOS = 3;
@@ -722,7 +736,7 @@ function vibrarLogin() {
   setTimeout(() => login.classList.remove('vibrar'), 600);
 }
 
-/* AUDITORÍA — DETECCIÓN DE DISPOSITIVO */
+/* AUDITORÍA */
 function detectarDispositivo(ua) {
   const u = (ua || navigator.userAgent).toLowerCase();
   let navegador = 'Desconocido';
@@ -731,14 +745,12 @@ function detectarDispositivo(ua) {
   else if (u.includes('safari') && !u.includes('chrome')) navegador = 'Safari';
   else if (u.includes('edg')) navegador = 'Edge';
   else if (u.includes('opera') || u.includes('opr')) navegador = 'Opera';
-
   let so = 'Desconocido';
   if (u.includes('windows')) so = 'Windows';
   else if (u.includes('mac')) so = 'macOS';
   else if (u.includes('linux') && !u.includes('android')) so = 'Linux';
   else if (u.includes('android')) so = 'Android';
   else if (u.includes('iphone') || u.includes('ipad')) so = 'iOS';
-
   return `${navegador} / ${so}`;
 }
 
@@ -746,19 +758,11 @@ async function registrarAcceso(email, tipo = 'login') {
   try {
     const { error } = await supabaseClient
       .from('logs_accesos')
-      .insert([{
-        email: email,
-        tipo: tipo,
-        user_agent: navigator.userAgent,
-        dispositivo: detectarDispositivo()
-      }]);
+      .insert([{ email: email, tipo: tipo, user_agent: navigator.userAgent, dispositivo: detectarDispositivo() }]);
     if (error) console.warn('No se pudo registrar el acceso:', error);
-  } catch (e) {
-    console.warn('Error registrando acceso:', e);
-  }
+  } catch (e) { console.warn('Error registrando acceso:', e); }
 }
 
-/* AUDITORÍA — MODAL */
 const modalAuditoria = document.getElementById('modal-auditoria');
 
 document.getElementById('btn-auditoria').addEventListener('click', async () => {
@@ -779,23 +783,16 @@ modalAuditoria.addEventListener('click', (e) => {
 async function cargarAuditoria() {
   const tbody = document.getElementById('tabla-auditoria');
   tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);">Cargando...</td></tr>';
-
   const { data, error } = await supabaseClient
-    .from('logs_accesos')
-    .select('*')
-    .order('fecha', { ascending: false })
-    .limit(100);
-
+    .from('logs_accesos').select('*').order('fecha', { ascending: false }).limit(100);
   if (error) {
     tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#fca5a5;">Error: ${error.message}</td></tr>`;
     return;
   }
-
   if (!data || data.length === 0) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);">No hay registros aún.</td></tr>';
     return;
   }
-
   tbody.innerHTML = '';
   data.forEach(log => {
     const tr = document.createElement('tr');
@@ -804,7 +801,6 @@ async function cargarAuditoria() {
                     : log.tipo === 'logout' ? '🚪 Salida'
                     : log.tipo === 'logout_inactividad' ? '⏱ Cerrado por inactividad'
                     : log.tipo;
-
     tr.innerHTML = `
       <td style="font-size:0.82rem;">${fecha}</td>
       <td style="font-size:0.82rem;">${log.email || '-'}</td>
@@ -817,10 +813,7 @@ async function cargarAuditoria() {
 
 /* LOGIN */
 async function intentarLogin() {
-  if (bloqueadoHasta && Date.now() < bloqueadoHasta) {
-    vibrarLogin();
-    return;
-  }
+  if (bloqueadoHasta && Date.now() < bloqueadoHasta) { vibrarLogin(); return; }
 
   const email = inputEmail.value.trim();
   const pass = inputPass.value;
@@ -829,21 +822,15 @@ async function intentarLogin() {
 
   if (!email || !pass) {
     errorLogin.textContent = 'Completá usuario y contraseña.';
-    errorLogin.classList.add('activo');
-    vibrarLogin();
-    return;
+    errorLogin.classList.add('activo'); vibrarLogin(); return;
   }
   if (!email.includes('@') || !email.includes('.')) {
     errorLogin.textContent = 'El email no es válido.';
-    errorLogin.classList.add('activo');
-    vibrarLogin();
-    return;
+    errorLogin.classList.add('activo'); vibrarLogin(); return;
   }
   if (pass.length < 6) {
     errorLogin.textContent = 'La contraseña debe tener al menos 6 caracteres.';
-    errorLogin.classList.add('activo');
-    vibrarLogin();
-    return;
+    errorLogin.classList.add('activo'); vibrarLogin(); return;
   }
 
   btnEntrar.disabled = true;
@@ -854,25 +841,15 @@ async function intentarLogin() {
   if (error) {
     intentosFallidos++;
     const restantes = MAX_INTENTOS - intentosFallidos;
-
     if (intentosFallidos >= MAX_INTENTOS) {
       bloqueadoHasta = Date.now() + (BLOQUEO_MINUTOS * 60 * 1000);
-      localStorage.setItem(LOGIN_KEY, JSON.stringify({
-        intentos: intentosFallidos,
-        bloqueadoHasta: bloqueadoHasta
-      }));
+      localStorage.setItem(LOGIN_KEY, JSON.stringify({ intentos: intentosFallidos, bloqueadoHasta: bloqueadoHasta }));
       actualizarUIBloqueo();
       if (intervalBloqueo) clearInterval(intervalBloqueo);
       intervalBloqueo = setInterval(actualizarUIBloqueo, 15000);
-      vibrarLogin();
-      return;
+      vibrarLogin(); return;
     }
-
-    localStorage.setItem(LOGIN_KEY, JSON.stringify({
-      intentos: intentosFallidos,
-      bloqueadoHasta: 0
-    }));
-
+    localStorage.setItem(LOGIN_KEY, JSON.stringify({ intentos: intentosFallidos, bloqueadoHasta: 0 }));
     let mensaje = 'Usuario o contraseña incorrectos.';
     if (error.message && error.message.toLowerCase().includes('email')) {
       mensaje = 'El email no está registrado o es inválido.';
@@ -881,8 +858,7 @@ async function intentarLogin() {
     errorLogin.classList.add('activo');
     btnEntrar.disabled = false;
     btnEntrar.textContent = 'Ingresar';
-    vibrarLogin();
-    return;
+    vibrarLogin(); return;
   }
 
   intentosFallidos = 0;
@@ -892,19 +868,13 @@ async function intentarLogin() {
   document.getElementById('aviso-bloqueo').classList.remove('activo');
 
   usuarioActual = data.user ? data.user.email : email;
-
-  // Registrar acceso
   registrarAcceso(usuarioActual, 'login');
 
   const ahora = new Date();
   const fechaFormateada = ahora.toLocaleString('es-AR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
-  localStorage.setItem(ULTIMO_ACCESO_KEY, JSON.stringify({
-    fecha: fechaFormateada,
-    email: email
-  }));
+  localStorage.setItem(ULTIMO_ACCESO_KEY, JSON.stringify({ fecha: fechaFormateada, email: email }));
 
   if (recordarEmail.checked) localStorage.setItem('panel_email_recordado', email);
   else localStorage.removeItem('panel_email_recordado');
@@ -949,10 +919,7 @@ function resetearTimerInactividad() {
   clearInterval(cuentaRegresiva);
   const aviso = document.getElementById('aviso-inactividad');
   if (aviso) aviso.classList.remove('activo');
-
-  timerInactividad = setTimeout(() => {
-    iniciarAvisoInactividad();
-  }, (INACTIVIDAD_MINUTOS - 1) * 60 * 1000);
+  timerInactividad = setTimeout(() => { iniciarAvisoInactividad(); }, (INACTIVIDAD_MINUTOS - 1) * 60 * 1000);
 }
 
 function iniciarAvisoInactividad() {
@@ -961,7 +928,6 @@ function iniciarAvisoInactividad() {
   const contador = document.getElementById('segundos-inactividad');
   aviso.classList.add('activo');
   contador.textContent = segundos;
-
   cuentaRegresiva = setInterval(() => {
     segundos--;
     contador.textContent = segundos;
@@ -975,9 +941,7 @@ function iniciarAvisoInactividad() {
   }, 1000);
 }
 
-document.getElementById('btn-seguir-activo').addEventListener('click', () => {
-  resetearTimerInactividad();
-});
+document.getElementById('btn-seguir-activo').addEventListener('click', () => { resetearTimerInactividad(); });
 
 function detenerTimerInactividad() {
   clearTimeout(timerInactividad);
@@ -1035,29 +999,21 @@ document.getElementById('btn-cambiar-pass').addEventListener('click', () => {
   setTimeout(() => passNueva.focus(), 100);
 });
 
-document.getElementById('btn-cancelar-pass').addEventListener('click', () => {
-  modalPass.classList.remove('activo');
-});
+document.getElementById('btn-cancelar-pass').addEventListener('click', () => { modalPass.classList.remove('activo'); });
 
 document.getElementById('btn-guardar-pass').addEventListener('click', async () => {
   const nueva = passNueva.value;
   const repetir = passRepetir.value;
-
   if (!nueva || !repetir) { alert('Completá ambos campos.'); return; }
   if (nueva.length < 8) { alert('La contraseña debe tener al menos 8 caracteres.'); return; }
   if (nueva !== repetir) { alert('Las contraseñas no coinciden.'); return; }
-
   const btn = document.getElementById('btn-guardar-pass');
   btn.disabled = true;
   btn.textContent = 'Guardando...';
-
   const { error } = await supabaseClient.auth.updateUser({ password: nueva });
-
   btn.disabled = false;
   btn.textContent = 'Guardar';
-
   if (error) { alert('No se pudo cambiar la contraseña: ' + error.message); return; }
-
   modalPass.classList.remove('activo');
   mostrarToast('🔑 Contraseña actualizada', 'Tu nueva contraseña ya está activa', 'success', 4000);
 });
@@ -1138,13 +1094,9 @@ const etiquetasDetalle = {
 /* CARGA DE SOLICITUDES */
 async function cargarSolicitudes() {
   const { data, error } = await supabaseClient
-    .from('solicitudes')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .from('solicitudes').select('*').order('created_at', { ascending: false });
   if (error) { console.error(error); return; }
-
   const nuevas = data || [];
-
   if (primeraCarga) {
     nuevas.forEach(s => idsConocidos.add(s.id));
     primeraCarga = false;
@@ -1158,7 +1110,6 @@ async function cargarSolicitudes() {
       });
     }
   }
-
   solicitudesCache = nuevas;
   actualizarContadores();
   renderTabla();
@@ -1169,15 +1120,10 @@ function actualizarContadores() {
   const procesados = solicitudesCache.filter(s => s.estado === 'procesado').length;
   const denegados = solicitudesCache.filter(s => s.estado === 'denegado').length;
   const urgentes = solicitudesCache.filter(s => s.urgente === true).length;
-
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const hace7dias = new Date();
-  hace7dias.setDate(hace7dias.getDate() - 7);
-
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const hace7dias = new Date(); hace7dias.setDate(hace7dias.getDate() - 7);
   const countHoy = solicitudesCache.filter(s => s.created_at && new Date(s.created_at) >= hoy).length;
   const countSemana = solicitudesCache.filter(s => s.created_at && new Date(s.created_at) >= hace7dias).length;
-
   document.getElementById('count-pendientes').textContent = pendientes;
   document.getElementById('count-procesados').textContent = procesados;
   document.getElementById('count-denegados').textContent = denegados;
@@ -1200,40 +1146,25 @@ supabaseClient
 function normalizarTexto(t) {
   return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
-
 function obtenerDniSolicitud(s) {
   const d = s.datos || {};
   return d.dni || d.dniSolicitante || d.dniMenor || d.testigo1Dni || '';
 }
-
 function obtenerNombreSolicitud(s) {
   const d = s.datos || {};
   return d.nombre || d.nombreSolicitante || d.nombreConviviente || d.nombreMenor || '';
 }
-
-function obtenerEmailSolicitud(s) {
-  const d = s.datos || {};
-  return d.email || '';
-}
-
-function obtenerTelefonoSolicitud(s) {
-  const d = s.datos || {};
-  return d.telefono || '';
-}
+function obtenerEmailSolicitud(s) { return (s.datos || {}).email || ''; }
+function obtenerTelefonoSolicitud(s) { return (s.datos || {}).telefono || ''; }
 
 function detectarDuplicados() {
-  const mapa = {};
-  const duplicados = new Set();
+  const mapa = {}; const duplicados = new Set();
   solicitudesCache.forEach(s => {
     const dni = obtenerDniSolicitud(s);
     if (!dni) return;
     const clave = `${dni}|${s.tramite}`;
-    if (mapa[clave]) {
-      duplicados.add(mapa[clave]);
-      duplicados.add(s.id);
-    } else {
-      mapa[clave] = s.id;
-    }
+    if (mapa[clave]) { duplicados.add(mapa[clave]); duplicados.add(s.id); }
+    else { mapa[clave] = s.id; }
   });
   return duplicados;
 }
@@ -1248,17 +1179,14 @@ function aplicarFiltros() {
   const fechaDesde = document.getElementById('fecha-desde').value;
   const fechaHasta = document.getElementById('fecha-hasta').value;
   const busqueda = normalizarTexto(document.getElementById('filtro-busqueda').value);
-
   const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
   const hace7dias = new Date(); hace7dias.setDate(hace7dias.getDate() - 7);
   const hace30dias = new Date(); hace30dias.setDate(hace30dias.getDate() - 30);
-
   return solicitudesCache.filter(s => {
     if (estado && s.estado !== estado) return false;
     if (comisaria && s.comisaria_asignada !== comisaria) return false;
     if (tipoDep && obtenerTipoDependencia(s.comisaria_asignada) !== tipoDep) return false;
     if (tramite && s.tramite !== tramite) return false;
-
     if (s.created_at) {
       const f = new Date(s.created_at);
       if (fechaFiltro === 'hoy' && f < hoy) return false;
@@ -1268,10 +1196,7 @@ function aplicarFiltros() {
         if (fechaDesde && f < new Date(fechaDesde + 'T00:00:00')) return false;
         if (fechaHasta && f > new Date(fechaHasta + 'T23:59:59')) return false;
       }
-    } else if (fechaFiltro) {
-      return false;
-    }
-
+    } else if (fechaFiltro) { return false; }
     if (busqueda) {
       const nombre = normalizarTexto(obtenerNombreSolicitud(s));
       const dni = normalizarTexto(obtenerDniSolicitud(s));
@@ -1288,25 +1213,11 @@ function ordenarLista(lista) {
   const { campo, dir } = ordenActual;
   return lista.sort((a, b) => {
     let va, vb;
-    if (campo === 'solicitante') {
-      va = obtenerNombreSolicitud(a);
-      vb = obtenerNombreSolicitud(b);
-    } else if (campo === 'comisaria_asignada') {
-      va = a.comisaria_asignada || '';
-      vb = b.comisaria_asignada || '';
-    } else {
-      va = a[campo] || '';
-      vb = b[campo] || '';
-    }
-
-    if (campo === 'created_at') {
-      va = new Date(va).getTime();
-      vb = new Date(vb).getTime();
-    } else {
-      va = String(va).toLowerCase();
-      vb = String(vb).toLowerCase();
-    }
-
+    if (campo === 'solicitante') { va = obtenerNombreSolicitud(a); vb = obtenerNombreSolicitud(b); }
+    else if (campo === 'comisaria_asignada') { va = a.comisaria_asignada || ''; vb = b.comisaria_asignada || ''; }
+    else { va = a[campo] || ''; vb = b[campo] || ''; }
+    if (campo === 'created_at') { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
+    else { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); }
     if (va < vb) return dir === 'asc' ? -1 : 1;
     if (va > vb) return dir === 'asc' ? 1 : -1;
     return 0;
@@ -1316,32 +1227,25 @@ function ordenarLista(lista) {
 function renderTabla() {
   const filtradas = ordenarLista(aplicarFiltros());
   const duplicados = detectarDuplicados();
-
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA));
   if (paginaActual > totalPaginas) paginaActual = totalPaginas;
-
   const inicio = (paginaActual - 1) * POR_PAGINA;
   const fin = Math.min(inicio + POR_PAGINA, filtradas.length);
   const paginadas = filtradas.slice(inicio, fin);
-
   const tbody = document.getElementById('tabla-solicitudes');
   tbody.innerHTML = '';
   document.getElementById('mensaje-vacio').style.display = filtradas.length ? 'none' : 'block';
-
   paginadas.forEach(s => {
     const tr = document.createElement('tr');
     tr.className = 'fila-solicitud';
     if (s.urgente) tr.classList.add('urgente');
-
     const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
     const nombreSolicitante = obtenerNombreSolicitud(s) || '-';
     const estadoTexto = s.estado === 'procesado' ? 'Procesado' :
                         s.estado === 'denegado' ? 'Denegado' : 'Pendiente';
-
     const esDuplicado = duplicados.has(s.id);
     const banderaUrgente = s.urgente ? '<span class="bandera-urgente" title="Urgente">🚨</span>' : '';
     const badgeDuplicado = esDuplicado ? '<span class="badge-duplicado" title="Mismo DNI ya cargó este tipo de trámite">⚠️ DUPLICADO</span>' : '';
-
     tr.innerHTML = `
       <td>${fecha}</td>
       <td>${banderaUrgente}${s.tramite_titulo || s.tramite || '-'}</td>
@@ -1352,20 +1256,13 @@ function renderTabla() {
     tr.addEventListener('click', () => mostrarDetalle(s));
     tbody.appendChild(tr);
   });
-
   document.getElementById('info-paginacion').textContent =
-    filtradas.length === 0
-      ? 'Mostrando 0 de 0'
-      : `Mostrando ${inicio + 1}-${fin} de ${filtradas.length}`;
-
+    filtradas.length === 0 ? 'Mostrando 0 de 0' : `Mostrando ${inicio + 1}-${fin} de ${filtradas.length}`;
   document.getElementById('btn-pag-prev').disabled = paginaActual <= 1;
   document.getElementById('btn-pag-next').disabled = paginaActual >= totalPaginas;
 }
 
-function resetPaginaYRender() {
-  paginaActual = 1;
-  renderTabla();
-}
+function resetPaginaYRender() { paginaActual = 1; renderTabla(); }
 
 document.getElementById('filtro-estado').addEventListener('change', resetPaginaYRender);
 document.getElementById('filtro-tramite').addEventListener('change', resetPaginaYRender);
@@ -1413,16 +1310,11 @@ document.getElementById('btn-limpiar').addEventListener('click', () => {
   mostrarToast('🧹 Filtros limpiados', '', 'success', 2000);
 });
 
-/* ORDENAMIENTO */
 document.querySelectorAll('th.ordenable').forEach(th => {
   th.addEventListener('click', () => {
     const campo = th.dataset.sort;
-    if (ordenActual.campo === campo) {
-      ordenActual.dir = ordenActual.dir === 'asc' ? 'desc' : 'asc';
-    } else {
-      ordenActual.campo = campo;
-      ordenActual.dir = 'asc';
-    }
+    if (ordenActual.campo === campo) ordenActual.dir = ordenActual.dir === 'asc' ? 'desc' : 'asc';
+    else { ordenActual.campo = campo; ordenActual.dir = 'asc'; }
     document.querySelectorAll('th.ordenable').forEach(x => {
       x.classList.remove('asc', 'desc');
       if (x.dataset.sort === campo) x.classList.add(ordenActual.dir);
@@ -1431,7 +1323,6 @@ document.querySelectorAll('th.ordenable').forEach(th => {
   });
 });
 
-/* PAGINACIÓN */
 document.getElementById('btn-pag-prev').addEventListener('click', () => {
   if (paginaActual > 1) {
     paginaActual--;
@@ -1450,29 +1341,302 @@ document.getElementById('btn-pag-next').addEventListener('click', () => {
   }
 });
 
+/* ============================================================
+   GENERADORES DE CERTIFICADOS OFICIALES
+   ============================================================ */
+function formatearDni(dni) {
+  if (!dni) return '—';
+  const s = String(dni).replace(/\D/g, '');
+  if (s.length === 8) return s.slice(0,2) + '.' + s.slice(2,5) + '.' + s.slice(5);
+  if (s.length === 7) return s.slice(0,1) + '.' + s.slice(1,4) + '.' + s.slice(4);
+  return s;
+}
+function calcularEdad(fechaISO) {
+  if (!fechaISO) return '—';
+  const hoy = new Date();
+  const nac = new Date(fechaISO);
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const m = hoy.getMonth() - nac.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+  return edad;
+}
+function formatearFechaCorta(fechaISO) {
+  if (!fechaISO) return '—';
+  const f = new Date(fechaISO + 'T00:00:00');
+  if (isNaN(f)) return fechaISO;
+  const dd = String(f.getDate()).padStart(2, '0');
+  const mm = String(f.getMonth() + 1).padStart(2, '0');
+  const yy = String(f.getFullYear()).slice(-2);
+  return `${dd}/${mm}/${yy}`;
+}
+function obtenerFechaActual() {
+  const hoy = new Date();
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                 'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return {
+    dia: String(hoy.getDate()).padStart(2, '0'),
+    mes: meses[hoy.getMonth()],
+    anio: hoy.getFullYear(),
+    hora: String(hoy.getHours()).padStart(2, '0') + ':' + String(hoy.getMinutes()).padStart(2, '0')
+  };
+}
+function certHeader(titulo) {
+  return `
+    <div class="cert-header">
+      <div class="cert-escudo"></div>
+      <div class="cert-titulo">
+        <div class="cert-linea1">POLICÍA DE LA PROVINCIA</div>
+        <div class="cert-linea2">S A L T A</div>
+        <div class="cert-nombre">${titulo}</div>
+      </div>
+    </div>`;
+}
+
+function generarCertificadoResidencia(r, comisaria) {
+  const f = obtenerFechaActual();
+  const t1 = (r.testigo1Nombre || '—').toUpperCase();
+  const t2 = (r.testigo2Nombre || '—').toUpperCase();
+  const sol = (r.nombre || '—').toUpperCase();
+  const dom = r.domicilio || '—';
+  const loc = r.localidad || '—';
+  return `
+    <div class="certificado-oficial">
+      ${certHeader('CERTIFICADO DE RESIDENCIA')}
+      <p class="cert-texto">
+        <strong>____:</strong> El Funcionario Policial que suscribe CERTIFICA de acuerdo a los
+        testimonios de los Sres. Testigos: <strong>${t1}</strong> DNI Nº ${formatearDni(r.testigo1Dni)}
+        con dlio. en ${dom} y de <strong>${t2}</strong> DNI Nº ${formatearDni(r.testigo2Dni)}
+        con dlio. en ${dom}, ambos de la Ciudad de ${loc}, a quienes les consta que la persona de
+        <strong>${sol}</strong> DNI Nº ${formatearDni(r.dni)}, argentino/a mayor de edad,
+        RESIDE: En el domicilio sito en <strong>${dom}</strong>, ${loc}.
+      </p>
+      <p class="cert-texto">
+        <strong>____:</strong> Se extiende el presente a solicitud de la parte interesada con el
+        solo objeto de ser presentado por ante ${r.motivo || '—'}. Dado en ${comisaria}, a los
+        ${f.dia} días del mes de ${f.mes} del año ${f.anio}.
+      </p>
+      <div class="cert-firmas-tres">
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Firma del Solicitante</div></div>
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Tgo. de Acto I</div></div>
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Tgo. de Acto II</div></div>
+      </div>
+    </div>`;
+}
+
+function generarCertificadoConvivencia(r, comisaria) {
+  const f = obtenerFechaActual();
+  const t1 = (r.testigo1Nombre || '—').toUpperCase();
+  const t2 = (r.testigo2Nombre || '—').toUpperCase();
+  const sol = (r.nombreSolicitante || '—').toUpperCase();
+  const conv = (r.nombreConviviente || '—').toUpperCase();
+  const dom = r.domicilioComun || '—';
+  const loc = r.localidad || '—';
+  return `
+    <div class="certificado-oficial">
+      ${certHeader('CERTIFICADO DE CONVIVENCIA')}
+      <p class="cert-texto">
+        <strong>____:</strong> El Funcionario Policial que suscribe CERTIFICA que de acuerdo al
+        testimonio brindado por los testigos Sres. <strong>${t1}</strong> DNI Nº
+        ${formatearDni(r.testigo1Dni)}, Dlio. en ${dom} y <strong>${t2}</strong> DNI Nº
+        ${formatearDni(r.testigo2Dni)}, con Dlio. en ${dom}, ambos del Barrio ${loc} – Salta
+        Capital, argentinos, mayores de edad, establece que la persona de <strong>${sol}</strong>,
+        DNI Nº ${formatearDni(r.dniSolicitante)}, argentino/a, mayor de edad RESIDE: en el
+        domicilio ubicado en ${dom} – ${loc} y CONVIVE con las siguientes personas:
+      </p>
+      <ul class="cert-lista-convivientes">
+        <li>${sol} DNI Nº ${formatearDni(r.dniSolicitante)} <span class="parentesco">(Solicitante)</span></li>
+        <li>${conv} DNI Nº ${formatearDni(r.dniConviviente)} <span class="parentesco">(${r.parentesco || '—'})</span></li>
+      </ul>
+      <p class="cert-texto">
+        <strong>____:</strong> Se expide el presente Certificado a solicitud de la parte interesada
+        a los fines de ser presentado por ante ${r.motivo || '—'}. Otorgado en ${comisaria} de la
+        Ciudad de Salta, Pcia. del mismo nombre, a los ${f.dia} días del mes de ${f.mes} del año ${f.anio}.
+      </p>
+      <div class="cert-firmas">
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Testigo Nº 1</div></div>
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Testigo Nº 2</div></div>
+      </div>
+    </div>`;
+}
+
+function generarCertificadoCarencia(r, comisaria) {
+  const f = obtenerFechaActual();
+  const t1 = (r.testigo1Nombre || '—').toUpperCase();
+  const t2 = (r.testigo2Nombre || '—').toUpperCase();
+  const sol = (r.nombre || '—').toUpperCase();
+  const dom = r.domicilio || '—';
+  const loc = r.localidad || '—';
+  return `
+    <div class="certificado-oficial">
+      ${certHeader('CERTIFICADO DE CARENTE DE RECURSO')}
+      <p class="cert-texto">
+        <strong>----:</strong> El Funcionario Policial que suscribe CERTIFICA que de acuerdo a los
+        testimonios brindados por los testigos Sres. <strong>${t1}</strong> DNI Nº
+        ${formatearDni(r.testigo1Dni)}, Dlio. en ${dom} y <strong>${t2}</strong> DNI Nº
+        ${formatearDni(r.testigo2Dni)}, Dlio. en ${dom}. Declaran Bajo Juramento de Ley que saben
+        y les consta que el/la Sr./Sra. <strong>${sol}</strong>, DNI Nº ${formatearDni(r.dni)},
+        Dlio. ${dom} de esta Ciudad, <strong>ES CARENTE DE RECURSOS ECONÓMICOS</strong>. Se
+        extiende el presente certificado a solicitud de la parte interesada y al solo efecto de
+        ser presentado por ante ${r.motivo || '—'}.
+      </p>
+      <p class="cert-texto" style="text-align:right;margin-top:20px;">
+        ${loc}, ${f.mes} ${f.dia} de ${f.anio}.-
+      </p>
+      <div class="cert-firmas-tres">
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Firma del Solicitante</div></div>
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Testigo Nº 1</div></div>
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Testigo Nº 2</div></div>
+      </div>
+    </div>`;
+}
+
+function generarConstanciaAutorizacion(r, comisaria) {
+  const f = obtenerFechaActual();
+  const prog = (r.nombreProgenitor || '—').toUpperCase();
+  const progDni = formatearDni(r.dniProgenitor);
+  const dom = r.domicilio || '—';
+  const menor = (r.nombreMenor || '—').toUpperCase();
+  const menorDni = formatearDni(r.dniMenor);
+  const edad = calcularEdad(r.fechaNacimientoMenor);
+  const destino = r.destino || '—';
+  let empresa = r.empresaTransporte || '—';
+  if (empresa === 'Otro (especificar abajo)' && r.empresaOtra) empresa = r.empresaOtra;
+  const fechaSalida = formatearFechaCorta(r.fechaSalida);
+  const fechaRegreso = formatearFechaCorta(r.fechaRegreso);
+  let viajaTexto = 'solo';
+  if (r.tipoViaje === 'acompanado') {
+    const acomp = (r.nombreAcompanante || 'acompañante').toUpperCase();
+    const vinculo = r.vinculoAcompanante ? ` (${r.vinculoAcompanante})` : '';
+    viajaTexto = `acompañado por ${acomp}${vinculo}`;
+  }
+  const prep = (empresa.toLowerCase().includes('vehículo') || empresa.toLowerCase().includes('vehiculo'))
+    ? 'en' : 'perteneciente a la empresa';
+  return `
+    <div class="certificado-oficial">
+      ${certHeader('CONSTANCIA DE AUTORIZACIÓN')}
+      <p class="cert-texto">
+        <strong>----:</strong> La/El que suscribe <strong>${prog}</strong> DNI N° ${progDni}
+        con Dlio. en ${dom} de esta ciudad, AUTORIZO a mi hijo/a <strong>${menor}</strong>
+        DNI N° ${menorDni} de ${edad} años a viajar a la localidad de <strong>${destino}</strong>,
+        en fecha ${fechaSalida} ${prep} <strong>${empresa}</strong>, el mismo se trasladaría
+        ${viajaTexto} y retornaría de la misma manera en fecha ${fechaRegreso} a esta ciudad.
+      </p>
+      <div class="cert-lugar-fecha">
+        ${comisaria} – Salta, ${f.mes} ${f.dia} del ${f.anio}.-
+      </div>
+      <p class="cert-texto">
+        <strong>-----:</strong> El Funcionario Policial que suscribe CERTIFICA que la firma que
+        antecede pertenece a la/el Sr./Sra. <strong>${prog}</strong> DNI N° ${progDni} la cual
+        fue estampada en mi presencia.
+      </p>
+      <div class="cert-firmas-una">
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Firma del Progenitor Autorizante</div></div>
+      </div>
+    </div>`;
+}
+
+function generarConstanciaExtravio(r, comisaria) {
+  const f = obtenerFechaActual();
+  const sol = (r.nombre || '—').toUpperCase();
+  const solDni = formatearDni(r.dni);
+  const edad = calcularEdad(r.fechaNacimiento);
+  const dom = r.domicilio || '—';
+  const loc = r.localidad || '—';
+  const tipoDoc = (r.tipoDocumento || 'documento').toLowerCase();
+  const numDoc = r.numeroDocumento ? ` Nº ${r.numeroDocumento}` : '';
+  const fechaExt = formatearFechaCorta(r.fechaExtravio);
+  const circ = (r.circunstancia || 'extravió').toLowerCase();
+  const lugar = r.lugarExtravio || '—';
+  const detalle = r.detalleExtravio || '';
+  let parrafo = `en la fecha ${fechaExt}, ${circ} en ${lugar}`;
+  if (detalle) parrafo += `, ${detalle}`;
+  parrafo += `, su <strong>${tipoDoc.toUpperCase()}${numDoc}</strong> a nombre de la misma`;
+  return `
+    <div class="certificado-oficial">
+      ${certHeader('CONSTANCIA DE EXTRAVÍO')}
+      <p class="cert-texto">
+        <strong>____:</strong> En la Ciudad de ${loc} de la Provincia del mismo nombre a los
+        ${f.dia} días del mes de ${f.mes} de ${f.anio}, siendo hs. ${f.hora} se labra la presente
+        a fin de dejar constancia que la persona de <strong>${sol}</strong> (${edad}) DNI Nº
+        ${solDni}, con domicilio en ${dom} de esta Ciudad, se hace presente por ante esta
+        preventora a fin de dejar constancia que ${parrafo}, motivo por lo que solicita la
+        presente a los fines de ser presentado por ante ${r.motivo || '—'}.-
+      </p>
+      <div class="cert-firmas-una">
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Firma del Solicitante</div></div>
+      </div>
+      <div class="cert-lugar-fecha" style="margin-top:50px;">
+        ${comisaria} – Salta, ${f.mes} ${f.dia} de ${f.anio}.-
+      </div>
+      <p class="cert-texto">
+        El Funcionario Policial que suscribe CERTIFICA que la firma que antecede, pertenece al/la
+        Sr./Sra. <strong>${sol}</strong> DNI Nº ${solDni} por haber sido puesta ante mi presencia.
+      </p>
+    </div>`;
+}
+
+function generarCertificadoSupervivencia(r, comisaria) {
+  const f = obtenerFechaActual();
+  const t1 = (r.testigo1Nombre || '—').toUpperCase();
+  const t2 = (r.testigo2Nombre || '—').toUpperCase();
+  const sol = (r.nombre || '—').toUpperCase();
+  const solDni = formatearDni(r.dni);
+  const dom = r.domicilio || '—';
+  const loc = r.localidad || '—';
+  const motivo = (r.motivo || r.tipoBeneficio || '—');
+  return `
+    <div class="certificado-oficial">
+      ${certHeader('CERTIFICADO DE SUPERVIVENCIA')}
+      <p class="cert-texto">
+        <strong>___:</strong> El Funcionario Policial que suscribe CERTIFICA que de acuerdo a los
+        testimonios brindados por los testigos Sres. <strong>${t1}</strong>, DNI Nº
+        ${formatearDni(r.testigo1Dni)}, Dlio. ${dom} y <strong>${t2}</strong> DNI Nº
+        ${formatearDni(r.testigo2Dni)}, Dlio. en ${dom} de esta Ciudad. Establecen que la persona
+        de <strong>${sol}</strong>, DNI Nº ${solDni}, <strong>VIVE Y RESIDE</strong> en ${dom}
+        ${loc} de esta Ciudad. Se extiende el presente certificado a solicitud de la parte
+        interesada y al solo efecto de ser presentado por ante ${motivo}.
+      </p>
+      <p class="cert-texto" style="text-align:right;margin-top:20px;">
+        ${loc}, ${f.mes} ${f.dia} de ${f.anio}.-
+      </p>
+      <div class="cert-firmas-tres">
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Firma del Solicitante</div></div>
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Testigo Nº 1</div></div>
+        <div class="cert-firma"><div class="cert-firma-espacio"></div><div>Testigo Nº 2</div></div>
+      </div>
+    </div>`;
+}
+
+function generarCertificadoOficial(tramite, datos, comisaria) {
+  switch (tramite) {
+    case 'residencia':    return generarCertificadoResidencia(datos, comisaria);
+    case 'convivencia':   return generarCertificadoConvivencia(datos, comisaria);
+    case 'carencia':      return generarCertificadoCarencia(datos, comisaria);
+    case 'autorizacion':  return generarConstanciaAutorizacion(datos, comisaria);
+    case 'extravio':      return generarConstanciaExtravio(datos, comisaria);
+    case 'supervivencia': return generarCertificadoSupervivencia(datos, comisaria);
+    default: return null;
+  }
+}
+
 /* DETALLE */
 let solicitudAbierta = null;
 
 async function crearSeccion(titulo, campos) {
   const seccion = document.createElement('div');
   seccion.className = 'detalle-seccion';
-
   const h = document.createElement('h4');
   h.className = 'detalle-seccion-titulo';
   h.innerHTML = titulo;
   seccion.appendChild(h);
-
   const lista = document.createElement('div');
   lista.className = 'detalle-lista';
-
   for (const [label, valor, esFoto] of campos) {
     if (valor === undefined || valor === null || valor === '') continue;
     const item = document.createElement('div');
     item.className = 'detalle-item';
-
     const dt = document.createElement('dt');
     dt.textContent = label;
-
     const dd = document.createElement('dd');
     if (esFoto) {
       const img = document.createElement('img');
@@ -1488,17 +1652,12 @@ async function crearSeccion(titulo, campos) {
         img.src = urlFinal;
         img.addEventListener('click', () => abrirFotoGrande(urlFinal));
         dd.appendChild(img);
-      } else {
-        dd.textContent = 'No se pudo cargar la imagen';
-      }
-    } else {
-      dd.textContent = valor;
-    }
+      } else { dd.textContent = 'No se pudo cargar la imagen'; }
+    } else { dd.textContent = valor; }
     item.appendChild(dt);
     item.appendChild(dd);
     lista.appendChild(item);
   }
-
   seccion.appendChild(lista);
   return seccion;
 }
@@ -1528,13 +1687,10 @@ async function mostrarDetalle(s) {
   const tituloEl = document.getElementById('detalle-titulo');
   const urgenteIcono = s.urgente ? '<span style="color:#fca5a5;">🚨 URGENTE</span>' : '';
   tituloEl.innerHTML = (s.tramite_titulo || s.tramite) + ' ' + urgenteIcono;
-
   const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
   document.getElementById('detalle-fecha').textContent = 'Solicitud recibida el ' + fecha;
-
   const cont = document.getElementById('detalle-contenido');
   cont.innerHTML = '';
-
   const d = s.datos || {};
   const et = etiquetasDetalle;
   const camposSol = [];
@@ -1616,7 +1772,7 @@ async function mostrarDetalle(s) {
   listaSol.appendChild(crearItemEstado(s.estado));
   cont.appendChild(seccionSol);
 
-  const tramitesConTestigos = ['residencia', 'convivencia', 'carencia'];
+  const tramitesConTestigos = ['residencia', 'convivencia', 'carencia', 'supervivencia'];
   if (tramitesConTestigos.includes(s.tramite)) {
     const camposT1 = [];
     if (d.testigo1Nombre) camposT1.push([et.testigo1Nombre, d.testigo1Nombre]);
@@ -1647,17 +1803,12 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
 /* CAMBIAR ESTADO */
 async function cambiarEstado(nuevoEstado) {
   if (!solicitudAbierta) return;
-
   let motivo = null;
   if (nuevoEstado === 'denegado') {
     motivo = prompt('Motivo de la denegación (obligatorio):', '');
     if (motivo === null) return;
-    if (!motivo.trim()) {
-      alert('Tenés que escribir un motivo para denegar.');
-      return;
-    }
+    if (!motivo.trim()) { alert('Tenés que escribir un motivo para denegar.'); return; }
   }
-
   const update = {
     estado: nuevoEstado,
     validado_por: usuarioActual,
@@ -1665,21 +1816,10 @@ async function cambiarEstado(nuevoEstado) {
   };
   if (nuevoEstado === 'denegado' && motivo) update.motivo_denegacion = motivo.trim();
   if (nuevoEstado !== 'denegado') update.motivo_denegacion = null;
-
-  const { error } = await supabaseClient
-    .from('solicitudes')
-    .update(update)
-    .eq('id', solicitudAbierta.id);
-
-  if (error) {
-    console.error(error);
-    alert('No se pudo actualizar: ' + error.message);
-    return;
-  }
-
+  const { error } = await supabaseClient.from('solicitudes').update(update).eq('id', solicitudAbierta.id);
+  if (error) { console.error(error); alert('No se pudo actualizar: ' + error.message); return; }
   document.getElementById('detalle').style.display = 'none';
   await cargarSolicitudes();
-
   const emoji = nuevoEstado === 'procesado' ? '✅' : nuevoEstado === 'denegado' ? '❌' : '⏱';
   mostrarToast(`${emoji} Trámite actualizado`, `Estado: ${nuevoEstado}`, 'success', 3000);
 }
@@ -1693,78 +1833,102 @@ document.getElementById('btn-urgente').addEventListener('click', async () => {
   if (!solicitudAbierta) return;
   const nuevoValor = !solicitudAbierta.urgente;
   const { error } = await supabaseClient
-    .from('solicitudes')
-    .update({ urgente: nuevoValor })
-    .eq('id', solicitudAbierta.id);
+    .from('solicitudes').update({ urgente: nuevoValor }).eq('id', solicitudAbierta.id);
   if (error) { alert('Error: ' + error.message); return; }
   solicitudAbierta.urgente = nuevoValor;
   await cargarSolicitudes();
   mostrarToast(nuevoValor ? '🚨 Marcado urgente' : '✅ Ya no es urgente', '', 'warning', 3000);
 });
 
-/* IMPRIMIR */
+/* ============================================================
+   IMPRIMIR
+   ============================================================ */
 document.getElementById('btn-imprimir').addEventListener('click', async () => {
   if (!solicitudAbierta) return;
   const s = solicitudAbierta;
   const ventana = window.open('', '_blank');
   const titulo = s.tramite_titulo || s.tramite;
-  const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
-
-  let html = `
-    <!DOCTYPE html>
-    <html><head>
-    <meta charset="UTF-8">
-    <title>${titulo}</title>
-    <style>
-      body{font-family:Arial,sans-serif; padding:30px; max-width:800px; margin:0 auto; color:#1f2937;}
-      h1{text-align:center; color:#0d2a4d; font-size:1.3rem; margin-bottom:4px; border-bottom:2px solid #c9a961; padding-bottom:12px;}
-      .subt{text-align:center; color:#6b7280; font-size:0.85rem; margin-bottom:24px;}
-      dl{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-      dt{font-size:0.72rem; color:#6b7280; text-transform:uppercase; letter-spacing:0.03em; font-weight:600;}
-      dd{margin:2px 0 0; font-size:0.9rem;}
-      dd img{max-width:280px; border:1px solid #ddd; border-radius:6px; margin-top:6px;}
-      .firma{margin-top:60px; display:flex; justify-content:space-between;}
-      .firma div{border-top:1px solid #333; padding-top:6px; width:40%; text-align:center; font-size:0.8rem;}
-      @media print{body{padding:10px;}}
-    </style>
-    </head><body>
-    <h1>${titulo}</h1>
-    <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
-    <p class="subt">Solicitud recibida el ${fecha}</p>
-    <dl>
-      <div><dt>Comisaría asignada</dt><dd>${s.comisaria_asignada || '-'}</dd></div>
-      <div><dt>Estado</dt><dd>${s.estado || 'pendiente'}</dd></div>
-  `;
-
   const d = s.datos || {};
-  for (const [campo, valor] of Object.entries(d)) {
-    if (!valor) continue;
-    const label = etiquetasDetalle[campo] || campo;
-    if (campo.startsWith('foto_')) {
-      let urlPrint = valor;
-      if (!valor.startsWith('http')) {
-        const { data: signedData } = await supabaseClient
-          .storage.from(BUCKET_FOTOS).createSignedUrl(valor, 600);
-        if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
-      }
-      html += `<div style="grid-column:1/-1;"><dt>${label}</dt><dd><img src="${urlPrint}"></dd></div>`;
-    } else {
-      html += `<div><dt>${label}</dt><dd>${valor}</dd></div>`;
-    }
-  }
+  const comisaria = s.comisaria_asignada || 'Comisaría asignada';
+  const tramitesOficiales = ['residencia','convivencia','carencia','autorizacion','extravio','supervivencia'];
 
-  if (s.motivo_denegacion) {
-    html += `<div style="grid-column:1/-1;"><dt>Motivo de denegación</dt><dd>${s.motivo_denegacion}</dd></div>`;
-  }
-
-  html += `
-    </dl>
-    <div class="firma">
-      <div>Firma del solicitante</div>
-      <div>Firma y sello - Autoridad policial</div>
-    </div>
-    </body></html>
+  const cssBase = `
+    body{font-family:Arial,sans-serif; padding:30px; max-width:800px; margin:0 auto; color:#1f2937;}
+    h1{text-align:center; color:#0d2a4d; font-size:1.3rem; margin-bottom:4px; border-bottom:2px solid #c9a961; padding-bottom:12px;}
+    .subt{text-align:center; color:#6b7280; font-size:0.85rem; margin-bottom:24px;}
+    dl{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+    dt{font-size:0.72rem; color:#6b7280; text-transform:uppercase; letter-spacing:0.03em; font-weight:600;}
+    dd{margin:2px 0 0; font-size:0.9rem;}
+    dd img{max-width:280px; border:1px solid #ddd; border-radius:6px; margin-top:6px;}
+    .firma{margin-top:60px; display:flex; justify-content:space-between;}
+    .firma div{border-top:1px solid #333; padding-top:6px; width:40%; text-align:center; font-size:0.8rem;}
+    .certificado-oficial{background:#fff;color:#1f2937;padding:20px 30px;font-family:'Times New Roman', Georgia, serif;line-height:1.8;text-align:justify;max-width:850px;margin:0 auto;}
+    .cert-header{text-align:center;margin-bottom:26px;border-bottom:2px solid #0d2a4d;padding-bottom:14px;}
+    .cert-escudo{display:inline-block;width:70px;height:70px;background-image:url('${window.location.origin}/MI-COMISARIA/logo-policia.png.jpeg');background-size:contain;background-repeat:no-repeat;background-position:center;margin-bottom:6px;}
+    .cert-titulo{font-family:'Segoe UI', Arial, sans-serif;font-weight:bold;color:#0d2a4d;}
+    .cert-titulo .cert-linea1{font-size:0.88rem;letter-spacing:0.15em;}
+    .cert-titulo .cert-linea2{font-size:1.1rem;letter-spacing:0.3em;color:#c9a961;margin:4px 0;font-family:'Times New Roman', serif;}
+    .cert-titulo .cert-nombre{font-size:1.15rem;letter-spacing:0.12em;margin-top:10px;padding-top:10px;border-top:1px solid #c9a961;text-decoration:underline;text-underline-offset:4px;}
+    .cert-texto{font-size:1rem;margin:18px 0;text-align:justify;color:#1f2937;}
+    .cert-texto strong{font-weight:bold;text-transform:uppercase;}
+    .cert-lista-convivientes{margin:16px 0 16px 30px;padding:0;list-style:none;}
+    .cert-lista-convivientes li{font-size:1rem;margin:6px 0;color:#1f2937;font-weight:bold;text-transform:uppercase;}
+    .cert-lista-convivientes li .parentesco{font-weight:normal;text-transform:none;font-style:italic;color:#4b5563;margin-left:6px;}
+    .cert-firmas{margin-top:70px;display:flex;justify-content:space-around;gap:20px;flex-wrap:wrap;}
+    .cert-firma{text-align:center;font-size:0.85rem;color:#1f2937;width:180px;}
+    .cert-firma-espacio{height:60px;border-bottom:1px solid #1f2937;margin-bottom:6px;}
+    .cert-firmas-tres{margin-top:70px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;}
+    .cert-firmas-tres .cert-firma{flex:1;min-width:130px;}
+    .cert-firmas-una{margin-top:70px;display:flex;justify-content:center;}
+    .cert-firmas-una .cert-firma{width:220px;}
+    .cert-lugar-fecha{text-align:right;font-size:0.95rem;margin:24px 0 18px;color:#1f2937;font-style:italic;}
+    @media print{body{padding:10px;}}
   `;
+
+  let html;
+
+  if (tramitesOficiales.includes(s.tramite)) {
+    const certHTML = generarCertificadoOficial(s.tramite, d, comisaria);
+    html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
+      <style>${cssBase}</style></head><body>${certHTML}</body></html>`;
+  } else {
+    const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
+    let listaHTML = `
+      <h1>${titulo}</h1>
+      <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
+      <p class="subt">Solicitud recibida el ${fecha}</p>
+      <dl>
+        <div><dt>Comisaría asignada</dt><dd>${s.comisaria_asignada || '-'}</dd></div>
+        <div><dt>Estado</dt><dd>${s.estado || 'pendiente'}</dd></div>
+    `;
+    for (const [campo, valor] of Object.entries(d)) {
+      if (!valor) continue;
+      const label = etiquetasDetalle[campo] || campo;
+      if (campo.startsWith('foto_')) {
+        let urlPrint = valor;
+        if (!valor.startsWith('http')) {
+          const { data: signedData } = await supabaseClient
+            .storage.from(BUCKET_FOTOS).createSignedUrl(valor, 600);
+          if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
+        }
+        listaHTML += `<div style="grid-column:1/-1;"><dt>${label}</dt><dd><img src="${urlPrint}"></dd></div>`;
+      } else {
+        listaHTML += `<div><dt>${label}</dt><dd>${valor}</dd></div>`;
+      }
+    }
+    if (s.motivo_denegacion) {
+      listaHTML += `<div style="grid-column:1/-1;"><dt>Motivo de denegación</dt><dd>${s.motivo_denegacion}</dd></div>`;
+    }
+    listaHTML += `
+      </dl>
+      <div class="firma">
+        <div>Firma del solicitante</div>
+        <div>Firma y sello - Autoridad policial</div>
+      </div>
+    `;
+    html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
+      <style>${cssBase}</style></head><body>${listaHTML}</body></html>`;
+  }
 
   ventana.document.write(html);
   ventana.document.close();
@@ -1774,17 +1938,12 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
 /* EXPORTAR CSV */
 document.getElementById('btn-exportar').addEventListener('click', () => {
   const filtradas = ordenarLista(aplicarFiltros());
-  if (!filtradas.length) {
-    alert('No hay solicitudes para exportar con los filtros actuales.');
-    return;
-  }
-
+  if (!filtradas.length) { alert('No hay solicitudes para exportar con los filtros actuales.'); return; }
   const filas = [[
     'Fecha', 'Trámite', 'Solicitante', 'DNI', 'Email', 'Teléfono',
     'Domicilio', 'Comisaría', 'Estado', 'Urgente',
     'Validado por', 'Fecha validación', 'Motivo denegación'
   ]];
-
   filtradas.forEach(s => {
     const d = s.datos || {};
     filas.push([
@@ -1792,8 +1951,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
       s.tramite_titulo || s.tramite || '-',
       obtenerNombreSolicitud(s) || '-',
       obtenerDniSolicitud(s) || '-',
-      d.email || '-',
-      d.telefono || '-',
+      d.email || '-', d.telefono || '-',
       d.domicilio || d.domicilioComun || '-',
       s.comisaria_asignada || '-',
       s.estado || 'pendiente',
@@ -1803,11 +1961,9 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
       s.motivo_denegacion || '-'
     ]);
   });
-
   const csv = filas.map(fila =>
     fila.map(celda => `"${String(celda).replace(/"/g, '""')}"`).join(';')
   ).join('\r\n');
-
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1815,7 +1971,6 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
   a.download = `solicitudes_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
-
   mostrarToast('📥 Exportado', `${filtradas.length} trámites exportados`, 'success', 3000);
 });
 
@@ -1824,15 +1979,11 @@ function abrirFotoGrande(src) {
   document.getElementById('foto-grande').src = src;
   document.getElementById('modal-foto').classList.add('activo');
 }
-
 document.getElementById('cerrar-modal').addEventListener('click', () => {
   document.getElementById('modal-foto').classList.remove('activo');
 });
-
 document.getElementById('modal-foto').addEventListener('click', (e) => {
-  if (e.target.id === 'modal-foto') {
-    document.getElementById('modal-foto').classList.remove('activo');
-  }
+  if (e.target.id === 'modal-foto') document.getElementById('modal-foto').classList.remove('activo');
 });
 </script>
 
