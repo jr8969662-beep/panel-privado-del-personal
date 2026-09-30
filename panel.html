@@ -770,6 +770,15 @@
         <option value="procesado">Procesados</option>
         <option value="denegado">Denegados</option>
       </select>
+      <select id="filtro-tipo-dependencia" title="Filtrar por tipo de dependencia">
+        <option value="">Todas las dependencias</option>
+        <option value="Comisaría">🏢 Comisarías</option>
+        <option value="Subcomisaría">🏛️ Subcomisarías</option>
+        <option value="Destacamento">🚔 Destacamentos</option>
+        <option value="Puerto Policial">⚓ Puertos Policiales</option>
+        <option value="Puesto">📌 Puestos Policiales</option>
+        <option value="Base Operativa">🎯 Bases Operativas</option>
+      </select>
       <select id="filtro-comisaria">
         <option value="">Todas las comisarías</option>
       </select>
@@ -976,7 +985,6 @@ const etiquetasDetalle = {
   foto_solicitante: 'Foto del DNI - Solicitante',
   foto_testigo1: 'Foto del DNI - Testigo 1',
   foto_testigo2: 'Foto del DNI - Testigo 2',
-  // Autorización de Menor
   nombreMenor: 'Nombre del menor', dniMenor: 'DNI del menor',
   fechaNacimientoMenor: 'Fecha de nacimiento del menor',
   nacionalidadMenor: 'Nacionalidad del menor',
@@ -995,18 +1003,14 @@ const etiquetasDetalle = {
   dniOtroProgenitor: 'DNI del otro progenitor',
   foto_menor: 'Foto del DNI - Menor',
   foto_progenitor: 'Foto del DNI - Progenitor autorizante',
-  // Antecedentes
   tipoCertificado: 'Tipo de certificado',
-  // Extravío
   tipoDocumento: 'Tipo de documento',
   numeroDocumento: 'Número del documento',
   fechaExtravio: 'Fecha aproximada del extravío',
   circunstancia: 'Circunstancia',
   lugarExtravio: 'Lugar aproximado del extravío',
   detalleExtravio: 'Detalle adicional',
-  // Supervivencia
   tipoBeneficio: 'Tipo de beneficio',
-  // Estadía
   tiempoEstadia: 'Tiempo de estadía',
 };
 
@@ -1045,6 +1049,18 @@ function normalizarTexto(t) {
     .toLowerCase().trim();
 }
 
+function obtenerTipoDependencia(nombre) {
+  if (!nombre) return '';
+  const n = String(nombre).trim();
+  if (/^subcomisar[íi]a/i.test(n)) return 'Subcomisaría';
+  if (/^comisar[íi]a/i.test(n)) return 'Comisaría';
+  if (/^destacamento/i.test(n)) return 'Destacamento';
+  if (/^puerto\s+pol/i.test(n)) return 'Puerto Policial';
+  if (/^puesto/i.test(n)) return 'Puesto';
+  if (/^base\s+operativa/i.test(n)) return 'Base Operativa';
+  return 'Otro';
+}
+
 function obtenerDniSolicitud(s) {
   const d = s.datos || {};
   return d.dni || d.dniSolicitante || d.dniMenor || d.testigo1Dni || '';
@@ -1058,12 +1074,14 @@ function obtenerNombreSolicitud(s) {
 function renderTabla() {
   const estado = document.getElementById('filtro-estado').value;
   const comisaria = document.getElementById('filtro-comisaria').value;
+  const tipoDep = document.getElementById('filtro-tipo-dependencia').value;
   const tramite = document.getElementById('filtro-tramite').value;
   const busqueda = normalizarTexto(document.getElementById('filtro-busqueda').value);
 
   const filtradas = solicitudesCache.filter(s => {
     if (estado && s.estado !== estado) return false;
     if (comisaria && s.comisaria_asignada !== comisaria) return false;
+    if (tipoDep && obtenerTipoDependencia(s.comisaria_asignada) !== tipoDep) return false;
     if (tramite && s.tramite !== tramite) return false;
     if (busqueda) {
       const nombre = normalizarTexto(obtenerNombreSolicitud(s));
@@ -1097,9 +1115,23 @@ function renderTabla() {
 }
 
 document.getElementById('filtro-estado').addEventListener('change', renderTabla);
-filtroComisaria.addEventListener('change', renderTabla);
 document.getElementById('filtro-tramite').addEventListener('change', renderTabla);
 document.getElementById('filtro-busqueda').addEventListener('input', renderTabla);
+
+// Filtro por tipo de dependencia: también filtra las opciones del desplegable de comisarías
+document.getElementById('filtro-tipo-dependencia').addEventListener('change', (e) => {
+  const tipo = e.target.value;
+  filtroComisaria.value = '';
+  Array.from(filtroComisaria.options).forEach(opt => {
+    if (!opt.value) return;
+    const esDelTipo = !tipo || obtenerTipoDependencia(opt.value) === tipo;
+    opt.hidden = !esDelTipo;
+    opt.disabled = !esDelTipo;
+  });
+  renderTabla();
+});
+
+filtroComisaria.addEventListener('change', renderTabla);
 
 let solicitudAbierta = null;
 
@@ -1216,7 +1248,6 @@ async function mostrarDetalle(s) {
     if (d.foto_menor) camposSol.push([et.foto_menor, d.foto_menor, true]);
     if (d.foto_progenitor) camposSol.push([et.foto_progenitor, d.foto_progenitor, true]);
   } else if (s.tramite === 'extravio') {
-    // Formulario de Extravío
     if (d.nombre) camposSol.push([et.nombre, d.nombre]);
     if (d.dni) camposSol.push([et.dni, d.dni]);
     if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
@@ -1232,7 +1263,6 @@ async function mostrarDetalle(s) {
     if (d.detalleExtravio) camposSol.push([et.detalleExtravio, d.detalleExtravio]);
     if (d.foto_solicitante) camposSol.push([et.foto_solicitante, d.foto_solicitante, true]);
   } else {
-    // Formularios estándar (residencia, convivencia, carencia, antecedentes, domicilio, supervivencia, estadia)
     const nombreSol = d.nombre || d.nombreSolicitante || '';
     const dniSol = d.dni || d.dniSolicitante || '';
     if (nombreSol) camposSol.push([et.nombre, nombreSol]);
@@ -1266,7 +1296,6 @@ async function mostrarDetalle(s) {
   listaSol.appendChild(crearItemEstado(s.estado));
   cont.appendChild(seccionSol);
 
-  // Testigos (solo para residencia, convivencia, carencia)
   const tramitesConTestigos = ['residencia', 'convivencia', 'carencia'];
   if (tramitesConTestigos.includes(s.tramite)) {
     const camposT1 = [];
@@ -1388,12 +1417,14 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
 document.getElementById('btn-exportar').addEventListener('click', () => {
   const estado = document.getElementById('filtro-estado').value;
   const comisaria = document.getElementById('filtro-comisaria').value;
+  const tipoDep = document.getElementById('filtro-tipo-dependencia').value;
   const tramite = document.getElementById('filtro-tramite').value;
   const busqueda = normalizarTexto(document.getElementById('filtro-busqueda').value);
 
   const filtradas = solicitudesCache.filter(s => {
     if (estado && s.estado !== estado) return false;
     if (comisaria && s.comisaria_asignada !== comisaria) return false;
+    if (tipoDep && obtenerTipoDependencia(s.comisaria_asignada) !== tipoDep) return false;
     if (tramite && s.tramite !== tramite) return false;
     if (busqueda) {
       const nombre = normalizarTexto(obtenerNombreSolicitud(s));
