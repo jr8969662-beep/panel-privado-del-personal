@@ -107,74 +107,39 @@
     padding:8px 12px;border-radius:8px;text-align:left;}
   #caps-warning.activo{display:block;}
 
-  /* LOGIN MEJORADO */
-  @keyframes vibracion {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-    20%, 40%, 60%, 80% { transform: translateX(8px); }
-  }
+  @keyframes vibracion {0%,100%{transform:translateX(0);}10%,30%,50%,70%,90%{transform:translateX(-8px);}20%,40%,60%,80%{transform:translateX(8px);}}
   #vista-login.vibrar { animation: vibracion 0.5s ease-in-out; }
-
-  .spinner {
-    display: inline-block; width: 16px; height: 16px;
-    border: 2px solid rgba(13,42,77,0.3); border-top-color: var(--azul-oscuro);
-    border-radius: 50%; animation: girar 0.7s linear infinite;
-    margin-right: 8px; vertical-align: middle;
-  }
+  .spinner {display:inline-block;width:16px;height:16px;border:2px solid rgba(13,42,77,0.3);
+    border-top-color:var(--azul-oscuro);border-radius:50%;animation:girar 0.7s linear infinite;
+    margin-right:8px;vertical-align:middle;}
   @keyframes girar { to { transform: rotate(360deg); } }
-
-  .ultimo-acceso {
-    font-size: 0.75rem; color: rgba(255,255,255,0.55);
-    margin-top: 18px; padding: 10px 12px;
-    background: rgba(0,0,0,0.25); border-radius: 8px;
-    border-left: 3px solid rgba(201,169,97,0.5);
-    text-align: left; display: none;
-  }
+  .ultimo-acceso {font-size:0.75rem;color:rgba(255,255,255,0.55);margin-top:18px;
+    padding:10px 12px;background:rgba(0,0,0,0.25);border-radius:8px;
+    border-left:3px solid rgba(201,169,97,0.5);text-align:left;display:none;}
   .ultimo-acceso.activo { display: block; }
   .ultimo-acceso strong { color: var(--dorado-claro); }
-
-  #banner-bienvenida {
-    display: none; margin: 0 0 18px; padding: 14px 18px;
-    background: rgba(21,128,61,0.25);
-    border: 1px solid rgba(134,239,172,0.5);
-    border-left: 4px solid #86efac; border-radius: 10px;
-    color: #fff; font-size: 0.92rem;
-    animation: slideIn 0.4s ease-out;
-  }
+  #banner-bienvenida {display:none;margin:0 0 18px;padding:14px 18px;
+    background:rgba(21,128,61,0.25);border:1px solid rgba(134,239,172,0.5);
+    border-left:4px solid #86efac;border-radius:10px;color:#fff;font-size:0.92rem;
+    animation:slideIn 0.4s ease-out;}
   #banner-bienvenida.activo { display: block; }
   #banner-bienvenida strong { color: #86efac; }
-
-  #aviso-bloqueo {
-    display: none; margin-top: 14px; padding: 12px 16px;
-    background: rgba(185,28,28,0.25);
-    border: 1px solid rgba(252,165,165,0.5);
-    border-left: 4px solid #fca5a5; border-radius: 8px;
-    color: #fff; font-size: 0.85rem; text-align: left;
-  }
+  #aviso-bloqueo {display:none;margin-top:14px;padding:12px 16px;
+    background:rgba(185,28,28,0.25);border:1px solid rgba(252,165,165,0.5);
+    border-left:4px solid #fca5a5;border-radius:8px;color:#fff;font-size:0.85rem;text-align:left;}
   #aviso-bloqueo.activo { display: block; }
   #aviso-bloqueo strong { color: #fca5a5; }
-
-  #aviso-inactividad {
-    display: none; position: fixed; top: 20px; left: 50%;
-    transform: translateX(-50%);
-    background: rgba(202,138,4,0.95); color: #fff;
-    padding: 14px 22px; border-radius: 10px;
-    border-left: 4px solid #fcd34d;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    z-index: 10001; font-size: 0.9rem; font-weight: 600;
-    backdrop-filter: blur(8px); animation: slideIn 0.3s ease-out;
-  }
+  #aviso-inactividad {display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);
+    background:rgba(202,138,4,0.95);color:#fff;padding:14px 22px;border-radius:10px;
+    border-left:4px solid #fcd34d;box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    z-index:10001;font-size:0.9rem;font-weight:600;backdrop-filter:blur(8px);
+    animation:slideIn 0.3s ease-out;}
   #aviso-inactividad.activo { display: block; }
-  #aviso-inactividad button {
-    background: rgba(255,255,255,0.2); color: #fff;
-    border: 1px solid rgba(255,255,255,0.4);
-    padding: 5px 12px; border-radius: 6px;
-    margin-left: 12px; cursor: pointer;
-    font-size: 0.82rem; font-weight: 600; font-family: inherit;
-  }
+  #aviso-inactividad button {background:rgba(255,255,255,0.2);color:#fff;
+    border:1px solid rgba(255,255,255,0.4);padding:5px 12px;border-radius:6px;
+    margin-left:12px;cursor:pointer;font-size:0.82rem;font-weight:600;font-family:inherit;}
 
   #vista-panel{display:none;}
-
   .resumen{display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
     gap:14px;margin-bottom:18px;}
   .tarjeta-resumen{background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);
@@ -233,7 +198,6 @@
   tr.fila-solicitud td{color:#e0e7f1;}
   tr.urgente{background:rgba(185,28,28,0.15);}
   tr.urgente:hover{background:rgba(185,28,28,0.25);}
-
   .etiqueta{padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:700;
     text-transform:uppercase;letter-spacing:0.03em;display:inline-block;}
   .etiqueta.pendiente{background:rgba(202,138,4,0.3);color:#fcd34d;border:1px solid rgba(252,211,77,0.5);}
@@ -243,7 +207,6 @@
   .badge-duplicado{background:rgba(185,28,28,0.4);color:#fca5a5;
     border:1px solid rgba(252,165,165,0.6);padding:2px 8px;border-radius:10px;
     font-size:0.68rem;font-weight:700;margin-left:6px;cursor:help;}
-
   .paginacion{display:flex;justify-content:space-between;align-items:center;
     margin-top:14px;gap:12px;flex-wrap:wrap;}
   .paginacion .info-pag{font-size:0.82rem;color:rgba(255,255,255,0.7);}
@@ -253,7 +216,6 @@
     cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;font-family:inherit;}
   .paginacion button:hover:not(:disabled){background:rgba(255,255,255,0.2);border-color:var(--dorado);}
   .paginacion button:disabled{opacity:0.4;cursor:not-allowed;}
-
   #detalle{display:none;background:rgba(13,42,77,0.75);backdrop-filter:blur(10px);
     border:1px solid rgba(201,169,97,0.4);border-top:3px solid var(--dorado);
     border-radius:10px;padding:26px;margin-top:20px;box-shadow:var(--sombra-media);}
@@ -297,10 +259,8 @@
   #btn-cerrar-detalle:hover{background:rgba(255,255,255,0.25);}
   #btn-urgente{background:rgba(185,28,28,0.7);color:#fff;border:1px solid rgba(252,165,165,0.5);}
   #btn-urgente:hover{background:rgba(185,28,28,0.9);}
-
   .vacio{padding:40px 20px;text-align:center;color:rgba(255,255,255,0.7);font-size:0.9rem;}
   .vacio .vacio-icono{font-size:3rem;margin-bottom:12px;opacity:0.5;}
-
   #modal-foto{display:none;position:fixed;top:0;left:0;right:0;bottom:0;
     background:rgba(0,0,0,0.95);z-index:9999;padding:20px;
     align-items:center;justify-content:center;}
@@ -309,7 +269,6 @@
   #modal-foto .cerrar-modal{position:absolute;top:20px;right:20px;
     background:rgba(255,255,255,0.9);color:#000;border:none;width:44px;height:44px;
     border-radius:50%;cursor:pointer;font-size:1.4rem;font-weight:700;}
-
   #toast-container{position:fixed;top:20px;right:20px;z-index:10000;
     display:flex;flex-direction:column;gap:10px;max-width:340px;}
   .toast{background:rgba(21,128,61,0.95);color:#fff;padding:14px 18px;
@@ -320,7 +279,6 @@
   .toast.error{background:rgba(185,28,28,0.95);border-left-color:#fca5a5;}
   .toast .toast-titulo{font-weight:700;display:block;margin-bottom:4px;}
   @keyframes slideIn{from{transform:translateX(400px);opacity:0;}to{transform:translateX(0);opacity:1;}}
-
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
     z-index:9998;align-items:center;justify-content:center;padding:20px;}
   .modal-overlay.activo{display:flex;}
@@ -372,6 +330,7 @@
     </div>
   </div>
   <div class="header-acciones">
+    <button id="btn-auditoria" title="Ver historial de accesos">📋 Auditoría</button>
     <button id="btn-cambiar-pass" title="Cambiar contraseña">🔑 Cambiar contraseña</button>
     <button id="btn-salir">Salir</button>
   </div>
@@ -587,6 +546,35 @@
   </div>
 </div>
 
+<!-- Modal Auditoría -->
+<div class="modal-overlay" id="modal-auditoria">
+  <div class="modal-caja" style="max-width:780px;">
+    <h3>📋 Historial de accesos</h3>
+    <p style="font-size:0.82rem;color:rgba(255,255,255,0.7);margin:0 0 16px;">
+      Últimos 100 ingresos del personal al panel.
+    </p>
+    <div style="max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid rgba(201,169,97,0.3);">
+      <table style="width:100%;">
+        <thead style="position:sticky;top:0;background:var(--azul-oscuro);z-index:1;">
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Email</th>
+            <th>Tipo</th>
+            <th>Dispositivo</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-auditoria">
+          <tr><td colspan="4" style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-btns">
+      <button type="button" id="btn-actualizar-auditoria" style="background:var(--azul);color:#fff;border:1px solid rgba(255,255,255,0.2);">🔄 Actualizar</button>
+      <button type="button" id="btn-cerrar-auditoria" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toasts -->
 <div id="toast-container"></div>
 
@@ -617,9 +605,7 @@ let solicitudesCache = [];
 let idsConocidos = new Set();
 let primeraCarga = true;
 
-/* ============================================================
-   TOASTS
-   ============================================================ */
+/* TOASTS */
 function mostrarToast(titulo, mensaje, tipo = 'success', duracion = 5000) {
   const toast = document.createElement('div');
   toast.className = 'toast' + (tipo !== 'success' ? ' ' + tipo : '');
@@ -633,18 +619,14 @@ function mostrarToast(titulo, mensaje, tipo = 'success', duracion = 5000) {
   }, duracion);
 }
 
-/* ============================================================
-   RECORDAR EMAIL
-   ============================================================ */
+/* RECORDAR EMAIL */
 const EMAIL_GUARDADO = localStorage.getItem('panel_email_recordado');
 if (EMAIL_GUARDADO) {
   inputEmail.value = EMAIL_GUARDADO;
   recordarEmail.checked = true;
 }
 
-/* ============================================================
-   MOSTRAR/OCULTAR CONTRASEÑA
-   ============================================================ */
+/* MOSTRAR/OCULTAR CONTRASEÑA */
 togglePass.addEventListener('click', () => {
   const esPass = inputPass.type === 'password';
   inputPass.type = esPass ? 'text' : 'password';
@@ -653,9 +635,7 @@ togglePass.addEventListener('click', () => {
   inputPass.focus();
 });
 
-/* ============================================================
-   CAPS LOCK
-   ============================================================ */
+/* CAPS LOCK */
 function checkCapsLock(e) {
   if (e.getModifierState) {
     const capsOn = e.getModifierState('CapsLock');
@@ -667,9 +647,7 @@ inputPass.addEventListener('keydown', checkCapsLock);
 inputPass.addEventListener('keyup', checkCapsLock);
 inputPass.addEventListener('blur', () => capsWarning.classList.remove('activo'));
 
-/* ============================================================
-   LOGIN MEJORADO
-   ============================================================ */
+/* LOGIN MEJORADO */
 const LOGIN_KEY = 'panel_login_control';
 const ULTIMO_ACCESO_KEY = 'panel_ultimo_acceso';
 const MAX_INTENTOS = 3;
@@ -736,9 +714,7 @@ function actualizarUIBloqueo() {
   }
 }
 
-if (verificarBloqueo()) {
-  // ya activado
-}
+verificarBloqueo();
 
 function vibrarLogin() {
   const login = document.getElementById('vista-login');
@@ -746,6 +722,100 @@ function vibrarLogin() {
   setTimeout(() => login.classList.remove('vibrar'), 600);
 }
 
+/* AUDITORÍA — DETECCIÓN DE DISPOSITIVO */
+function detectarDispositivo(ua) {
+  const u = (ua || navigator.userAgent).toLowerCase();
+  let navegador = 'Desconocido';
+  if (u.includes('chrome') && !u.includes('edg')) navegador = 'Chrome';
+  else if (u.includes('firefox')) navegador = 'Firefox';
+  else if (u.includes('safari') && !u.includes('chrome')) navegador = 'Safari';
+  else if (u.includes('edg')) navegador = 'Edge';
+  else if (u.includes('opera') || u.includes('opr')) navegador = 'Opera';
+
+  let so = 'Desconocido';
+  if (u.includes('windows')) so = 'Windows';
+  else if (u.includes('mac')) so = 'macOS';
+  else if (u.includes('linux') && !u.includes('android')) so = 'Linux';
+  else if (u.includes('android')) so = 'Android';
+  else if (u.includes('iphone') || u.includes('ipad')) so = 'iOS';
+
+  return `${navegador} / ${so}`;
+}
+
+async function registrarAcceso(email, tipo = 'login') {
+  try {
+    const { error } = await supabaseClient
+      .from('logs_accesos')
+      .insert([{
+        email: email,
+        tipo: tipo,
+        user_agent: navigator.userAgent,
+        dispositivo: detectarDispositivo()
+      }]);
+    if (error) console.warn('No se pudo registrar el acceso:', error);
+  } catch (e) {
+    console.warn('Error registrando acceso:', e);
+  }
+}
+
+/* AUDITORÍA — MODAL */
+const modalAuditoria = document.getElementById('modal-auditoria');
+
+document.getElementById('btn-auditoria').addEventListener('click', async () => {
+  modalAuditoria.classList.add('activo');
+  await cargarAuditoria();
+});
+
+document.getElementById('btn-cerrar-auditoria').addEventListener('click', () => {
+  modalAuditoria.classList.remove('activo');
+});
+
+document.getElementById('btn-actualizar-auditoria').addEventListener('click', cargarAuditoria);
+
+modalAuditoria.addEventListener('click', (e) => {
+  if (e.target.id === 'modal-auditoria') modalAuditoria.classList.remove('activo');
+});
+
+async function cargarAuditoria() {
+  const tbody = document.getElementById('tabla-auditoria');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);">Cargando...</td></tr>';
+
+  const { data, error } = await supabaseClient
+    .from('logs_accesos')
+    .select('*')
+    .order('fecha', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#fca5a5;">Error: ${error.message}</td></tr>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);">No hay registros aún.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  data.forEach(log => {
+    const tr = document.createElement('tr');
+    const fecha = log.fecha ? new Date(log.fecha).toLocaleString('es-AR') : '-';
+    const tipoTexto = log.tipo === 'login' ? '✅ Ingreso'
+                    : log.tipo === 'logout' ? '🚪 Salida'
+                    : log.tipo === 'logout_inactividad' ? '⏱ Cerrado por inactividad'
+                    : log.tipo;
+
+    tr.innerHTML = `
+      <td style="font-size:0.82rem;">${fecha}</td>
+      <td style="font-size:0.82rem;">${log.email || '-'}</td>
+      <td style="font-size:0.82rem;">${tipoTexto}</td>
+      <td style="font-size:0.82rem;">${log.dispositivo || '-'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* LOGIN */
 async function intentarLogin() {
   if (bloqueadoHasta && Date.now() < bloqueadoHasta) {
     vibrarLogin();
@@ -823,6 +893,9 @@ async function intentarLogin() {
 
   usuarioActual = data.user ? data.user.email : email;
 
+  // Registrar acceso
+  registrarAcceso(usuarioActual, 'login');
+
   const ahora = new Date();
   const fechaFormateada = ahora.toLocaleString('es-AR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
@@ -862,13 +935,10 @@ linkRecuperar.addEventListener('click', (e) => {
   alert('Para recuperar tu contraseña, contactá al administrador del sistema:\n\nadmin@salta.gob.ar');
 });
 
-/* ============================================================
-   AUTO-LOGOUT POR INACTIVIDAD
-   ============================================================ */
+/* AUTO-LOGOUT POR INACTIVIDAD */
 function iniciarTimerInactividad() {
   detenerTimerInactividad();
   resetearTimerInactividad();
-
   ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(ev => {
     document.addEventListener(ev, resetearTimerInactividad, { passive: true });
   });
@@ -898,6 +968,7 @@ function iniciarAvisoInactividad() {
     if (segundos <= 0) {
       clearInterval(cuentaRegresiva);
       aviso.classList.remove('activo');
+      if (usuarioActual) registrarAcceso(usuarioActual, 'logout_inactividad');
       supabaseClient.auth.signOut();
       mostrarToast('🔒 Sesión cerrada', 'Por inactividad', 'warning', 4000);
     }
@@ -917,6 +988,7 @@ function detenerTimerInactividad() {
 
 btnSalir.addEventListener('click', async () => {
   if (!confirm('¿Cerrar sesión?')) return;
+  if (usuarioActual) registrarAcceso(usuarioActual, 'logout');
   detenerTimerInactividad();
   await supabaseClient.auth.signOut();
 });
@@ -951,9 +1023,7 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
   mostrarSesion(!!session);
 });
 
-/* ============================================================
-   CAMBIAR CONTRASEÑA
-   ============================================================ */
+/* CAMBIAR CONTRASEÑA */
 const modalPass = document.getElementById('modal-pass');
 const passNueva = document.getElementById('pass-nueva');
 const passRepetir = document.getElementById('pass-repetir');
@@ -996,9 +1066,7 @@ modalPass.addEventListener('click', (e) => {
   if (e.target.id === 'modal-pass') modalPass.classList.remove('activo');
 });
 
-/* ============================================================
-   FILTRO COMISARÍA
-   ============================================================ */
+/* FILTRO COMISARÍA */
 const filtroComisaria = document.getElementById('filtro-comisaria');
 DEPENDENCIAS_POLICIALES.forEach(dep => {
   const opt = document.createElement('option');
@@ -1019,9 +1087,7 @@ function obtenerTipoDependencia(nombre) {
   return 'Otro';
 }
 
-/* ============================================================
-   ETIQUETAS
-   ============================================================ */
+/* ETIQUETAS */
 const etiquetasDetalle = {
   nombre: 'Nombre completo', dni: 'DNI', fechaNacimiento: 'Fecha de nacimiento',
   email: 'Email de contacto', telefono: 'Teléfono / WhatsApp',
@@ -1069,9 +1135,7 @@ const etiquetasDetalle = {
   notas_internas: 'Notas internas',
 };
 
-/* ============================================================
-   CARGA DE SOLICITUDES
-   ============================================================ */
+/* CARGA DE SOLICITUDES */
 async function cargarSolicitudes() {
   const { data, error } = await supabaseClient
     .from('solicitudes')
@@ -1132,13 +1196,9 @@ supabaseClient
   .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes' }, cargarSolicitudes)
   .subscribe();
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
+/* HELPERS */
 function normalizarTexto(t) {
-  return String(t || '')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().trim();
+  return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
 
 function obtenerDniSolicitud(s) {
@@ -1178,9 +1238,7 @@ function detectarDuplicados() {
   return duplicados;
 }
 
-/* ============================================================
-   RENDER TABLA
-   ============================================================ */
+/* FILTROS + RENDER */
 function aplicarFiltros() {
   const estado = document.getElementById('filtro-estado').value;
   const tipoDep = document.getElementById('filtro-tipo-dependencia').value;
@@ -1304,9 +1362,6 @@ function renderTabla() {
   document.getElementById('btn-pag-next').disabled = paginaActual >= totalPaginas;
 }
 
-/* ============================================================
-   LISTENERS DE FILTROS
-   ============================================================ */
 function resetPaginaYRender() {
   paginaActual = 1;
   renderTabla();
@@ -1358,9 +1413,7 @@ document.getElementById('btn-limpiar').addEventListener('click', () => {
   mostrarToast('🧹 Filtros limpiados', '', 'success', 2000);
 });
 
-/* ============================================================
-   ORDENAMIENTO
-   ============================================================ */
+/* ORDENAMIENTO */
 document.querySelectorAll('th.ordenable').forEach(th => {
   th.addEventListener('click', () => {
     const campo = th.dataset.sort;
@@ -1378,9 +1431,7 @@ document.querySelectorAll('th.ordenable').forEach(th => {
   });
 });
 
-/* ============================================================
-   PAGINACIÓN
-   ============================================================ */
+/* PAGINACIÓN */
 document.getElementById('btn-pag-prev').addEventListener('click', () => {
   if (paginaActual > 1) {
     paginaActual--;
@@ -1399,9 +1450,7 @@ document.getElementById('btn-pag-next').addEventListener('click', () => {
   }
 });
 
-/* ============================================================
-   DETALLE
-   ============================================================ */
+/* DETALLE */
 let solicitudAbierta = null;
 
 async function crearSeccion(titulo, campos) {
@@ -1431,9 +1480,7 @@ async function crearSeccion(titulo, campos) {
       let urlFinal = valor;
       if (!valor.startsWith('http')) {
         const { data: signedData, error: signedError } = await supabaseClient
-          .storage
-          .from(BUCKET_FOTOS)
-          .createSignedUrl(valor, 3600);
+          .storage.from(BUCKET_FOTOS).createSignedUrl(valor, 3600);
         if (!signedError && signedData && signedData.signedUrl) urlFinal = signedData.signedUrl;
         else urlFinal = '';
       }
@@ -1597,9 +1644,7 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
   document.getElementById('detalle').style.display = 'none';
 });
 
-/* ============================================================
-   CAMBIAR ESTADO
-   ============================================================ */
+/* CAMBIAR ESTADO */
 async function cambiarEstado(nuevoEstado) {
   if (!solicitudAbierta) return;
 
@@ -1643,9 +1688,7 @@ document.getElementById('btn-validar').addEventListener('click', () => cambiarEs
 document.getElementById('btn-denegar').addEventListener('click', () => cambiarEstado('denegado'));
 document.getElementById('btn-pendiente').addEventListener('click', () => cambiarEstado('pendiente'));
 
-/* ============================================================
-   MARCAR URGENTE
-   ============================================================ */
+/* MARCAR URGENTE */
 document.getElementById('btn-urgente').addEventListener('click', async () => {
   if (!solicitudAbierta) return;
   const nuevoValor = !solicitudAbierta.urgente;
@@ -1659,9 +1702,7 @@ document.getElementById('btn-urgente').addEventListener('click', async () => {
   mostrarToast(nuevoValor ? '🚨 Marcado urgente' : '✅ Ya no es urgente', '', 'warning', 3000);
 });
 
-/* ============================================================
-   IMPRIMIR
-   ============================================================ */
+/* IMPRIMIR */
 document.getElementById('btn-imprimir').addEventListener('click', async () => {
   if (!solicitudAbierta) return;
   const s = solicitudAbierta;
@@ -1730,9 +1771,7 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
   setTimeout(() => ventana.print(), 500);
 });
 
-/* ============================================================
-   EXPORTAR CSV
-   ============================================================ */
+/* EXPORTAR CSV */
 document.getElementById('btn-exportar').addEventListener('click', () => {
   const filtradas = ordenarLista(aplicarFiltros());
   if (!filtradas.length) {
@@ -1780,9 +1819,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
   mostrarToast('📥 Exportado', `${filtradas.length} trámites exportados`, 'success', 3000);
 });
 
-/* ============================================================
-   MODAL FOTO
-   ============================================================ */
+/* MODAL FOTO */
 function abrirFotoGrande(src) {
   document.getElementById('foto-grande').src = src;
   document.getElementById('modal-foto').classList.add('activo');
