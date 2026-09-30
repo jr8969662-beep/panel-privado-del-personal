@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Base de datos del Personal Policial</title>
+<title>Base del Personal Policial</title>
 <style>
   :root{
     --azul-fondo:#0a1e3d;
@@ -129,9 +129,6 @@
     flex:1;
   }
 
-  /* ============================================================
-     LOGIN MEJORADO
-     ============================================================ */
   #vista-login{
     max-width:420px;
     margin:50px auto 0;
@@ -338,10 +335,8 @@
   }
   #caps-warning.activo{display:block;}
 
-  /* Panel */
   #vista-panel{display:none;}
 
-  /* Tarjetas de resumen */
   .resumen{
     display:grid;
     grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
@@ -395,7 +390,6 @@
     font-weight:600;
   }
 
-  /* Filtros */
   .filtros{
     display:flex;
     gap:10px;
@@ -459,7 +453,6 @@
     background:var(--dorado-claro);
   }
 
-  /* Tabla TRANSPARENTE */
   .tabla-wrapper{
     background:transparent;
     border-radius:10px;
@@ -505,7 +498,6 @@
   .etiqueta.procesado{background:rgba(21,128,61,0.3); color:#86efac; border:1px solid rgba(134,239,172,0.5);}
   .etiqueta.denegado{background:rgba(185,28,28,0.3); color:#fca5a5; border:1px solid rgba(252,165,165,0.5);}
 
-  /* Detalle TRANSPARENTE */
   #detalle{
     display:none;
     background:rgba(13,42,77,0.75);
@@ -703,7 +695,7 @@
   <div class="header-info">
     <div class="header-logo"></div>
     <div class="header-texto">
-      <h1>Base de datos del Personal Policial</h1>
+      <h1>Base del Personal Policial</h1>
       <p>Policía de Salta · DMI (JP)</p>
     </div>
   </div>
@@ -715,7 +707,7 @@
   <!-- LOGIN -->
   <div id="vista-login">
     <div class="login-logo"></div>
-    <h2>Base de datos del Personal Policial</h2>
+    <h2>Base del Personal Policial</h2>
     <p class="login-sub">Acceso restringido</p>
     <div class="login-separador"></div>
 
@@ -786,6 +778,12 @@
         <option value="residencia">Residencia</option>
         <option value="convivencia">Convivencia</option>
         <option value="carencia">Carencia de recursos</option>
+        <option value="autorizacion">Autorización de Menor</option>
+        <option value="antecedentes">Antecedentes Penales</option>
+        <option value="domicilio">Certificado de Domicilio</option>
+        <option value="extravio">Extravío de Documentos</option>
+        <option value="supervivencia">Supervivencia</option>
+        <option value="estadia">Certificado de Estadía</option>
       </select>
       <button id="btn-actualizar" class="btn-filtro" type="button">🔄 Actualizar</button>
       <button id="btn-exportar" class="btn-filtro" type="button">📥 Exportar</button>
@@ -848,9 +846,9 @@ const togglePass = document.getElementById('toggle-password');
 const recordarEmail = document.getElementById('recordar-email');
 const linkRecuperar = document.getElementById('link-recuperar');
 
-/* ============================================================
-   RECORDAR EMAIL
-   ============================================================ */
+const BUCKET_FOTOS = 'fotos-tramites';
+
+/* RECORDAR EMAIL */
 const EMAIL_GUARDADO = localStorage.getItem('panel_email_recordado');
 if (EMAIL_GUARDADO) {
   inputEmail.value = EMAIL_GUARDADO;
@@ -858,9 +856,7 @@ if (EMAIL_GUARDADO) {
   setTimeout(() => inputPass.focus(), 100);
 }
 
-/* ============================================================
-   MOSTRAR/OCULTAR CONTRASEÑA
-   ============================================================ */
+/* MOSTRAR/OCULTAR CONTRASEÑA */
 togglePass.addEventListener('click', () => {
   const esPass = inputPass.type === 'password';
   inputPass.type = esPass ? 'text' : 'password';
@@ -869,33 +865,25 @@ togglePass.addEventListener('click', () => {
   inputPass.focus();
 });
 
-/* ============================================================
-   CAPS LOCK WARNING
-   ============================================================ */
+/* CAPS LOCK WARNING */
 function checkCapsLock(e) {
   if (e.getModifierState) {
     const capsOn = e.getModifierState('CapsLock');
-    if (capsOn) {
-      capsWarning.classList.add('activo');
-    } else {
-      capsWarning.classList.remove('activo');
-    }
+    if (capsOn) capsWarning.classList.add('activo');
+    else capsWarning.classList.remove('activo');
   }
 }
 inputPass.addEventListener('keydown', checkCapsLock);
 inputPass.addEventListener('keyup', checkCapsLock);
 inputPass.addEventListener('blur', () => capsWarning.classList.remove('activo'));
 
-/* ============================================================
-   LOGIN
-   ============================================================ */
+/* LOGIN */
 async function intentarLogin() {
   const email = inputEmail.value.trim();
   const pass = inputPass.value;
   errorLogin.classList.remove('activo');
   errorLogin.textContent = '';
 
-  // Validaciones
   if (!email || !pass) {
     errorLogin.textContent = 'Completá usuario y contraseña.';
     errorLogin.classList.add('activo');
@@ -912,7 +900,6 @@ async function intentarLogin() {
     return;
   }
 
-  // Deshabilitar botón mientras se procesa
   btnEntrar.disabled = true;
   const textoOriginal = btnEntrar.textContent;
   btnEntrar.textContent = 'Verificando...';
@@ -932,22 +919,14 @@ async function intentarLogin() {
     return;
   }
 
-  // Guardar email si eligió "recordar"
-  if (recordarEmail.checked) {
-    localStorage.setItem('panel_email_recordado', email);
-  } else {
-    localStorage.removeItem('panel_email_recordado');
-  }
+  if (recordarEmail.checked) localStorage.setItem('panel_email_recordado', email);
+  else localStorage.removeItem('panel_email_recordado');
 }
 
 btnEntrar.addEventListener('click', intentarLogin);
 
-inputEmail.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') inputPass.focus();
-});
-inputPass.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') intentarLogin();
-});
+inputEmail.addEventListener('keypress', (e) => { if (e.key === 'Enter') inputPass.focus(); });
+inputPass.addEventListener('keypress', (e) => { if (e.key === 'Enter') intentarLogin(); });
 
 linkRecuperar.addEventListener('click', (e) => {
   e.preventDefault();
@@ -966,7 +945,6 @@ function mostrarSesion(sesionActiva) {
     vistaLogin.style.display = 'block';
     vistaPanel.style.display = 'none';
     btnSalir.style.display = 'none';
-    // Limpiar el campo de contraseña por seguridad
     inputPass.value = '';
     inputPass.type = 'password';
     togglePass.textContent = '👁️';
@@ -986,17 +964,50 @@ DEPENDENCIAS_POLICIALES.forEach(dep => {
 
 const etiquetasDetalle = {
   nombre: 'Nombre completo', dni: 'DNI', fechaNacimiento: 'Fecha de nacimiento',
+  email: 'Email de contacto', telefono: 'Teléfono / WhatsApp',
   domicilio: 'Domicilio', localidad: 'Localidad', tiempoResidencia: 'Tiempo de residencia',
   motivo: 'Motivo del trámite', nombreSolicitante: 'Nombre del solicitante',
   dniSolicitante: 'DNI del solicitante', nombreConviviente: 'Nombre del conviviente',
-  dniConviviente: 'DNI del conviviente', domicilioComun: 'Domicilio en común',
-  tiempoConvivencia: 'Tiempo de convivencia', estadoCivil: 'Estado civil',
+  dniConviviente: 'DNI del conviviente', parentesco: 'Parentesco con el conviviente',
+  domicilioComun: 'Domicilio en común', estadoCivil: 'Estado civil',
   situacionLaboral: 'Situación laboral', personasACargo: 'Personas a cargo',
   testigo1Nombre: 'Nombre del testigo 1', testigo1Dni: 'DNI del testigo 1',
   testigo2Nombre: 'Nombre del testigo 2', testigo2Dni: 'DNI del testigo 2',
   foto_solicitante: 'Foto del DNI - Solicitante',
   foto_testigo1: 'Foto del DNI - Testigo 1',
   foto_testigo2: 'Foto del DNI - Testigo 2',
+  // Autorización de Menor
+  nombreMenor: 'Nombre del menor', dniMenor: 'DNI del menor',
+  fechaNacimientoMenor: 'Fecha de nacimiento del menor',
+  nacionalidadMenor: 'Nacionalidad del menor',
+  nombreProgenitor: 'Nombre del progenitor que autoriza',
+  dniProgenitor: 'DNI del progenitor que autoriza',
+  vinculoProgenitor: 'Vínculo con el menor',
+  destino: 'Destino del viaje', motivoViaje: 'Motivo del viaje',
+  fechaSalida: 'Fecha de salida', fechaRegreso: 'Fecha de regreso',
+  empresaTransporte: 'Empresa de transporte',
+  empresaOtra: 'Empresa de transporte (otra)',
+  tipoViaje: 'Tipo de viaje',
+  nombreAcompanante: 'Nombre del acompañante',
+  dniAcompanante: 'DNI del acompañante',
+  vinculoAcompanante: 'Vínculo del acompañante',
+  nombreOtroProgenitor: 'Nombre del otro progenitor',
+  dniOtroProgenitor: 'DNI del otro progenitor',
+  foto_menor: 'Foto del DNI - Menor',
+  foto_progenitor: 'Foto del DNI - Progenitor autorizante',
+  // Antecedentes
+  tipoCertificado: 'Tipo de certificado',
+  // Extravío
+  tipoDocumento: 'Tipo de documento',
+  numeroDocumento: 'Número del documento',
+  fechaExtravio: 'Fecha aproximada del extravío',
+  circunstancia: 'Circunstancia',
+  lugarExtravio: 'Lugar aproximado del extravío',
+  detalleExtravio: 'Detalle adicional',
+  // Supervivencia
+  tipoBeneficio: 'Tipo de beneficio',
+  // Estadía
+  tiempoEstadia: 'Tiempo de estadía',
 };
 
 let solicitudesCache = [];
@@ -1031,18 +1042,17 @@ supabaseClient
 function normalizarTexto(t) {
   return String(t || '')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
+    .toLowerCase().trim();
 }
 
 function obtenerDniSolicitud(s) {
   const d = s.datos || {};
-  return d.dni || d.dniSolicitante || d.testigo1Dni || '';
+  return d.dni || d.dniSolicitante || d.dniMenor || d.testigo1Dni || '';
 }
 
 function obtenerNombreSolicitud(s) {
   const d = s.datos || {};
-  return d.nombre || d.nombreSolicitante || d.nombreConviviente || '';
+  return d.nombre || d.nombreSolicitante || d.nombreConviviente || d.nombreMenor || '';
 }
 
 function renderTabla() {
@@ -1093,7 +1103,7 @@ document.getElementById('filtro-busqueda').addEventListener('input', renderTabla
 
 let solicitudAbierta = null;
 
-function crearSeccion(titulo, campos) {
+async function crearSeccion(titulo, campos) {
   const seccion = document.createElement('div');
   seccion.className = 'detalle-seccion';
 
@@ -1105,8 +1115,8 @@ function crearSeccion(titulo, campos) {
   const lista = document.createElement('div');
   lista.className = 'detalle-lista';
 
-  campos.forEach(([label, valor, esFoto]) => {
-    if (valor === undefined || valor === null || valor === '') return;
+  for (const [label, valor, esFoto] of campos) {
+    if (valor === undefined || valor === null || valor === '') continue;
     const item = document.createElement('div');
     item.className = 'detalle-item';
 
@@ -1116,18 +1126,30 @@ function crearSeccion(titulo, campos) {
     const dd = document.createElement('dd');
     if (esFoto) {
       const img = document.createElement('img');
-      img.src = valor;
       img.alt = label;
-      img.addEventListener('click', () => abrirFotoGrande(valor));
-      dd.appendChild(img);
+      let urlFinal = valor;
+      if (!valor.startsWith('http')) {
+        const { data: signedData, error: signedError } = await supabaseClient
+          .storage
+          .from(BUCKET_FOTOS)
+          .createSignedUrl(valor, 3600);
+        if (!signedError && signedData && signedData.signedUrl) urlFinal = signedData.signedUrl;
+        else { console.warn('No se pudo firmar la URL:', valor, signedError); urlFinal = ''; }
+      }
+      if (urlFinal) {
+        img.src = urlFinal;
+        img.addEventListener('click', () => abrirFotoGrande(urlFinal));
+        dd.appendChild(img);
+      } else {
+        dd.textContent = 'No se pudo cargar la imagen';
+      }
     } else {
       dd.textContent = valor;
     }
-
     item.appendChild(dt);
     item.appendChild(dd);
     lista.appendChild(item);
-  });
+  }
 
   seccion.appendChild(lista);
   return seccion;
@@ -1142,21 +1164,18 @@ function crearSeparador() {
 function crearItemEstado(estado) {
   const item = document.createElement('div');
   item.className = 'detalle-item';
-
   const dt = document.createElement('dt');
   dt.textContent = 'Estado actual';
-
   const dd = document.createElement('dd');
   const estadoTexto = estado === 'procesado' ? 'Procesado' :
                       estado === 'denegado' ? 'Denegado' : 'Pendiente';
   dd.innerHTML = `<span class="etiqueta ${estado}">${estadoTexto}</span>`;
-
   item.appendChild(dt);
   item.appendChild(dd);
   return item;
 }
 
-function mostrarDetalle(s) {
+async function mostrarDetalle(s) {
   solicitudAbierta = s;
   document.getElementById('detalle-titulo').textContent = s.tramite_titulo || s.tramite;
   const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
@@ -1167,56 +1186,106 @@ function mostrarDetalle(s) {
 
   const d = s.datos || {};
   const et = etiquetasDetalle;
-
   const camposSol = [];
   camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
 
-  const nombreSol = d.nombre || d.nombreSolicitante || '';
-  const dniSol = d.dni || d.dniSolicitante || '';
-  if (nombreSol) camposSol.push([et.nombre, nombreSol]);
-  if (dniSol) camposSol.push([et.dni, dniSol]);
-  if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
+  if (s.tramite === 'autorizacion') {
+    if (d.nombreMenor) camposSol.push([et.nombreMenor, d.nombreMenor]);
+    if (d.dniMenor) camposSol.push([et.dniMenor, d.dniMenor]);
+    if (d.fechaNacimientoMenor) camposSol.push([et.fechaNacimientoMenor, d.fechaNacimientoMenor]);
+    if (d.nacionalidadMenor) camposSol.push([et.nacionalidadMenor, d.nacionalidadMenor]);
+    if (d.nombreProgenitor) camposSol.push([et.nombreProgenitor, d.nombreProgenitor]);
+    if (d.dniProgenitor) camposSol.push([et.dniProgenitor, d.dniProgenitor]);
+    if (d.vinculoProgenitor) camposSol.push([et.vinculoProgenitor, d.vinculoProgenitor]);
+    if (d.email) camposSol.push([et.email, d.email]);
+    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
+    if (d.destino) camposSol.push([et.destino, d.destino]);
+    if (d.motivoViaje) camposSol.push([et.motivoViaje, d.motivoViaje]);
+    if (d.fechaSalida) camposSol.push([et.fechaSalida, d.fechaSalida]);
+    if (d.fechaRegreso) camposSol.push([et.fechaRegreso, d.fechaRegreso]);
+    if (d.empresaTransporte) camposSol.push([et.empresaTransporte, d.empresaTransporte]);
+    if (d.empresaOtra) camposSol.push([et.empresaOtra, d.empresaOtra]);
+    if (d.tipoViaje) camposSol.push([et.tipoViaje, d.tipoViaje === 'solo' ? 'Viaja SOLO' : 'Viaja ACOMPAÑADO']);
+    if (d.nombreAcompanante) camposSol.push([et.nombreAcompanante, d.nombreAcompanante]);
+    if (d.dniAcompanante) camposSol.push([et.dniAcompanante, d.dniAcompanante]);
+    if (d.vinculoAcompanante) camposSol.push([et.vinculoAcompanante, d.vinculoAcompanante]);
+    if (d.nombreOtroProgenitor) camposSol.push([et.nombreOtroProgenitor, d.nombreOtroProgenitor]);
+    if (d.dniOtroProgenitor) camposSol.push([et.dniOtroProgenitor, d.dniOtroProgenitor]);
+    if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
+    if (d.localidad) camposSol.push([et.localidad, d.localidad]);
+    if (d.foto_menor) camposSol.push([et.foto_menor, d.foto_menor, true]);
+    if (d.foto_progenitor) camposSol.push([et.foto_progenitor, d.foto_progenitor, true]);
+  } else if (s.tramite === 'extravio') {
+    // Formulario de Extravío
+    if (d.nombre) camposSol.push([et.nombre, d.nombre]);
+    if (d.dni) camposSol.push([et.dni, d.dni]);
+    if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
+    if (d.email) camposSol.push([et.email, d.email]);
+    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
+    if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
+    if (d.localidad) camposSol.push([et.localidad, d.localidad]);
+    if (d.tipoDocumento) camposSol.push([et.tipoDocumento, d.tipoDocumento]);
+    if (d.numeroDocumento) camposSol.push([et.numeroDocumento, d.numeroDocumento]);
+    if (d.fechaExtravio) camposSol.push([et.fechaExtravio, d.fechaExtravio]);
+    if (d.circunstancia) camposSol.push([et.circunstancia, d.circunstancia]);
+    if (d.lugarExtravio) camposSol.push([et.lugarExtravio, d.lugarExtravio]);
+    if (d.detalleExtravio) camposSol.push([et.detalleExtravio, d.detalleExtravio]);
+    if (d.foto_solicitante) camposSol.push([et.foto_solicitante, d.foto_solicitante, true]);
+  } else {
+    // Formularios estándar (residencia, convivencia, carencia, antecedentes, domicilio, supervivencia, estadia)
+    const nombreSol = d.nombre || d.nombreSolicitante || '';
+    const dniSol = d.dni || d.dniSolicitante || '';
+    if (nombreSol) camposSol.push([et.nombre, nombreSol]);
+    if (dniSol) camposSol.push([et.dni, dniSol]);
+    if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
+    if (d.email) camposSol.push([et.email, d.email]);
+    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
 
-  if (d.nombreConviviente) camposSol.push([et.nombreConviviente, d.nombreConviviente]);
-  if (d.dniConviviente) camposSol.push([et.dniConviviente, d.dniConviviente]);
+    if (d.nombreConviviente) camposSol.push([et.nombreConviviente, d.nombreConviviente]);
+    if (d.dniConviviente) camposSol.push([et.dniConviviente, d.dniConviviente]);
+    if (d.parentesco) camposSol.push([et.parentesco, d.parentesco]);
 
-  if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
-  if (d.domicilioComun) camposSol.push([et.domicilioComun, d.domicilioComun]);
-  if (d.localidad) camposSol.push([et.localidad, d.localidad]);
-  if (d.tiempoResidencia) camposSol.push([et.tiempoResidencia, d.tiempoResidencia]);
-  if (d.tiempoConvivencia) camposSol.push([et.tiempoConvivencia, d.tiempoConvivencia]);
-  if (d.estadoCivil) camposSol.push([et.estadoCivil, d.estadoCivil]);
-  if (d.situacionLaboral) camposSol.push([et.situacionLaboral, d.situacionLaboral]);
-  if (d.personasACargo) camposSol.push([et.personasACargo, d.personasACargo]);
-  if (d.motivo) camposSol.push([et.motivo, d.motivo]);
+    if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
+    if (d.domicilioComun) camposSol.push([et.domicilioComun, d.domicilioComun]);
+    if (d.localidad) camposSol.push([et.localidad, d.localidad]);
+    if (d.tiempoResidencia) camposSol.push([et.tiempoResidencia, d.tiempoResidencia]);
+    if (d.tiempoEstadia) camposSol.push([et.tiempoEstadia, d.tiempoEstadia]);
+    if (d.estadoCivil) camposSol.push([et.estadoCivil, d.estadoCivil]);
+    if (d.situacionLaboral) camposSol.push([et.situacionLaboral, d.situacionLaboral]);
+    if (d.personasACargo) camposSol.push([et.personasACargo, d.personasACargo]);
+    if (d.tipoCertificado) camposSol.push([et.tipoCertificado, d.tipoCertificado]);
+    if (d.tipoBeneficio) camposSol.push([et.tipoBeneficio, d.tipoBeneficio]);
+    if (d.motivo) camposSol.push([et.motivo, d.motivo]);
 
-  const fotoSol = d.foto_solicitante || d.fotoSolicitante;
-  if (fotoSol) camposSol.push([et.foto_solicitante, fotoSol, true]);
-
-  const seccionSol = crearSeccion('👤 Solicitante', camposSol);
-  const listaSol = seccionSol.querySelector('.detalle-lista');
-  listaSol.appendChild(crearItemEstado(s.estado));
-
-  cont.appendChild(seccionSol);
-
-  const camposT1 = [];
-  if (d.testigo1Nombre) camposT1.push([et.testigo1Nombre, d.testigo1Nombre]);
-  if (d.testigo1Dni) camposT1.push([et.testigo1Dni, d.testigo1Dni]);
-  if (d.foto_testigo1) camposT1.push([et.foto_testigo1, d.foto_testigo1, true]);
-
-  if (camposT1.length) {
-    cont.appendChild(crearSeparador());
-    cont.appendChild(crearSeccion('👤 Testigo 1', camposT1));
+    const fotoSol = d.foto_solicitante || d.fotoSolicitante;
+    if (fotoSol) camposSol.push([et.foto_solicitante, fotoSol, true]);
   }
 
-  const camposT2 = [];
-  if (d.testigo2Nombre) camposT2.push([et.testigo2Nombre, d.testigo2Nombre]);
-  if (d.testigo2Dni) camposT2.push([et.testigo2Dni, d.testigo2Dni]);
-  if (d.foto_testigo2) camposT2.push([et.foto_testigo2, d.foto_testigo2, true]);
+  const seccionSol = await crearSeccion('👤 Solicitante', camposSol);
+  const listaSol = seccionSol.querySelector('.detalle-lista');
+  listaSol.appendChild(crearItemEstado(s.estado));
+  cont.appendChild(seccionSol);
 
-  if (camposT2.length) {
-    cont.appendChild(crearSeparador());
-    cont.appendChild(crearSeccion('👤 Testigo 2', camposT2));
+  // Testigos (solo para residencia, convivencia, carencia)
+  const tramitesConTestigos = ['residencia', 'convivencia', 'carencia'];
+  if (tramitesConTestigos.includes(s.tramite)) {
+    const camposT1 = [];
+    if (d.testigo1Nombre) camposT1.push([et.testigo1Nombre, d.testigo1Nombre]);
+    if (d.testigo1Dni) camposT1.push([et.testigo1Dni, d.testigo1Dni]);
+    if (d.foto_testigo1) camposT1.push([et.foto_testigo1, d.foto_testigo1, true]);
+    if (camposT1.length) {
+      cont.appendChild(crearSeparador());
+      cont.appendChild(await crearSeccion('👤 Testigo 1', camposT1));
+    }
+
+    const camposT2 = [];
+    if (d.testigo2Nombre) camposT2.push([et.testigo2Nombre, d.testigo2Nombre]);
+    if (d.testigo2Dni) camposT2.push([et.testigo2Dni, d.testigo2Dni]);
+    if (d.foto_testigo2) camposT2.push([et.foto_testigo2, d.foto_testigo2, true]);
+    if (camposT2.length) {
+      cont.appendChild(crearSeparador());
+      cont.appendChild(await crearSeccion('👤 Testigo 2', camposT2));
+    }
   }
 
   document.getElementById('detalle').style.display = 'block';
@@ -1229,23 +1298,19 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
 
 async function cambiarEstado(nuevoEstado) {
   if (!solicitudAbierta) return;
-
   if (nuevoEstado === 'denegado') {
     const motivo = prompt('Motivo de la denegación (opcional):');
     if (motivo === null) return;
   }
-
   const { error } = await supabaseClient
     .from('solicitudes')
     .update({ estado: nuevoEstado })
     .eq('id', solicitudAbierta.id);
-
   if (error) {
     console.error(error);
     alert('No se pudo actualizar. Revisá tu conexión.');
     return;
   }
-
   document.getElementById('detalle').style.display = 'none';
   await cargarSolicitudes();
 }
@@ -1254,7 +1319,7 @@ document.getElementById('btn-validar').addEventListener('click', () => cambiarEs
 document.getElementById('btn-denegar').addEventListener('click', () => cambiarEstado('denegado'));
 document.getElementById('btn-pendiente').addEventListener('click', () => cambiarEstado('pendiente'));
 
-document.getElementById('btn-imprimir').addEventListener('click', () => {
+document.getElementById('btn-imprimir').addEventListener('click', async () => {
   if (!solicitudAbierta) return;
   const s = solicitudAbierta;
   const ventana = window.open('', '_blank');
@@ -1287,15 +1352,24 @@ document.getElementById('btn-imprimir').addEventListener('click', () => {
       <div><dt>Estado</dt><dd>${s.estado || 'pendiente'}</dd></div>
   `;
 
-  Object.entries(s.datos || {}).forEach(([campo, valor]) => {
-    if (!valor) return;
+  const d = s.datos || {};
+  for (const [campo, valor] of Object.entries(d)) {
+    if (!valor) continue;
     const label = etiquetasDetalle[campo] || campo;
     if (campo.startsWith('foto_')) {
-      html += `<div style="grid-column:1/-1;"><dt>${label}</dt><dd><img src="${valor}"></dd></div>`;
+      let urlPrint = valor;
+      if (!valor.startsWith('http')) {
+        const { data: signedData } = await supabaseClient
+          .storage
+          .from(BUCKET_FOTOS)
+          .createSignedUrl(valor, 600);
+        if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
+      }
+      html += `<div style="grid-column:1/-1;"><dt>${label}</dt><dd><img src="${urlPrint}"></dd></div>`;
     } else {
       html += `<div><dt>${label}</dt><dd>${valor}</dd></div>`;
     }
-  });
+  }
 
   html += `
     </dl>
@@ -1336,7 +1410,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
 
   filtradas.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-  const filas = [['Fecha', 'Trámite', 'Solicitante', 'DNI', 'Domicilio', 'Comisaría', 'Estado']];
+  const filas = [['Fecha', 'Trámite', 'Solicitante', 'DNI', 'Email', 'Teléfono', 'Domicilio', 'Comisaría', 'Estado']];
 
   filtradas.forEach(s => {
     const d = s.datos || {};
@@ -1345,6 +1419,8 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
       s.tramite_titulo || s.tramite || '-',
       obtenerNombreSolicitud(s) || '-',
       obtenerDniSolicitud(s) || '-',
+      d.email || '-',
+      d.telefono || '-',
       d.domicilio || d.domicilioComun || '-',
       s.comisaria_asignada || '-',
       s.estado || 'pendiente'
