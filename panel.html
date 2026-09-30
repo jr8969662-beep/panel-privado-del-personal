@@ -6,686 +6,291 @@
 <title>Base del Personal Policial</title>
 <style>
   :root{
-    --azul-fondo:#0a1e3d;
-    --azul-oscuro:#0d2a4d;
-    --azul:#1a3a6b;
-    --azul-claro:#2c5aa0;
-    --dorado:#c9a961;
-    --dorado-claro:#e6c988;
-    --dorado-brilloso:#f0d78c;
-    --verde:#15803d;
-    --rojo:#b91c1c;
-    --amarillo:#ca8a04;
+    --azul-fondo:#0a1e3d;--azul-oscuro:#0d2a4d;--azul:#1a3a6b;--azul-claro:#2c5aa0;
+    --dorado:#c9a961;--dorado-claro:#e6c988;--dorado-brilloso:#f0d78c;
+    --verde:#15803d;--rojo:#b91c1c;--amarillo:#ca8a04;
     --sombra-suave:0 2px 8px rgba(13,42,77,0.08);
     --sombra-media:0 4px 16px rgba(13,42,77,0.12);
     --sombra-fuerte:0 8px 32px rgba(13,42,77,0.16);
   }
   *{box-sizing:border-box;}
   html{background:var(--azul-fondo); min-height:100%;}
-  body{
-    font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-    background:var(--azul-fondo);
-    margin:0;
-    color:#fff;
-    position:relative;
-    overflow-x:hidden;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-  }
-  body::before{
-    content:'';
-    position:fixed;
-    top:50%; left:50%;
-    transform:translate(-50%,-50%);
-    width:100vmin;
-    height:100vmin;
-    background-image:url('logo-policia.png.jpeg');
-    background-size:contain;
-    background-repeat:no-repeat;
-    background-position:center;
-    opacity:0.55;
-    pointer-events:none;
-    z-index:0;
-  }
+  body{font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    background:var(--azul-fondo);margin:0;color:#fff;position:relative;
+    overflow-x:hidden;min-height:100vh;display:flex;flex-direction:column;}
+  body::before{content:'';position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:100vmin;height:100vmin;background-image:url('logo-policia.png.jpeg');
+    background-size:contain;background-repeat:no-repeat;background-position:center;
+    opacity:0.55;pointer-events:none;z-index:0;}
   body > *{position:relative; z-index:1;}
-
-  header{
-    background:linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul) 100%);
-    color:#fff;
-    padding:20px 24px;
-    position:relative;
-    overflow:hidden;
-    border-bottom:3px solid var(--dorado);
-    box-shadow:var(--sombra-media);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:16px;
-  }
-  header::after{
-    content:'';
-    position:absolute;
-    top:-50%; right:-10%;
-    width:400px; height:400px;
+  header{background:linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul) 100%);
+    color:#fff;padding:20px 24px;position:relative;overflow:hidden;
+    border-bottom:3px solid var(--dorado);box-shadow:var(--sombra-media);
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+  header::after{content:'';position:absolute;top:-50%;right:-10%;width:400px;height:400px;
     background:radial-gradient(circle, rgba(201,169,97,0.15) 0%, transparent 70%);
-    border-radius:50%;
-    pointer-events:none;
-  }
-  header .header-info{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    position:relative;
-    z-index:2;
-  }
-  header .header-logo{
-    width:52px;
-    height:52px;
-    background-image:url('logo-policia.png.jpeg');
-    background-size:contain;
-    background-repeat:no-repeat;
-    background-position:center;
-    filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3));
-    flex-shrink:0;
-  }
-  header .header-texto h1{
-    margin:0;
-    font-size:1.05rem;
-    font-weight:700;
-    color:#fff;
-    text-shadow:0 2px 4px rgba(0,0,0,0.2);
-  }
-  header .header-texto p{
-    margin:2px 0 0;
-    font-size:0.75rem;
-    color:var(--dorado-claro);
-    font-weight:500;
-    letter-spacing:0.02em;
-  }
-  #btn-salir{
-    background:rgba(255,255,255,0.15);
-    color:#fff;
-    border:1px solid rgba(255,255,255,0.35);
-    padding:8px 16px;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:0.85rem;
-    font-weight:600;
-    transition:all 0.2s;
-    position:relative;
-    z-index:2;
-  }
-  #btn-salir:hover{
-    background:rgba(255,255,255,0.25);
-    border-color:var(--dorado);
-  }
+    border-radius:50%;pointer-events:none;}
+  header .header-info{display:flex;align-items:center;gap:14px;position:relative;z-index:2;}
+  header .header-logo{width:52px;height:52px;background-image:url('logo-policia.png.jpeg');
+    background-size:contain;background-repeat:no-repeat;background-position:center;
+    filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3));flex-shrink:0;}
+  header .header-texto h1{margin:0;font-size:1.05rem;font-weight:700;color:#fff;
+    text-shadow:0 2px 4px rgba(0,0,0,0.2);}
+  header .header-texto p{margin:2px 0 0;font-size:0.75rem;color:var(--dorado-claro);
+    font-weight:500;letter-spacing:0.02em;}
+  header .header-acciones{display:flex;gap:8px;position:relative;z-index:2;flex-wrap:wrap;}
+  header .header-acciones button{background:rgba(255,255,255,0.15);color:#fff;
+    border:1px solid rgba(255,255,255,0.35);padding:8px 14px;border-radius:6px;
+    cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;font-family:inherit;}
+  header .header-acciones button:hover{background:rgba(255,255,255,0.25);border-color:var(--dorado);}
 
-  main{
-    max-width:1000px;
-    margin:24px auto;
-    padding:0 16px 32px;
-    width:100%;
-    flex:1;
-  }
+  main{max-width:1200px;margin:24px auto;padding:0 16px 32px;width:100%;flex:1;}
 
-  #vista-login{
-    max-width:420px;
-    margin:50px auto 0;
-    background:rgba(13,42,77,0.75);
-    backdrop-filter:blur(14px);
-    border:1px solid rgba(201,169,97,0.5);
-    border-top:3px solid var(--dorado);
-    border-radius:16px;
-    padding:40px 34px;
+  #vista-login{max-width:420px;margin:50px auto 0;background:rgba(13,42,77,0.75);
+    backdrop-filter:blur(14px);border:1px solid rgba(201,169,97,0.5);
+    border-top:3px solid var(--dorado);border-radius:16px;padding:40px 34px;
     box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 80px rgba(201,169,97,0.15);
-    text-align:center;
-    animation:loginFadeIn 0.6s ease-out;
-    position:relative;
-    overflow:hidden;
-  }
-  #vista-login::before{
-    content:'';
-    position:absolute;
-    top:-50%; right:-30%;
-    width:300px; height:300px;
+    text-align:center;animation:loginFadeIn 0.6s ease-out;position:relative;overflow:hidden;}
+  #vista-login::before{content:'';position:absolute;top:-50%;right:-30%;width:300px;height:300px;
     background:radial-gradient(circle, rgba(201,169,97,0.12) 0%, transparent 70%);
-    border-radius:50%;
-    pointer-events:none;
-  }
-  @keyframes loginFadeIn{
-    from{opacity:0; transform:translateY(20px);}
-    to{opacity:1; transform:translateY(0);}
-  }
-  #vista-login .login-logo{
-    width:100px;
-    height:100px;
-    margin:0 auto 20px;
-    background-image:url('logo-policia.png.jpeg');
-    background-size:contain;
-    background-repeat:no-repeat;
-    background-position:center;
+    border-radius:50%;pointer-events:none;}
+  @keyframes loginFadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  #vista-login .login-logo{width:100px;height:100px;margin:0 auto 20px;
+    background-image:url('logo-policia.png.jpeg');background-size:contain;
+    background-repeat:no-repeat;background-position:center;
     filter:drop-shadow(0 4px 20px rgba(201,169,97,0.5));
-    animation:logoPulse 3s ease-in-out infinite;
-  }
-  @keyframes logoPulse{
-    0%,100%{filter:drop-shadow(0 4px 20px rgba(201,169,97,0.5));}
-    50%{filter:drop-shadow(0 4px 28px rgba(201,169,97,0.8));}
-  }
-  #vista-login h2{
-    margin:0 0 8px;
-    font-size:1.5rem;
-    color:var(--dorado-brilloso);
-    font-weight:700;
-    letter-spacing:0.02em;
-    text-shadow:0 2px 6px rgba(0,0,0,0.4);
-  }
-  #vista-login .login-sub{
-    margin:0 0 28px;
-    font-size:0.85rem;
-    color:rgba(255,255,255,0.75);
-    letter-spacing:0.05em;
-    text-transform:uppercase;
-    font-weight:600;
-  }
-  #vista-login .login-separador{
-    height:1px;
-    background:linear-gradient(90deg, transparent, var(--dorado), transparent);
-    margin:0 0 24px;
-    opacity:0.5;
-  }
-  #vista-login label{
-    display:block;
-    font-size:0.85rem;
-    font-weight:600;
-    margin:18px 0 8px;
-    text-align:left;
-    color:var(--dorado-claro);
-    letter-spacing:0.02em;
-  }
-  #vista-login .input-wrapper{
-    position:relative;
-  }
-  #vista-login input[type="email"],
-  #vista-login input[type="password"],
-  #vista-login input[type="text"]{
-    width:100%;
-    padding:13px 46px 13px 14px;
-    border:1px solid rgba(201,169,97,0.35);
-    border-radius:8px;
-    font-size:0.95rem;
-    font-family:inherit;
-    transition:all 0.2s;
-    background:rgba(0,0,0,0.35);
-    color:#fff;
-  }
-  #vista-login input::placeholder{
-    color:rgba(255,255,255,0.35);
-  }
-  #vista-login input:focus{
-    outline:none;
-    border-color:var(--dorado);
-    box-shadow:0 0 0 3px rgba(201,169,97,0.25);
-    background:rgba(0,0,0,0.5);
-  }
-  #vista-login .toggle-password{
-    position:absolute;
-    right:10px;
-    top:50%;
-    transform:translateY(-50%);
-    background:transparent;
-    border:none;
-    color:var(--dorado-claro);
-    cursor:pointer;
-    font-size:1.2rem;
-    padding:6px 10px;
-    border-radius:6px;
-    transition:all 0.2s;
-    line-height:1;
-  }
-  #vista-login .toggle-password:hover{
-    color:var(--dorado-brilloso);
-    background:rgba(201,169,97,0.15);
-  }
-  #vista-login .login-extras{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin:16px 0 0;
-    font-size:0.82rem;
-    flex-wrap:wrap;
-    gap:10px;
-  }
-  #vista-login .login-extras label{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin:0;
-    font-size:0.82rem;
-    color:rgba(255,255,255,0.8);
-    cursor:pointer;
-    font-weight:500;
-    text-align:left;
-  }
-  #vista-login .login-extras input[type="checkbox"]{
-    width:16px;
-    height:16px;
-    accent-color:var(--dorado);
-    cursor:pointer;
-    margin:0;
-    padding:0;
-  }
-  #vista-login .link-recuperar{
-    color:var(--dorado-claro);
-    text-decoration:none;
-    font-weight:500;
-    transition:all 0.2s;
-    border-bottom:1px solid transparent;
-  }
-  #vista-login .link-recuperar:hover{
-    color:var(--dorado-brilloso);
-    border-bottom-color:var(--dorado-brilloso);
-  }
-  #vista-login button[type="submit"]{
-    margin-top:26px;
-    width:100%;
-    padding:14px;
+    animation:logoPulse 3s ease-in-out infinite;}
+  @keyframes logoPulse{0%,100%{filter:drop-shadow(0 4px 20px rgba(201,169,97,0.5));}
+    50%{filter:drop-shadow(0 4px 28px rgba(201,169,97,0.8));}}
+  #vista-login h2{margin:0 0 8px;font-size:1.5rem;color:var(--dorado-brilloso);
+    font-weight:700;letter-spacing:0.02em;text-shadow:0 2px 6px rgba(0,0,0,0.4);}
+  #vista-login .login-sub{margin:0 0 28px;font-size:0.85rem;color:rgba(255,255,255,0.75);
+    letter-spacing:0.05em;text-transform:uppercase;font-weight:600;}
+  #vista-login .login-separador{height:1px;background:linear-gradient(90deg, transparent, var(--dorado), transparent);
+    margin:0 0 24px;opacity:0.5;}
+  #vista-login label{display:block;font-size:0.85rem;font-weight:600;margin:18px 0 8px;
+    text-align:left;color:var(--dorado-claro);letter-spacing:0.02em;}
+  #vista-login .input-wrapper{position:relative;}
+  #vista-login input{width:100%;padding:13px 46px 13px 14px;
+    border:1px solid rgba(201,169,97,0.35);border-radius:8px;font-size:0.95rem;
+    font-family:inherit;transition:all 0.2s;background:rgba(0,0,0,0.35);color:#fff;}
+  #vista-login input::placeholder{color:rgba(255,255,255,0.35);}
+  #vista-login input:focus{outline:none;border-color:var(--dorado);
+    box-shadow:0 0 0 3px rgba(201,169,97,0.25);background:rgba(0,0,0,0.5);}
+  #vista-login .toggle-password{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    background:transparent;border:none;color:var(--dorado-claro);cursor:pointer;
+    font-size:1.2rem;padding:6px 10px;border-radius:6px;transition:all 0.2s;line-height:1;}
+  #vista-login .toggle-password:hover{color:var(--dorado-brilloso);background:rgba(201,169,97,0.15);}
+  #vista-login .login-extras{display:flex;align-items:center;justify-content:space-between;
+    margin:16px 0 0;font-size:0.82rem;flex-wrap:wrap;gap:10px;}
+  #vista-login .login-extras label{display:flex;align-items:center;gap:8px;margin:0;
+    font-size:0.82rem;color:rgba(255,255,255,0.8);cursor:pointer;font-weight:500;text-align:left;}
+  #vista-login .login-extras input[type="checkbox"]{width:16px;height:16px;
+    accent-color:var(--dorado);cursor:pointer;margin:0;padding:0;}
+  #vista-login .link-recuperar{color:var(--dorado-claro);text-decoration:none;
+    font-weight:500;transition:all 0.2s;border-bottom:1px solid transparent;}
+  #vista-login .link-recuperar:hover{color:var(--dorado-brilloso);border-bottom-color:var(--dorado-brilloso);}
+  #vista-login button[type="submit"]{margin-top:26px;width:100%;padding:14px;
     background:linear-gradient(135deg, var(--dorado) 0%, var(--dorado-brilloso) 50%, var(--dorado) 100%);
-    color:var(--azul-oscuro);
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:1rem;
-    font-weight:700;
-    transition:all 0.25s;
-    letter-spacing:0.03em;
-    text-transform:uppercase;
-    box-shadow:0 4px 16px rgba(201,169,97,0.3);
-  }
-  #vista-login button[type="submit"]:hover:not(:disabled){
-    transform:translateY(-2px);
-    box-shadow:0 8px 24px rgba(201,169,97,0.5);
-  }
-  #vista-login button[type="submit"]:disabled{
-    opacity:0.6;
-    cursor:not-allowed;
-  }
-  #error-login{
-    color:#fca5a5;
-    font-size:0.85rem;
-    margin-top:18px;
-    display:none;
-    background:rgba(185,28,28,0.25);
-    border:1px solid rgba(252,165,165,0.4);
-    padding:10px 14px;
-    border-radius:8px;
-    text-align:left;
-  }
+    color:var(--azul-oscuro);border:none;border-radius:8px;cursor:pointer;font-size:1rem;
+    font-weight:700;transition:all 0.25s;letter-spacing:0.03em;text-transform:uppercase;
+    box-shadow:0 4px 16px rgba(201,169,97,0.3);font-family:inherit;}
+  #vista-login button[type="submit"]:hover:not(:disabled){transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(201,169,97,0.5);}
+  #vista-login button[type="submit"]:disabled{opacity:0.6;cursor:not-allowed;}
+  #error-login{color:#fca5a5;font-size:0.85rem;margin-top:18px;display:none;
+    background:rgba(185,28,28,0.25);border:1px solid rgba(252,165,165,0.4);
+    padding:10px 14px;border-radius:8px;text-align:left;}
   #error-login.activo{display:block;}
-  #caps-warning{
-    color:#fcd34d;
-    font-size:0.78rem;
-    margin-top:8px;
-    display:none;
-    background:rgba(202,138,4,0.2);
-    border:1px solid rgba(252,211,77,0.4);
-    padding:8px 12px;
-    border-radius:8px;
-    text-align:left;
-  }
+  #caps-warning{color:#fcd34d;font-size:0.78rem;margin-top:8px;display:none;
+    background:rgba(202,138,4,0.2);border:1px solid rgba(252,211,77,0.4);
+    padding:8px 12px;border-radius:8px;text-align:left;}
   #caps-warning.activo{display:block;}
 
   #vista-panel{display:none;}
 
-  .resumen{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
-    gap:14px;
-    margin-bottom:20px;
-  }
-  .tarjeta-resumen{
-    background:rgba(255,255,255,0.12);
-    backdrop-filter:blur(8px);
-    border:1px solid rgba(255,255,255,0.2);
-    border-radius:10px;
-    padding:18px 20px;
-    box-shadow:var(--sombra-suave);
-    display:flex;
-    align-items:center;
-    gap:14px;
-    transition:transform 0.2s, box-shadow 0.2s, background 0.2s;
-  }
-  .tarjeta-resumen:hover{
-    transform:translateY(-2px);
-    box-shadow:var(--sombra-media);
-    background:rgba(255,255,255,0.18);
-  }
-  .tarjeta-resumen .icono{
-    width:46px; height:46px;
-    border-radius:10px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1.4rem;
-    flex-shrink:0;
-    background:rgba(255,255,255,0.15);
-  }
-  .tarjeta-resumen .info{
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-  }
-  .tarjeta-resumen .numero{
-    font-size:1.6rem;
-    font-weight:700;
-    color:#fff;
-    line-height:1;
-    text-shadow:0 2px 4px rgba(0,0,0,0.3);
-  }
-  .tarjeta-resumen .label{
-    font-size:0.75rem;
-    color:var(--dorado-claro);
-    text-transform:uppercase;
-    letter-spacing:0.05em;
-    font-weight:600;
-  }
+  .resumen{display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
+    gap:14px;margin-bottom:18px;}
+  .tarjeta-resumen{background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:16px 18px;
+    box-shadow:var(--sombra-suave);display:flex;align-items:center;gap:14px;
+    transition:transform 0.2s, box-shadow 0.2s, background 0.2s;}
+  .tarjeta-resumen:hover{transform:translateY(-2px);box-shadow:var(--sombra-media);
+    background:rgba(255,255,255,0.18);}
+  .tarjeta-resumen .icono{width:46px;height:46px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+    flex-shrink:0;background:rgba(255,255,255,0.15);}
+  .tarjeta-resumen .info{display:flex;flex-direction:column;gap:2px;}
+  .tarjeta-resumen .numero{font-size:1.5rem;font-weight:700;color:#fff;line-height:1;
+    text-shadow:0 2px 4px rgba(0,0,0,0.3);}
+  .tarjeta-resumen .label{font-size:0.72rem;color:var(--dorado-claro);
+    text-transform:uppercase;letter-spacing:0.05em;font-weight:600;}
 
-  .filtros{
-    display:flex;
-    gap:10px;
-    margin-bottom:16px;
-    flex-wrap:wrap;
-    background:rgba(255,255,255,0.1);
-    backdrop-filter:blur(8px);
-    padding:14px;
-    border-radius:10px;
-    box-shadow:var(--sombra-suave);
-    border:1px solid rgba(255,255,255,0.15);
-  }
-  .filtros input,
-  .filtros select{
-    padding:9px 12px;
-    border:1px solid rgba(255,255,255,0.2);
-    border-radius:6px;
-    font-size:0.85rem;
-    font-family:inherit;
-    background:rgba(0,0,0,0.2);
-    color:#fff;
-    transition:border-color 0.2s;
-  }
+  .filtros{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;
+    background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);padding:14px;
+    border-radius:10px;box-shadow:var(--sombra-suave);border:1px solid rgba(255,255,255,0.15);}
+  .filtros input,.filtros select{padding:9px 12px;border:1px solid rgba(255,255,255,0.2);
+    border-radius:6px;font-size:0.85rem;font-family:inherit;background:rgba(0,0,0,0.2);
+    color:#fff;transition:border-color 0.2s;}
   .filtros input::placeholder{color:rgba(255,255,255,0.6);}
-  .filtros input:focus,
-  .filtros select:focus{
-    outline:none;
-    border-color:var(--dorado);
-    box-shadow:0 0 0 3px rgba(201,169,97,0.2);
-  }
-  .filtros select option{
-    background:var(--azul-oscuro);
-    color:#fff;
-  }
-  #filtro-busqueda{
-    flex:1;
-    min-width:200px;
-  }
-  .btn-filtro{
-    padding:9px 16px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:0.85rem;
-    font-weight:600;
-    transition:all 0.2s;
-  }
-  #btn-actualizar{
-    background:var(--azul);
-    color:#fff;
-    border:1px solid rgba(255,255,255,0.2);
-  }
-  #btn-actualizar:hover{
-    background:var(--azul-claro);
-  }
-  #btn-exportar{
-    background:var(--dorado);
-    color:var(--azul-oscuro);
-  }
-  #btn-exportar:hover{
-    background:var(--dorado-claro);
-  }
+  .filtros input:focus,.filtros select:focus{outline:none;border-color:var(--dorado);
+    box-shadow:0 0 0 3px rgba(201,169,97,0.2);}
+  .filtros select option{background:var(--azul-oscuro);color:#fff;}
+  #filtro-busqueda{flex:1;min-width:220px;}
+  .btn-filtro{padding:9px 16px;border:none;border-radius:6px;cursor:pointer;
+    font-size:0.85rem;font-weight:600;transition:all 0.2s;font-family:inherit;}
+  #btn-actualizar{background:var(--azul);color:#fff;border:1px solid rgba(255,255,255,0.2);}
+  #btn-actualizar:hover{background:var(--azul-claro);}
+  #btn-exportar{background:var(--dorado);color:var(--azul-oscuro);}
+  #btn-exportar:hover{background:var(--dorado-claro);}
+  .rango-fechas{display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    background:rgba(0,0,0,0.2);padding:6px 10px;border-radius:6px;}
+  .rango-fechas label{font-size:0.78rem;color:var(--dorado-claro);font-weight:600;}
+  .rango-fechas input[type="date"]{padding:6px 8px;font-size:0.82rem;}
 
-  .tabla-wrapper{
-    background:transparent;
-    border-radius:10px;
-    border:1px solid rgba(255,255,255,0.2);
-    overflow:hidden;
-    backdrop-filter:blur(2px);
-  }
-  table{
-    width:100%;
-    border-collapse:collapse;
-  }
-  th, td{
-    padding:12px 14px;
-    text-align:left;
-    font-size:0.85rem;
-    border-bottom:1px solid rgba(255,255,255,0.12);
-    color:#fff;
-  }
-  th{
-    background:rgba(201,169,97,0.15);
-    color:var(--dorado-claro);
-    font-weight:700;
-    font-size:0.78rem;
-    text-transform:uppercase;
-    letter-spacing:0.03em;
-    border-bottom:2px solid rgba(201,169,97,0.4);
-  }
-  tr.fila-solicitud{cursor:pointer; transition:background 0.15s; color:#fff;}
+  .tabla-wrapper{background:transparent;border-radius:10px;
+    border:1px solid rgba(255,255,255,0.2);overflow:hidden;backdrop-filter:blur(2px);}
+  table{width:100%;border-collapse:collapse;}
+  th,td{padding:12px 14px;text-align:left;font-size:0.85rem;
+    border-bottom:1px solid rgba(255,255,255,0.12);color:#fff;}
+  th{background:rgba(201,169,97,0.15);color:var(--dorado-claro);font-weight:700;
+    font-size:0.78rem;text-transform:uppercase;letter-spacing:0.03em;
+    border-bottom:2px solid rgba(201,169,97,0.4);user-select:none;}
+  th.ordenable{cursor:pointer;transition:background 0.15s;position:relative;padding-right:26px;}
+  th.ordenable:hover{background:rgba(201,169,97,0.25);}
+  th.ordenable::after{content:'⇅';position:absolute;right:8px;opacity:0.4;font-size:0.9rem;}
+  th.ordenable.asc::after{content:'▲';opacity:1;}
+  th.ordenable.desc::after{content:'▼';opacity:1;}
+  tr.fila-solicitud{cursor:pointer;transition:background 0.15s;color:#fff;}
   tr.fila-solicitud:hover{background:rgba(255,255,255,0.1);}
   tr.fila-solicitud:last-child td{border-bottom:none;}
   tr.fila-solicitud td{color:#e0e7f1;}
+  tr.urgente{background:rgba(185,28,28,0.15);}
+  tr.urgente:hover{background:rgba(185,28,28,0.25);}
 
-  .etiqueta{
-    padding:4px 10px;
-    border-radius:12px;
-    font-size:0.72rem;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:0.03em;
-    display:inline-block;
-  }
-  .etiqueta.pendiente{background:rgba(202,138,4,0.3); color:#fcd34d; border:1px solid rgba(252,211,77,0.5);}
-  .etiqueta.procesado{background:rgba(21,128,61,0.3); color:#86efac; border:1px solid rgba(134,239,172,0.5);}
-  .etiqueta.denegado{background:rgba(185,28,28,0.3); color:#fca5a5; border:1px solid rgba(252,165,165,0.5);}
+  .etiqueta{padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.03em;display:inline-block;}
+  .etiqueta.pendiente{background:rgba(202,138,4,0.3);color:#fcd34d;border:1px solid rgba(252,211,77,0.5);}
+  .etiqueta.procesado{background:rgba(21,128,61,0.3);color:#86efac;border:1px solid rgba(134,239,172,0.5);}
+  .etiqueta.denegado{background:rgba(185,28,28,0.3);color:#fca5a5;border:1px solid rgba(252,165,165,0.5);}
+  .bandera-urgente{color:#fca5a5;font-size:1rem;margin-right:4px;}
+  .badge-duplicado{background:rgba(185,28,28,0.4);color:#fca5a5;
+    border:1px solid rgba(252,165,165,0.6);padding:2px 8px;border-radius:10px;
+    font-size:0.68rem;font-weight:700;margin-left:6px;cursor:help;}
 
-  #detalle{
-    display:none;
-    background:rgba(13,42,77,0.75);
-    backdrop-filter:blur(10px);
-    border:1px solid rgba(201,169,97,0.4);
-    border-top:3px solid var(--dorado);
-    border-radius:10px;
-    padding:26px;
-    margin-top:20px;
-    box-shadow:var(--sombra-media);
-  }
-  #detalle h3{
-    margin:0 0 4px;
-    color:var(--dorado-claro);
-    font-size:1.15rem;
-  }
-  #detalle .detalle-fecha{
-    font-size:0.8rem;
-    color:rgba(255,255,255,0.7);
-    margin-bottom:20px;
-    padding-bottom:16px;
-    border-bottom:1px solid rgba(255,255,255,0.15);
-  }
+  .paginacion{display:flex;justify-content:space-between;align-items:center;
+    margin-top:14px;gap:12px;flex-wrap:wrap;}
+  .paginacion .info-pag{font-size:0.82rem;color:rgba(255,255,255,0.7);}
+  .paginacion .botones-pag{display:flex;gap:6px;}
+  .paginacion button{background:rgba(255,255,255,0.1);color:#fff;
+    border:1px solid rgba(255,255,255,0.2);padding:7px 14px;border-radius:6px;
+    cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;font-family:inherit;}
+  .paginacion button:hover:not(:disabled){background:rgba(255,255,255,0.2);border-color:var(--dorado);}
+  .paginacion button:disabled{opacity:0.4;cursor:not-allowed;}
 
-  .detalle-seccion-titulo{
-    font-size:0.9rem;
-    color:var(--dorado-claro);
-    text-transform:uppercase;
-    letter-spacing:0.08em;
-    font-weight:700;
-    margin:0 0 16px;
-    padding-bottom:8px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
-  .detalle-seccion-titulo::after{
-    content:'';
-    flex:1;
-    height:1px;
-    background:linear-gradient(90deg, var(--dorado), transparent);
-  }
-
-  .detalle-lista{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-  }
-
-  .detalle-item{
-    display:flex;
-    flex-direction:column;
-    gap:4px;
-    padding:12px 16px;
-    background:rgba(255,255,255,0.06);
-    border-radius:8px;
-    border-left:3px solid var(--dorado);
-  }
-
-  .detalle-item dt{
-    font-size:0.72rem;
-    color:var(--dorado-claro);
-    text-transform:uppercase;
-    letter-spacing:0.04em;
-    font-weight:700;
-    margin:0;
-  }
-
-  .detalle-item dd{
-    margin:0;
-    font-size:0.95rem;
-    color:#fff;
-    font-weight:500;
-    word-break:break-word;
-    line-height:1.4;
-  }
-
-  .detalle-item dd img{
-    max-width:100%;
-    max-height:320px;
-    border:1px solid rgba(255,255,255,0.3);
-    border-radius:8px;
-    margin-top:6px;
-    display:block;
-    cursor:pointer;
-    transition:transform 0.2s;
-  }
-  .detalle-item dd img:hover{
-    transform:scale(1.02);
-    box-shadow:var(--sombra-media);
-  }
-
-  .detalle-separador{
-    height:1px;
+  #detalle{display:none;background:rgba(13,42,77,0.75);backdrop-filter:blur(10px);
+    border:1px solid rgba(201,169,97,0.4);border-top:3px solid var(--dorado);
+    border-radius:10px;padding:26px;margin-top:20px;box-shadow:var(--sombra-media);}
+  #detalle h3{margin:0 0 4px;color:var(--dorado-claro);font-size:1.15rem;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  #detalle .detalle-fecha{font-size:0.8rem;color:rgba(255,255,255,0.7);
+    margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.15);}
+  .detalle-seccion-titulo{font-size:0.9rem;color:var(--dorado-claro);
+    text-transform:uppercase;letter-spacing:0.08em;font-weight:700;margin:0 0 16px;
+    padding-bottom:8px;display:flex;align-items:center;gap:10px;}
+  .detalle-seccion-titulo::after{content:'';flex:1;height:1px;
+    background:linear-gradient(90deg, var(--dorado), transparent);}
+  .detalle-lista{display:flex;flex-direction:column;gap:14px;}
+  .detalle-item{display:flex;flex-direction:column;gap:4px;padding:12px 16px;
+    background:rgba(255,255,255,0.06);border-radius:8px;border-left:3px solid var(--dorado);}
+  .detalle-item dt{font-size:0.72rem;color:var(--dorado-claro);text-transform:uppercase;
+    letter-spacing:0.04em;font-weight:700;margin:0;}
+  .detalle-item dd{margin:0;font-size:0.95rem;color:#fff;font-weight:500;
+    word-break:break-word;line-height:1.4;}
+  .detalle-item dd img{max-width:100%;max-height:320px;
+    border:1px solid rgba(255,255,255,0.3);border-radius:8px;margin-top:6px;
+    display:block;cursor:pointer;transition:transform 0.2s;}
+  .detalle-item dd img:hover{transform:scale(1.02);box-shadow:var(--sombra-media);}
+  .detalle-separador{height:1px;
     background:linear-gradient(90deg, transparent, var(--dorado), var(--dorado-claro), var(--dorado), transparent);
-    margin:24px 0;
-    opacity:0.8;
-  }
-
-  #detalle .btns{
-    margin-top:24px;
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    padding-top:18px;
-    border-top:1px solid rgba(255,255,255,0.2);
-  }
-  #detalle button{
-    padding:10px 18px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:0.85rem;
-    font-weight:600;
-    transition:all 0.2s;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-  }
-  #btn-validar{background:#15803d; color:#fff;}
+    margin:24px 0;opacity:0.8;}
+  #detalle .btns{margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;
+    padding-top:18px;border-top:1px solid rgba(255,255,255,0.2);}
+  #detalle button{padding:10px 18px;border:none;border-radius:6px;cursor:pointer;
+    font-size:0.85rem;font-weight:600;transition:all 0.2s;
+    display:inline-flex;align-items:center;gap:6px;font-family:inherit;}
+  #btn-validar{background:#15803d;color:#fff;}
   #btn-validar:hover{background:#166534;}
-  #btn-denegar{background:#b91c1c; color:#fff;}
+  #btn-denegar{background:#b91c1c;color:#fff;}
   #btn-denegar:hover{background:#991b1b;}
-  #btn-pendiente{background:#ca8a04; color:#fff;}
+  #btn-pendiente{background:#ca8a04;color:#fff;}
   #btn-pendiente:hover{background:#a16207;}
-  #btn-imprimir{background:var(--azul); color:#fff; border:1px solid rgba(255,255,255,0.2);}
+  #btn-imprimir{background:var(--azul);color:#fff;border:1px solid rgba(255,255,255,0.2);}
   #btn-imprimir:hover{background:var(--azul-claro);}
-  #btn-cerrar-detalle{background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.2);}
+  #btn-cerrar-detalle{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);}
   #btn-cerrar-detalle:hover{background:rgba(255,255,255,0.25);}
+  #btn-urgente{background:rgba(185,28,28,0.7);color:#fff;border:1px solid rgba(252,165,165,0.5);}
+  #btn-urgente:hover{background:rgba(185,28,28,0.9);}
 
-  .vacio{
-    padding:40px 20px;
-    text-align:center;
-    color:rgba(255,255,255,0.7);
-    font-size:0.9rem;
-  }
-  .vacio .vacio-icono{
-    font-size:3rem;
-    margin-bottom:12px;
-    opacity:0.5;
-  }
+  .vacio{padding:40px 20px;text-align:center;color:rgba(255,255,255,0.7);font-size:0.9rem;}
+  .vacio .vacio-icono{font-size:3rem;margin-bottom:12px;opacity:0.5;}
 
-  #modal-foto{
-    display:none;
-    position:fixed;
-    top:0; left:0; right:0; bottom:0;
-    background:rgba(0,0,0,0.95);
-    z-index:9999;
-    padding:20px;
-    align-items:center;
-    justify-content:center;
-  }
+  #modal-foto{display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.95);z-index:9999;padding:20px;
+    align-items:center;justify-content:center;}
   #modal-foto.activo{display:flex;}
-  #modal-foto img{
-    max-width:100%;
-    max-height:100%;
-    border-radius:8px;
-  }
-  #modal-foto .cerrar-modal{
-    position:absolute;
-    top:20px; right:20px;
-    background:rgba(255,255,255,0.9);
-    color:#000;
-    border:none;
-    width:44px; height:44px;
-    border-radius:50%;
-    cursor:pointer;
-    font-size:1.4rem;
-    font-weight:700;
-  }
+  #modal-foto img{max-width:100%;max-height:100%;border-radius:8px;}
+  #modal-foto .cerrar-modal{position:absolute;top:20px;right:20px;
+    background:rgba(255,255,255,0.9);color:#000;border:none;width:44px;height:44px;
+    border-radius:50%;cursor:pointer;font-size:1.4rem;font-weight:700;}
 
-  @media (max-width: 600px){
+  #toast-container{position:fixed;top:20px;right:20px;z-index:10000;
+    display:flex;flex-direction:column;gap:10px;max-width:340px;}
+  .toast{background:rgba(21,128,61,0.95);color:#fff;padding:14px 18px;
+    border-radius:10px;border-left:4px solid #86efac;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:slideIn 0.3s ease-out;
+    font-size:0.88rem;font-weight:500;backdrop-filter:blur(8px);}
+  .toast.warning{background:rgba(202,138,4,0.95);border-left-color:#fcd34d;}
+  .toast.error{background:rgba(185,28,28,0.95);border-left-color:#fca5a5;}
+  .toast .toast-titulo{font-weight:700;display:block;margin-bottom:4px;}
+  @keyframes slideIn{from{transform:translateX(400px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
+    z-index:9998;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.activo{display:flex;}
+  .modal-caja{background:var(--azul-oscuro);border:1px solid rgba(201,169,97,0.5);
+    border-top:3px solid var(--dorado);border-radius:12px;padding:28px;
+    max-width:420px;width:100%;box-shadow:var(--sombra-fuerte);}
+  .modal-caja h3{margin:0 0 16px;color:var(--dorado-claro);font-size:1.05rem;}
+  .modal-caja label{display:block;font-size:0.85rem;color:var(--dorado-claro);
+    font-weight:600;margin:14px 0 6px;}
+  .modal-caja input{width:100%;padding:11px 12px;border:1px solid rgba(201,169,97,0.35);
+    border-radius:6px;font-size:0.9rem;font-family:inherit;background:rgba(0,0,0,0.35);
+    color:#fff;transition:all 0.2s;}
+  .modal-caja input:focus{outline:none;border-color:var(--dorado);
+    box-shadow:0 0 0 3px rgba(201,169,97,0.2);}
+  .modal-caja .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+  .modal-caja .modal-btns button{padding:10px 18px;border:none;border-radius:6px;
+    cursor:pointer;font-size:0.88rem;font-weight:600;transition:all 0.2s;font-family:inherit;}
+
+  @media (max-width: 700px){
     header{padding:14px 16px;}
-    header .header-logo{width:42px; height:42px;}
+    header .header-logo{width:42px;height:42px;}
     header .header-texto h1{font-size:0.92rem;}
     header .header-texto p{font-size:0.68rem;}
-    main{margin:16px auto; padding:0 10px 20px;}
-    #vista-login{padding:30px 22px; margin-top:30px;}
-    #vista-login .login-logo{width:80px; height:80px;}
+    main{margin:16px auto;padding:0 10px 20px;}
+    #vista-login{padding:30px 22px;margin-top:30px;}
+    #vista-login .login-logo{width:80px;height:80px;}
     #vista-login h2{font-size:1.25rem;}
     .tarjeta-resumen{padding:14px 16px;}
     .tarjeta-resumen .numero{font-size:1.3rem;}
     .filtros{padding:10px;}
-    th, td{padding:10px 8px; font-size:0.78rem;}
+    th,td{padding:10px 8px;font-size:0.78rem;}
     th:nth-child(1), td:nth-child(1){display:none;}
     #detalle{padding:18px;}
     #detalle .btns{flex-direction:column;}
-    #detalle button{width:100%; justify-content:center;}
+    #detalle button{width:100%;justify-content:center;}
+    #toast-container{top:10px;right:10px;left:10px;max-width:none;}
   }
 </style>
 </head>
@@ -699,7 +304,10 @@
       <p>Policía de Salta · DMI (JP)</p>
     </div>
   </div>
-  <button id="btn-salir">Salir</button>
+  <div class="header-acciones">
+    <button id="btn-cambiar-pass" title="Cambiar contraseña">🔑 Cambiar contraseña</button>
+    <button id="btn-salir">Salir</button>
+  </div>
 </header>
 
 <main>
@@ -760,16 +368,50 @@
           <span class="label">Denegados</span>
         </div>
       </div>
+      <div class="tarjeta-resumen">
+        <div class="icono">📅</div>
+        <div class="info">
+          <span class="numero" id="count-hoy">0</span>
+          <span class="label">Recibidos hoy</span>
+        </div>
+      </div>
+      <div class="tarjeta-resumen">
+        <div class="icono">📊</div>
+        <div class="info">
+          <span class="numero" id="count-semana">0</span>
+          <span class="label">Esta semana</span>
+        </div>
+      </div>
+      <div class="tarjeta-resumen">
+        <div class="icono">⚠️</div>
+        <div class="info">
+          <span class="numero" id="count-urgentes">0</span>
+          <span class="label">Urgentes</span>
+        </div>
+      </div>
     </div>
 
     <div class="filtros">
-      <input type="text" id="filtro-busqueda" placeholder="🔍 Buscar por DNI o nombre...">
+      <input type="text" id="filtro-busqueda" placeholder="🔍 Buscar por nombre, DNI, email o teléfono...">
       <select id="filtro-estado">
         <option value="">Todos los estados</option>
         <option value="pendiente">Pendientes</option>
         <option value="procesado">Procesados</option>
         <option value="denegado">Denegados</option>
       </select>
+      <select id="filtro-fecha">
+        <option value="">Cualquier fecha</option>
+        <option value="hoy">Hoy</option>
+        <option value="semana">Última semana</option>
+        <option value="mes">Último mes</option>
+        <option value="rango">Rango personalizado</option>
+      </select>
+      <div class="rango-fechas" id="rango-fechas" style="display:none;">
+        <label>Desde</label>
+        <input type="date" id="fecha-desde">
+        <label>Hasta</label>
+        <input type="date" id="fecha-hasta">
+      </div>
       <select id="filtro-tipo-dependencia" title="Filtrar por tipo de dependencia">
         <option value="">Todas las dependencias</option>
         <option value="Comisaría">🏢 Comisarías</option>
@@ -794,6 +436,7 @@
         <option value="supervivencia">Supervivencia</option>
         <option value="estadia">Certificado de Estadía</option>
       </select>
+      <button id="btn-limpiar" class="btn-filtro" type="button" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);">🧹 Limpiar</button>
       <button id="btn-actualizar" class="btn-filtro" type="button">🔄 Actualizar</button>
       <button id="btn-exportar" class="btn-filtro" type="button">📥 Exportar</button>
     </div>
@@ -802,11 +445,11 @@
       <table>
         <thead>
           <tr>
-            <th>Fecha</th>
-            <th>Trámite</th>
-            <th>Solicitante</th>
-            <th>Comisaría</th>
-            <th>Estado</th>
+            <th class="ordenable" data-sort="created_at">Fecha</th>
+            <th class="ordenable" data-sort="tramite_titulo">Trámite</th>
+            <th class="ordenable" data-sort="solicitante">Solicitante</th>
+            <th class="ordenable" data-sort="comisaria_asignada">Comisaría</th>
+            <th class="ordenable" data-sort="estado">Estado</th>
           </tr>
         </thead>
         <tbody id="tabla-solicitudes"></tbody>
@@ -817,6 +460,14 @@
       </p>
     </div>
 
+    <div class="paginacion">
+      <div class="info-pag" id="info-paginacion">Mostrando 0 de 0</div>
+      <div class="botones-pag">
+        <button id="btn-pag-prev">◀ Anterior</button>
+        <button id="btn-pag-next">Siguiente ▶</button>
+      </div>
+    </div>
+
     <div id="detalle">
       <h3 id="detalle-titulo"></h3>
       <p class="detalle-fecha" id="detalle-fecha"></p>
@@ -825,6 +476,7 @@
         <button id="btn-validar">✓ Validar</button>
         <button id="btn-denegar">✕ Denegar</button>
         <button id="btn-pendiente">⏱ Marcar pendiente</button>
+        <button id="btn-urgente">🚨 Marcar urgente</button>
         <button id="btn-imprimir">🖨 Imprimir</button>
         <button id="btn-cerrar-detalle">Cerrar</button>
       </div>
@@ -833,659 +485,26 @@
 
 </main>
 
-<!-- Modal para ver foto en grande -->
+<!-- Modal foto -->
 <div id="modal-foto">
   <button class="cerrar-modal" id="cerrar-modal">✕</button>
   <img id="foto-grande" alt="Foto ampliada">
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script src="comisarias-config.js"></script>
-<script>
-const vistaLogin = document.getElementById('vista-login');
-const vistaPanel = document.getElementById('vista-panel');
-const btnSalir = document.getElementById('btn-salir');
-const errorLogin = document.getElementById('error-login');
-const inputEmail = document.getElementById('login-email');
-const inputPass = document.getElementById('login-pass');
-const btnEntrar = document.getElementById('btn-entrar');
-const capsWarning = document.getElementById('caps-warning');
-const togglePass = document.getElementById('toggle-password');
-const recordarEmail = document.getElementById('recordar-email');
-const linkRecuperar = document.getElementById('link-recuperar');
-
-const BUCKET_FOTOS = 'fotos-tramites';
-
-/* RECORDAR EMAIL */
-const EMAIL_GUARDADO = localStorage.getItem('panel_email_recordado');
-if (EMAIL_GUARDADO) {
-  inputEmail.value = EMAIL_GUARDADO;
-  recordarEmail.checked = true;
-  setTimeout(() => inputPass.focus(), 100);
-}
-
-/* MOSTRAR/OCULTAR CONTRASEÑA */
-togglePass.addEventListener('click', () => {
-  const esPass = inputPass.type === 'password';
-  inputPass.type = esPass ? 'text' : 'password';
-  togglePass.textContent = esPass ? '🙈' : '👁️';
-  togglePass.title = esPass ? 'Ocultar contraseña' : 'Mostrar contraseña';
-  inputPass.focus();
-});
-
-/* CAPS LOCK WARNING */
-function checkCapsLock(e) {
-  if (e.getModifierState) {
-    const capsOn = e.getModifierState('CapsLock');
-    if (capsOn) capsWarning.classList.add('activo');
-    else capsWarning.classList.remove('activo');
-  }
-}
-inputPass.addEventListener('keydown', checkCapsLock);
-inputPass.addEventListener('keyup', checkCapsLock);
-inputPass.addEventListener('blur', () => capsWarning.classList.remove('activo'));
-
-/* LOGIN */
-async function intentarLogin() {
-  const email = inputEmail.value.trim();
-  const pass = inputPass.value;
-  errorLogin.classList.remove('activo');
-  errorLogin.textContent = '';
-
-  if (!email || !pass) {
-    errorLogin.textContent = 'Completá usuario y contraseña.';
-    errorLogin.classList.add('activo');
-    return;
-  }
-  if (!email.includes('@') || !email.includes('.')) {
-    errorLogin.textContent = 'El email no es válido.';
-    errorLogin.classList.add('activo');
-    return;
-  }
-  if (pass.length < 6) {
-    errorLogin.textContent = 'La contraseña debe tener al menos 6 caracteres.';
-    errorLogin.classList.add('activo');
-    return;
-  }
-
-  btnEntrar.disabled = true;
-  const textoOriginal = btnEntrar.textContent;
-  btnEntrar.textContent = 'Verificando...';
-
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-
-  btnEntrar.disabled = false;
-  btnEntrar.textContent = textoOriginal;
-
-  if (error) {
-    let mensaje = 'Usuario o contraseña incorrectos.';
-    if (error.message && error.message.toLowerCase().includes('email')) {
-      mensaje = 'El email no está registrado o es inválido.';
-    }
-    errorLogin.textContent = mensaje;
-    errorLogin.classList.add('activo');
-    return;
-  }
-
-  if (recordarEmail.checked) localStorage.setItem('panel_email_recordado', email);
-  else localStorage.removeItem('panel_email_recordado');
-}
-
-btnEntrar.addEventListener('click', intentarLogin);
-
-inputEmail.addEventListener('keypress', (e) => { if (e.key === 'Enter') inputPass.focus(); });
-inputPass.addEventListener('keypress', (e) => { if (e.key === 'Enter') intentarLogin(); });
-
-linkRecuperar.addEventListener('click', (e) => {
-  e.preventDefault();
-  alert('Para recuperar tu contraseña, contactá al administrador del sistema:\n\nadmin@salta.gob.ar');
-});
-
-btnSalir.addEventListener('click', () => supabaseClient.auth.signOut());
-
-function mostrarSesion(sesionActiva) {
-  if (sesionActiva) {
-    vistaLogin.style.display = 'none';
-    vistaPanel.style.display = 'block';
-    btnSalir.style.display = 'inline-block';
-    cargarSolicitudes();
-  } else {
-    vistaLogin.style.display = 'block';
-    vistaPanel.style.display = 'none';
-    btnSalir.style.display = 'none';
-    inputPass.value = '';
-    inputPass.type = 'password';
-    togglePass.textContent = '👁️';
-  }
-}
-
-supabaseClient.auth.getSession().then(({ data: { session } }) => mostrarSesion(!!session));
-supabaseClient.auth.onAuthStateChange((_event, session) => mostrarSesion(!!session));
-
-const filtroComisaria = document.getElementById('filtro-comisaria');
-DEPENDENCIAS_POLICIALES.forEach(dep => {
-  const opt = document.createElement('option');
-  opt.value = dep.nombre;
-  opt.textContent = dep.nombre;
-  filtroComisaria.appendChild(opt);
-});
-
-const etiquetasDetalle = {
-  nombre: 'Nombre completo', dni: 'DNI', fechaNacimiento: 'Fecha de nacimiento',
-  email: 'Email de contacto', telefono: 'Teléfono / WhatsApp',
-  domicilio: 'Domicilio', localidad: 'Localidad', tiempoResidencia: 'Tiempo de residencia',
-  motivo: 'Motivo del trámite', nombreSolicitante: 'Nombre del solicitante',
-  dniSolicitante: 'DNI del solicitante', nombreConviviente: 'Nombre del conviviente',
-  dniConviviente: 'DNI del conviviente', parentesco: 'Parentesco con el conviviente',
-  domicilioComun: 'Domicilio en común', estadoCivil: 'Estado civil',
-  situacionLaboral: 'Situación laboral', personasACargo: 'Personas a cargo',
-  testigo1Nombre: 'Nombre del testigo 1', testigo1Dni: 'DNI del testigo 1',
-  testigo2Nombre: 'Nombre del testigo 2', testigo2Dni: 'DNI del testigo 2',
-  foto_solicitante: 'Foto del DNI - Solicitante',
-  foto_testigo1: 'Foto del DNI - Testigo 1',
-  foto_testigo2: 'Foto del DNI - Testigo 2',
-  nombreMenor: 'Nombre del menor', dniMenor: 'DNI del menor',
-  fechaNacimientoMenor: 'Fecha de nacimiento del menor',
-  nacionalidadMenor: 'Nacionalidad del menor',
-  nombreProgenitor: 'Nombre del progenitor que autoriza',
-  dniProgenitor: 'DNI del progenitor que autoriza',
-  vinculoProgenitor: 'Vínculo con el menor',
-  destino: 'Destino del viaje', motivoViaje: 'Motivo del viaje',
-  fechaSalida: 'Fecha de salida', fechaRegreso: 'Fecha de regreso',
-  empresaTransporte: 'Empresa de transporte',
-  empresaOtra: 'Empresa de transporte (otra)',
-  tipoViaje: 'Tipo de viaje',
-  nombreAcompanante: 'Nombre del acompañante',
-  dniAcompanante: 'DNI del acompañante',
-  vinculoAcompanante: 'Vínculo del acompañante',
-  nombreOtroProgenitor: 'Nombre del otro progenitor',
-  dniOtroProgenitor: 'DNI del otro progenitor',
-  foto_menor: 'Foto del DNI - Menor',
-  foto_progenitor: 'Foto del DNI - Progenitor autorizante',
-  tipoCertificado: 'Tipo de certificado',
-  tipoDocumento: 'Tipo de documento',
-  numeroDocumento: 'Número del documento',
-  fechaExtravio: 'Fecha aproximada del extravío',
-  circunstancia: 'Circunstancia',
-  lugarExtravio: 'Lugar aproximado del extravío',
-  detalleExtravio: 'Detalle adicional',
-  tipoBeneficio: 'Tipo de beneficio',
-  tiempoEstadia: 'Tiempo de estadía',
-};
-
-let solicitudesCache = [];
-
-async function cargarSolicitudes() {
-  const { data, error } = await supabaseClient
-    .from('solicitudes')
-    .select('*')
-    .order('created_at', { ascending: false });
-  if (error) { console.error(error); return; }
-  solicitudesCache = data || [];
-  actualizarContadores();
-  renderTabla();
-}
-
-function actualizarContadores() {
-  const pendientes = solicitudesCache.filter(s => s.estado === 'pendiente').length;
-  const procesados = solicitudesCache.filter(s => s.estado === 'procesado').length;
-  const denegados = solicitudesCache.filter(s => s.estado === 'denegado').length;
-  document.getElementById('count-pendientes').textContent = pendientes;
-  document.getElementById('count-procesados').textContent = procesados;
-  document.getElementById('count-denegados').textContent = denegados;
-}
-
-document.getElementById('btn-actualizar').addEventListener('click', cargarSolicitudes);
-
-supabaseClient
-  .channel('solicitudes-cambios')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes' }, cargarSolicitudes)
-  .subscribe();
-
-function normalizarTexto(t) {
-  return String(t || '')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().trim();
-}
-
-function obtenerTipoDependencia(nombre) {
-  if (!nombre) return '';
-  const n = String(nombre).trim();
-  if (/^subcomisar[íi]a/i.test(n)) return 'Subcomisaría';
-  if (/^comisar[íi]a/i.test(n)) return 'Comisaría';
-  if (/^destacamento/i.test(n)) return 'Destacamento';
-  if (/^puerto\s+pol/i.test(n)) return 'Puerto Policial';
-  if (/^puesto/i.test(n)) return 'Puesto';
-  if (/^base\s+operativa/i.test(n)) return 'Base Operativa';
-  return 'Otro';
-}
-
-function obtenerDniSolicitud(s) {
-  const d = s.datos || {};
-  return d.dni || d.dniSolicitante || d.dniMenor || d.testigo1Dni || '';
-}
-
-function obtenerNombreSolicitud(s) {
-  const d = s.datos || {};
-  return d.nombre || d.nombreSolicitante || d.nombreConviviente || d.nombreMenor || '';
-}
-
-function renderTabla() {
-  const estado = document.getElementById('filtro-estado').value;
-  const comisaria = document.getElementById('filtro-comisaria').value;
-  const tipoDep = document.getElementById('filtro-tipo-dependencia').value;
-  const tramite = document.getElementById('filtro-tramite').value;
-  const busqueda = normalizarTexto(document.getElementById('filtro-busqueda').value);
-
-  const filtradas = solicitudesCache.filter(s => {
-    if (estado && s.estado !== estado) return false;
-    if (comisaria && s.comisaria_asignada !== comisaria) return false;
-    if (tipoDep && obtenerTipoDependencia(s.comisaria_asignada) !== tipoDep) return false;
-    if (tramite && s.tramite !== tramite) return false;
-    if (busqueda) {
-      const nombre = normalizarTexto(obtenerNombreSolicitud(s));
-      const dni = normalizarTexto(obtenerDniSolicitud(s));
-      if (!nombre.includes(busqueda) && !dni.includes(busqueda)) return false;
-    }
-    return true;
-  });
-
-  const tbody = document.getElementById('tabla-solicitudes');
-  tbody.innerHTML = '';
-  document.getElementById('mensaje-vacio').style.display = filtradas.length ? 'none' : 'block';
-
-  filtradas.forEach(s => {
-    const tr = document.createElement('tr');
-    tr.className = 'fila-solicitud';
-    const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
-    const nombreSolicitante = obtenerNombreSolicitud(s) || '-';
-    const estadoTexto = s.estado === 'procesado' ? 'Procesado' :
-                        s.estado === 'denegado' ? 'Denegado' : 'Pendiente';
-    tr.innerHTML = `
-      <td>${fecha}</td>
-      <td>${s.tramite_titulo || s.tramite || '-'}</td>
-      <td>${nombreSolicitante}</td>
-      <td>${s.comisaria_asignada || '-'}</td>
-      <td><span class="etiqueta ${s.estado}">${estadoTexto}</span></td>
-    `;
-    tr.addEventListener('click', () => mostrarDetalle(s));
-    tbody.appendChild(tr);
-  });
-}
-
-document.getElementById('filtro-estado').addEventListener('change', renderTabla);
-document.getElementById('filtro-tramite').addEventListener('change', renderTabla);
-document.getElementById('filtro-busqueda').addEventListener('input', renderTabla);
-
-// Filtro por tipo de dependencia: también filtra las opciones del desplegable de comisarías
-document.getElementById('filtro-tipo-dependencia').addEventListener('change', (e) => {
-  const tipo = e.target.value;
-  filtroComisaria.value = '';
-  Array.from(filtroComisaria.options).forEach(opt => {
-    if (!opt.value) return;
-    const esDelTipo = !tipo || obtenerTipoDependencia(opt.value) === tipo;
-    opt.hidden = !esDelTipo;
-    opt.disabled = !esDelTipo;
-  });
-  renderTabla();
-});
-
-filtroComisaria.addEventListener('change', renderTabla);
-
-let solicitudAbierta = null;
-
-async function crearSeccion(titulo, campos) {
-  const seccion = document.createElement('div');
-  seccion.className = 'detalle-seccion';
-
-  const h = document.createElement('h4');
-  h.className = 'detalle-seccion-titulo';
-  h.innerHTML = titulo;
-  seccion.appendChild(h);
-
-  const lista = document.createElement('div');
-  lista.className = 'detalle-lista';
-
-  for (const [label, valor, esFoto] of campos) {
-    if (valor === undefined || valor === null || valor === '') continue;
-    const item = document.createElement('div');
-    item.className = 'detalle-item';
-
-    const dt = document.createElement('dt');
-    dt.textContent = label;
-
-    const dd = document.createElement('dd');
-    if (esFoto) {
-      const img = document.createElement('img');
-      img.alt = label;
-      let urlFinal = valor;
-      if (!valor.startsWith('http')) {
-        const { data: signedData, error: signedError } = await supabaseClient
-          .storage
-          .from(BUCKET_FOTOS)
-          .createSignedUrl(valor, 3600);
-        if (!signedError && signedData && signedData.signedUrl) urlFinal = signedData.signedUrl;
-        else { console.warn('No se pudo firmar la URL:', valor, signedError); urlFinal = ''; }
-      }
-      if (urlFinal) {
-        img.src = urlFinal;
-        img.addEventListener('click', () => abrirFotoGrande(urlFinal));
-        dd.appendChild(img);
-      } else {
-        dd.textContent = 'No se pudo cargar la imagen';
-      }
-    } else {
-      dd.textContent = valor;
-    }
-    item.appendChild(dt);
-    item.appendChild(dd);
-    lista.appendChild(item);
-  }
-
-  seccion.appendChild(lista);
-  return seccion;
-}
-
-function crearSeparador() {
-  const sep = document.createElement('div');
-  sep.className = 'detalle-separador';
-  return sep;
-}
-
-function crearItemEstado(estado) {
-  const item = document.createElement('div');
-  item.className = 'detalle-item';
-  const dt = document.createElement('dt');
-  dt.textContent = 'Estado actual';
-  const dd = document.createElement('dd');
-  const estadoTexto = estado === 'procesado' ? 'Procesado' :
-                      estado === 'denegado' ? 'Denegado' : 'Pendiente';
-  dd.innerHTML = `<span class="etiqueta ${estado}">${estadoTexto}</span>`;
-  item.appendChild(dt);
-  item.appendChild(dd);
-  return item;
-}
-
-async function mostrarDetalle(s) {
-  solicitudAbierta = s;
-  document.getElementById('detalle-titulo').textContent = s.tramite_titulo || s.tramite;
-  const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
-  document.getElementById('detalle-fecha').textContent = 'Solicitud recibida el ' + fecha;
-
-  const cont = document.getElementById('detalle-contenido');
-  cont.innerHTML = '';
-
-  const d = s.datos || {};
-  const et = etiquetasDetalle;
-  const camposSol = [];
-  camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
-
-  if (s.tramite === 'autorizacion') {
-    if (d.nombreMenor) camposSol.push([et.nombreMenor, d.nombreMenor]);
-    if (d.dniMenor) camposSol.push([et.dniMenor, d.dniMenor]);
-    if (d.fechaNacimientoMenor) camposSol.push([et.fechaNacimientoMenor, d.fechaNacimientoMenor]);
-    if (d.nacionalidadMenor) camposSol.push([et.nacionalidadMenor, d.nacionalidadMenor]);
-    if (d.nombreProgenitor) camposSol.push([et.nombreProgenitor, d.nombreProgenitor]);
-    if (d.dniProgenitor) camposSol.push([et.dniProgenitor, d.dniProgenitor]);
-    if (d.vinculoProgenitor) camposSol.push([et.vinculoProgenitor, d.vinculoProgenitor]);
-    if (d.email) camposSol.push([et.email, d.email]);
-    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
-    if (d.destino) camposSol.push([et.destino, d.destino]);
-    if (d.motivoViaje) camposSol.push([et.motivoViaje, d.motivoViaje]);
-    if (d.fechaSalida) camposSol.push([et.fechaSalida, d.fechaSalida]);
-    if (d.fechaRegreso) camposSol.push([et.fechaRegreso, d.fechaRegreso]);
-    if (d.empresaTransporte) camposSol.push([et.empresaTransporte, d.empresaTransporte]);
-    if (d.empresaOtra) camposSol.push([et.empresaOtra, d.empresaOtra]);
-    if (d.tipoViaje) camposSol.push([et.tipoViaje, d.tipoViaje === 'solo' ? 'Viaja SOLO' : 'Viaja ACOMPAÑADO']);
-    if (d.nombreAcompanante) camposSol.push([et.nombreAcompanante, d.nombreAcompanante]);
-    if (d.dniAcompanante) camposSol.push([et.dniAcompanante, d.dniAcompanante]);
-    if (d.vinculoAcompanante) camposSol.push([et.vinculoAcompanante, d.vinculoAcompanante]);
-    if (d.nombreOtroProgenitor) camposSol.push([et.nombreOtroProgenitor, d.nombreOtroProgenitor]);
-    if (d.dniOtroProgenitor) camposSol.push([et.dniOtroProgenitor, d.dniOtroProgenitor]);
-    if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
-    if (d.localidad) camposSol.push([et.localidad, d.localidad]);
-    if (d.foto_menor) camposSol.push([et.foto_menor, d.foto_menor, true]);
-    if (d.foto_progenitor) camposSol.push([et.foto_progenitor, d.foto_progenitor, true]);
-  } else if (s.tramite === 'extravio') {
-    if (d.nombre) camposSol.push([et.nombre, d.nombre]);
-    if (d.dni) camposSol.push([et.dni, d.dni]);
-    if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
-    if (d.email) camposSol.push([et.email, d.email]);
-    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
-    if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
-    if (d.localidad) camposSol.push([et.localidad, d.localidad]);
-    if (d.tipoDocumento) camposSol.push([et.tipoDocumento, d.tipoDocumento]);
-    if (d.numeroDocumento) camposSol.push([et.numeroDocumento, d.numeroDocumento]);
-    if (d.fechaExtravio) camposSol.push([et.fechaExtravio, d.fechaExtravio]);
-    if (d.circunstancia) camposSol.push([et.circunstancia, d.circunstancia]);
-    if (d.lugarExtravio) camposSol.push([et.lugarExtravio, d.lugarExtravio]);
-    if (d.detalleExtravio) camposSol.push([et.detalleExtravio, d.detalleExtravio]);
-    if (d.foto_solicitante) camposSol.push([et.foto_solicitante, d.foto_solicitante, true]);
-  } else {
-    const nombreSol = d.nombre || d.nombreSolicitante || '';
-    const dniSol = d.dni || d.dniSolicitante || '';
-    if (nombreSol) camposSol.push([et.nombre, nombreSol]);
-    if (dniSol) camposSol.push([et.dni, dniSol]);
-    if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
-    if (d.email) camposSol.push([et.email, d.email]);
-    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
-
-    if (d.nombreConviviente) camposSol.push([et.nombreConviviente, d.nombreConviviente]);
-    if (d.dniConviviente) camposSol.push([et.dniConviviente, d.dniConviviente]);
-    if (d.parentesco) camposSol.push([et.parentesco, d.parentesco]);
-
-    if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
-    if (d.domicilioComun) camposSol.push([et.domicilioComun, d.domicilioComun]);
-    if (d.localidad) camposSol.push([et.localidad, d.localidad]);
-    if (d.tiempoResidencia) camposSol.push([et.tiempoResidencia, d.tiempoResidencia]);
-    if (d.tiempoEstadia) camposSol.push([et.tiempoEstadia, d.tiempoEstadia]);
-    if (d.estadoCivil) camposSol.push([et.estadoCivil, d.estadoCivil]);
-    if (d.situacionLaboral) camposSol.push([et.situacionLaboral, d.situacionLaboral]);
-    if (d.personasACargo) camposSol.push([et.personasACargo, d.personasACargo]);
-    if (d.tipoCertificado) camposSol.push([et.tipoCertificado, d.tipoCertificado]);
-    if (d.tipoBeneficio) camposSol.push([et.tipoBeneficio, d.tipoBeneficio]);
-    if (d.motivo) camposSol.push([et.motivo, d.motivo]);
-
-    const fotoSol = d.foto_solicitante || d.fotoSolicitante;
-    if (fotoSol) camposSol.push([et.foto_solicitante, fotoSol, true]);
-  }
-
-  const seccionSol = await crearSeccion('👤 Solicitante', camposSol);
-  const listaSol = seccionSol.querySelector('.detalle-lista');
-  listaSol.appendChild(crearItemEstado(s.estado));
-  cont.appendChild(seccionSol);
-
-  const tramitesConTestigos = ['residencia', 'convivencia', 'carencia'];
-  if (tramitesConTestigos.includes(s.tramite)) {
-    const camposT1 = [];
-    if (d.testigo1Nombre) camposT1.push([et.testigo1Nombre, d.testigo1Nombre]);
-    if (d.testigo1Dni) camposT1.push([et.testigo1Dni, d.testigo1Dni]);
-    if (d.foto_testigo1) camposT1.push([et.foto_testigo1, d.foto_testigo1, true]);
-    if (camposT1.length) {
-      cont.appendChild(crearSeparador());
-      cont.appendChild(await crearSeccion('👤 Testigo 1', camposT1));
-    }
-
-    const camposT2 = [];
-    if (d.testigo2Nombre) camposT2.push([et.testigo2Nombre, d.testigo2Nombre]);
-    if (d.testigo2Dni) camposT2.push([et.testigo2Dni, d.testigo2Dni]);
-    if (d.foto_testigo2) camposT2.push([et.foto_testigo2, d.foto_testigo2, true]);
-    if (camposT2.length) {
-      cont.appendChild(crearSeparador());
-      cont.appendChild(await crearSeccion('👤 Testigo 2', camposT2));
-    }
-  }
-
-  document.getElementById('detalle').style.display = 'block';
-  document.getElementById('detalle').scrollIntoView({ behavior: 'smooth' });
-}
-
-document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
-  document.getElementById('detalle').style.display = 'none';
-});
-
-async function cambiarEstado(nuevoEstado) {
-  if (!solicitudAbierta) return;
-  if (nuevoEstado === 'denegado') {
-    const motivo = prompt('Motivo de la denegación (opcional):');
-    if (motivo === null) return;
-  }
-  const { error } = await supabaseClient
-    .from('solicitudes')
-    .update({ estado: nuevoEstado })
-    .eq('id', solicitudAbierta.id);
-  if (error) {
-    console.error(error);
-    alert('No se pudo actualizar. Revisá tu conexión.');
-    return;
-  }
-  document.getElementById('detalle').style.display = 'none';
-  await cargarSolicitudes();
-}
-
-document.getElementById('btn-validar').addEventListener('click', () => cambiarEstado('procesado'));
-document.getElementById('btn-denegar').addEventListener('click', () => cambiarEstado('denegado'));
-document.getElementById('btn-pendiente').addEventListener('click', () => cambiarEstado('pendiente'));
-
-document.getElementById('btn-imprimir').addEventListener('click', async () => {
-  if (!solicitudAbierta) return;
-  const s = solicitudAbierta;
-  const ventana = window.open('', '_blank');
-  const titulo = s.tramite_titulo || s.tramite;
-  const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
-
-  let html = `
-    <!DOCTYPE html>
-    <html><head>
-    <meta charset="UTF-8">
-    <title>${titulo}</title>
-    <style>
-      body{font-family:Arial,sans-serif; padding:30px; max-width:800px; margin:0 auto; color:#1f2937;}
-      h1{text-align:center; color:#0d2a4d; font-size:1.3rem; margin-bottom:4px; border-bottom:2px solid #c9a961; padding-bottom:12px;}
-      .subt{text-align:center; color:#6b7280; font-size:0.85rem; margin-bottom:24px;}
-      dl{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-      dt{font-size:0.72rem; color:#6b7280; text-transform:uppercase; letter-spacing:0.03em; font-weight:600;}
-      dd{margin:2px 0 0; font-size:0.9rem;}
-      dd img{max-width:280px; border:1px solid #ddd; border-radius:6px; margin-top:6px;}
-      .firma{margin-top:60px; display:flex; justify-content:space-between;}
-      .firma div{border-top:1px solid #333; padding-top:6px; width:40%; text-align:center; font-size:0.8rem;}
-      @media print{body{padding:10px;}}
-    </style>
-    </head><body>
-    <h1>${titulo}</h1>
-    <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
-    <p class="subt">Solicitud recibida el ${fecha}</p>
-    <dl>
-      <div><dt>Comisaría asignada</dt><dd>${s.comisaria_asignada || '-'}</dd></div>
-      <div><dt>Estado</dt><dd>${s.estado || 'pendiente'}</dd></div>
-  `;
-
-  const d = s.datos || {};
-  for (const [campo, valor] of Object.entries(d)) {
-    if (!valor) continue;
-    const label = etiquetasDetalle[campo] || campo;
-    if (campo.startsWith('foto_')) {
-      let urlPrint = valor;
-      if (!valor.startsWith('http')) {
-        const { data: signedData } = await supabaseClient
-          .storage
-          .from(BUCKET_FOTOS)
-          .createSignedUrl(valor, 600);
-        if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
-      }
-      html += `<div style="grid-column:1/-1;"><dt>${label}</dt><dd><img src="${urlPrint}"></dd></div>`;
-    } else {
-      html += `<div><dt>${label}</dt><dd>${valor}</dd></div>`;
-    }
-  }
-
-  html += `
-    </dl>
-    <div class="firma">
-      <div>Firma del solicitante</div>
-      <div>Firma y sello - Autoridad policial</div>
+<!-- Modal cambiar contraseña -->
+<div class="modal-overlay" id="modal-pass">
+  <div class="modal-caja">
+    <h3>🔑 Cambiar contraseña</h3>
+    <label>Nueva contraseña (mínimo 8 caracteres)</label>
+    <input type="password" id="pass-nueva" placeholder="••••••••">
+    <label>Repetir contraseña</label>
+    <input type="password" id="pass-repetir" placeholder="••••••••">
+    <div class="modal-btns">
+      <button type="button" id="btn-cancelar-pass" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);">Cancelar</button>
+      <button type="button" id="btn-guardar-pass" style="background:linear-gradient(135deg, var(--dorado), var(--dorado-brilloso));color:var(--azul-oscuro);">Guardar</button>
     </div>
-    </body></html>
-  `;
+  </div>
+</div>
 
-  ventana.document.write(html);
-  ventana.document.close();
-  setTimeout(() => ventana.print(), 500);
-});
-
-document.getElementById('btn-exportar').addEventListener('click', () => {
-  const estado = document.getElementById('filtro-estado').value;
-  const comisaria = document.getElementById('filtro-comisaria').value;
-  const tipoDep = document.getElementById('filtro-tipo-dependencia').value;
-  const tramite = document.getElementById('filtro-tramite').value;
-  const busqueda = normalizarTexto(document.getElementById('filtro-busqueda').value);
-
-  const filtradas = solicitudesCache.filter(s => {
-    if (estado && s.estado !== estado) return false;
-    if (comisaria && s.comisaria_asignada !== comisaria) return false;
-    if (tipoDep && obtenerTipoDependencia(s.comisaria_asignada) !== tipoDep) return false;
-    if (tramite && s.tramite !== tramite) return false;
-    if (busqueda) {
-      const nombre = normalizarTexto(obtenerNombreSolicitud(s));
-      const dni = normalizarTexto(obtenerDniSolicitud(s));
-      if (!nombre.includes(busqueda) && !dni.includes(busqueda)) return false;
-    }
-    return true;
-  });
-
-  if (!filtradas.length) {
-    alert('No hay solicitudes para exportar con los filtros actuales.');
-    return;
-  }
-
-  filtradas.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-  const filas = [['Fecha', 'Trámite', 'Solicitante', 'DNI', 'Email', 'Teléfono', 'Domicilio', 'Comisaría', 'Estado']];
-
-  filtradas.forEach(s => {
-    const d = s.datos || {};
-    filas.push([
-      s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-',
-      s.tramite_titulo || s.tramite || '-',
-      obtenerNombreSolicitud(s) || '-',
-      obtenerDniSolicitud(s) || '-',
-      d.email || '-',
-      d.telefono || '-',
-      d.domicilio || d.domicilioComun || '-',
-      s.comisaria_asignada || '-',
-      s.estado || 'pendiente'
-    ]);
-  });
-
-  const csv = filas.map(fila =>
-    fila.map(celda => `"${String(celda).replace(/"/g, '""')}"`).join(';')
-  ).join('\r\n');
-
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `solicitudes_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
-function abrirFotoGrande(src) {
-  document.getElementById('foto-grande').src = src;
-  document.getElementById('modal-foto').classList.add('activo');
-}
-
-document.getElementById('cerrar-modal').addEventListener('click', () => {
-  document.getElementById('modal-foto').classList.remove('activo');
-});
-
-document.getElementById('modal-foto').addEventListener('click', (e) => {
-  if (e.target.id === 'modal-foto') {
-    document.getElementById('modal-foto').classList.remove('activo');
-  }
-});
-</script>
-
-</body>
-</html>
+<!-- Toasts -->
+<div id="toast-container"></div>
