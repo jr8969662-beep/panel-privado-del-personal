@@ -107,6 +107,72 @@
     padding:8px 12px;border-radius:8px;text-align:left;}
   #caps-warning.activo{display:block;}
 
+  /* LOGIN MEJORADO */
+  @keyframes vibracion {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+    20%, 40%, 60%, 80% { transform: translateX(8px); }
+  }
+  #vista-login.vibrar { animation: vibracion 0.5s ease-in-out; }
+
+  .spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid rgba(13,42,77,0.3); border-top-color: var(--azul-oscuro);
+    border-radius: 50%; animation: girar 0.7s linear infinite;
+    margin-right: 8px; vertical-align: middle;
+  }
+  @keyframes girar { to { transform: rotate(360deg); } }
+
+  .ultimo-acceso {
+    font-size: 0.75rem; color: rgba(255,255,255,0.55);
+    margin-top: 18px; padding: 10px 12px;
+    background: rgba(0,0,0,0.25); border-radius: 8px;
+    border-left: 3px solid rgba(201,169,97,0.5);
+    text-align: left; display: none;
+  }
+  .ultimo-acceso.activo { display: block; }
+  .ultimo-acceso strong { color: var(--dorado-claro); }
+
+  #banner-bienvenida {
+    display: none; margin: 0 0 18px; padding: 14px 18px;
+    background: rgba(21,128,61,0.25);
+    border: 1px solid rgba(134,239,172,0.5);
+    border-left: 4px solid #86efac; border-radius: 10px;
+    color: #fff; font-size: 0.92rem;
+    animation: slideIn 0.4s ease-out;
+  }
+  #banner-bienvenida.activo { display: block; }
+  #banner-bienvenida strong { color: #86efac; }
+
+  #aviso-bloqueo {
+    display: none; margin-top: 14px; padding: 12px 16px;
+    background: rgba(185,28,28,0.25);
+    border: 1px solid rgba(252,165,165,0.5);
+    border-left: 4px solid #fca5a5; border-radius: 8px;
+    color: #fff; font-size: 0.85rem; text-align: left;
+  }
+  #aviso-bloqueo.activo { display: block; }
+  #aviso-bloqueo strong { color: #fca5a5; }
+
+  #aviso-inactividad {
+    display: none; position: fixed; top: 20px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(202,138,4,0.95); color: #fff;
+    padding: 14px 22px; border-radius: 10px;
+    border-left: 4px solid #fcd34d;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    z-index: 10001; font-size: 0.9rem; font-weight: 600;
+    backdrop-filter: blur(8px); animation: slideIn 0.3s ease-out;
+  }
+  #aviso-inactividad.activo { display: block; }
+  #aviso-inactividad button {
+    background: rgba(255,255,255,0.2); color: #fff;
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 5px 12px; border-radius: 6px;
+    margin-left: 12px; cursor: pointer;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+  }
+
   #vista-panel{display:none;}
 
   .resumen{display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
@@ -291,6 +357,7 @@
     #detalle .btns{flex-direction:column;}
     #detalle button{width:100%;justify-content:center;}
     #toast-container{top:10px;right:10px;left:10px;max-width:none;}
+    #aviso-inactividad{left:10px;right:10px;transform:none;font-size:0.82rem;}
   }
 </style>
 </head>
@@ -341,10 +408,24 @@
 
     <button type="submit" id="btn-entrar">Ingresar</button>
     <p id="error-login"></p>
+
+    <div id="aviso-bloqueo"></div>
+
+    <div class="ultimo-acceso" id="ultimo-acceso">
+      <strong>Último ingreso:</strong> <span id="ultimo-acceso-texto">—</span>
+    </div>
+  </div>
+
+  <!-- Aviso de inactividad -->
+  <div id="aviso-inactividad">
+    ⏱ Tu sesión expira en <span id="segundos-inactividad">60</span>s por inactividad
+    <button type="button" id="btn-seguir-activo">Seguir activo</button>
   </div>
 
   <!-- PANEL -->
   <div id="vista-panel">
+
+    <div id="banner-bienvenida"></div>
 
     <div class="resumen">
       <div class="tarjeta-resumen pendiente">
@@ -505,7 +586,11 @@
     </div>
   </div>
 </div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Toasts -->
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="comisarias-config.js"></script>
 <script>
@@ -555,7 +640,6 @@ const EMAIL_GUARDADO = localStorage.getItem('panel_email_recordado');
 if (EMAIL_GUARDADO) {
   inputEmail.value = EMAIL_GUARDADO;
   recordarEmail.checked = true;
-  setTimeout(() => inputPass.focus(), 100);
 }
 
 /* ============================================================
@@ -584,9 +668,90 @@ inputPass.addEventListener('keyup', checkCapsLock);
 inputPass.addEventListener('blur', () => capsWarning.classList.remove('activo'));
 
 /* ============================================================
-   LOGIN
+   LOGIN MEJORADO
    ============================================================ */
+const LOGIN_KEY = 'panel_login_control';
+const ULTIMO_ACCESO_KEY = 'panel_ultimo_acceso';
+const MAX_INTENTOS = 3;
+const BLOQUEO_MINUTOS = 15;
+const INACTIVIDAD_MINUTOS = 30;
+const AVISO_INACTIVIDAD_SEG = 60;
+
+let intentosFallidos = 0;
+let bloqueadoHasta = 0;
+let timerInactividad = null;
+let cuentaRegresiva = null;
+let intervalBloqueo = null;
+
+function mostrarUltimoAcceso() {
+  const datos = JSON.parse(localStorage.getItem(ULTIMO_ACCESO_KEY) || 'null');
+  const cont = document.getElementById('ultimo-acceso');
+  const texto = document.getElementById('ultimo-acceso-texto');
+  if (datos && datos.fecha) {
+    cont.classList.add('activo');
+    texto.textContent = `${datos.fecha} (${datos.email})`;
+  } else {
+    cont.classList.remove('activo');
+  }
+}
+mostrarUltimoAcceso();
+
+function verificarBloqueo() {
+  const datos = JSON.parse(localStorage.getItem(LOGIN_KEY) || '{}');
+  if (datos.bloqueadoHasta && Date.now() < datos.bloqueadoHasta) {
+    bloqueadoHasta = datos.bloqueadoHasta;
+    intentosFallidos = datos.intentos || MAX_INTENTOS;
+    actualizarUIBloqueo();
+    if (intervalBloqueo) clearInterval(intervalBloqueo);
+    intervalBloqueo = setInterval(actualizarUIBloqueo, 15000);
+    return true;
+  } else if (datos.bloqueadoHasta) {
+    localStorage.removeItem(LOGIN_KEY);
+    intentosFallidos = 0;
+    bloqueadoHasta = 0;
+  }
+  return false;
+}
+
+function actualizarUIBloqueo() {
+  const aviso = document.getElementById('aviso-bloqueo');
+  if (bloqueadoHasta && Date.now() < bloqueadoHasta) {
+    const minRestantes = Math.max(1, Math.ceil((bloqueadoHasta - Date.now()) / 60000));
+    aviso.classList.add('activo');
+    aviso.innerHTML = `<strong>🔒 Cuenta bloqueada temporalmente</strong><br>Demasiados intentos fallidos. Esperá ${minRestantes} minuto(s) o contactá al administrador.`;
+    btnEntrar.disabled = true;
+    btnEntrar.textContent = `Bloqueado (${minRestantes} min)`;
+  } else if (bloqueadoHasta) {
+    aviso.classList.remove('activo');
+    btnEntrar.disabled = false;
+    btnEntrar.textContent = 'Ingresar';
+    bloqueadoHasta = 0;
+    intentosFallidos = 0;
+    localStorage.removeItem(LOGIN_KEY);
+    if (intervalBloqueo) { clearInterval(intervalBloqueo); intervalBloqueo = null; }
+  } else {
+    aviso.classList.remove('activo');
+    btnEntrar.disabled = false;
+    btnEntrar.textContent = 'Ingresar';
+  }
+}
+
+if (verificarBloqueo()) {
+  // ya activado
+}
+
+function vibrarLogin() {
+  const login = document.getElementById('vista-login');
+  login.classList.add('vibrar');
+  setTimeout(() => login.classList.remove('vibrar'), 600);
+}
+
 async function intentarLogin() {
+  if (bloqueadoHasta && Date.now() < bloqueadoHasta) {
+    vibrarLogin();
+    return;
+  }
+
   const email = inputEmail.value.trim();
   const pass = inputPass.value;
   errorLogin.classList.remove('activo');
@@ -595,42 +760,90 @@ async function intentarLogin() {
   if (!email || !pass) {
     errorLogin.textContent = 'Completá usuario y contraseña.';
     errorLogin.classList.add('activo');
+    vibrarLogin();
     return;
   }
   if (!email.includes('@') || !email.includes('.')) {
     errorLogin.textContent = 'El email no es válido.';
     errorLogin.classList.add('activo');
+    vibrarLogin();
     return;
   }
   if (pass.length < 6) {
     errorLogin.textContent = 'La contraseña debe tener al menos 6 caracteres.';
     errorLogin.classList.add('activo');
+    vibrarLogin();
     return;
   }
 
   btnEntrar.disabled = true;
-  const textoOriginal = btnEntrar.textContent;
-  btnEntrar.textContent = 'Verificando...';
+  btnEntrar.innerHTML = '<span class="spinner"></span>Verificando...';
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
 
-  btnEntrar.disabled = false;
-  btnEntrar.textContent = textoOriginal;
-
   if (error) {
+    intentosFallidos++;
+    const restantes = MAX_INTENTOS - intentosFallidos;
+
+    if (intentosFallidos >= MAX_INTENTOS) {
+      bloqueadoHasta = Date.now() + (BLOQUEO_MINUTOS * 60 * 1000);
+      localStorage.setItem(LOGIN_KEY, JSON.stringify({
+        intentos: intentosFallidos,
+        bloqueadoHasta: bloqueadoHasta
+      }));
+      actualizarUIBloqueo();
+      if (intervalBloqueo) clearInterval(intervalBloqueo);
+      intervalBloqueo = setInterval(actualizarUIBloqueo, 15000);
+      vibrarLogin();
+      return;
+    }
+
+    localStorage.setItem(LOGIN_KEY, JSON.stringify({
+      intentos: intentosFallidos,
+      bloqueadoHasta: 0
+    }));
+
     let mensaje = 'Usuario o contraseña incorrectos.';
     if (error.message && error.message.toLowerCase().includes('email')) {
       mensaje = 'El email no está registrado o es inválido.';
     }
-    errorLogin.textContent = mensaje;
+    errorLogin.textContent = `${mensaje} (${restantes} intento${restantes === 1 ? '' : 's'} restante${restantes === 1 ? '' : 's'})`;
     errorLogin.classList.add('activo');
+    btnEntrar.disabled = false;
+    btnEntrar.textContent = 'Ingresar';
+    vibrarLogin();
     return;
   }
 
+  intentosFallidos = 0;
+  localStorage.removeItem(LOGIN_KEY);
+  bloqueadoHasta = 0;
+  if (intervalBloqueo) { clearInterval(intervalBloqueo); intervalBloqueo = null; }
+  document.getElementById('aviso-bloqueo').classList.remove('activo');
+
   usuarioActual = data.user ? data.user.email : email;
+
+  const ahora = new Date();
+  const fechaFormateada = ahora.toLocaleString('es-AR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+  localStorage.setItem(ULTIMO_ACCESO_KEY, JSON.stringify({
+    fecha: fechaFormateada,
+    email: email
+  }));
 
   if (recordarEmail.checked) localStorage.setItem('panel_email_recordado', email);
   else localStorage.removeItem('panel_email_recordado');
+
+  btnEntrar.disabled = false;
+  btnEntrar.textContent = 'Ingresar';
+
+  const nombreCorto = email.split('@')[0];
+  const banner = document.getElementById('banner-bienvenida');
+  banner.innerHTML = `👮 <strong>Bienvenido/a, ${nombreCorto}</strong> · Último ingreso: ${fechaFormateada}`;
+  banner.classList.add('activo');
+  setTimeout(() => banner.classList.remove('activo'), 6000);
 
   mostrarToast('✅ Bienvenido/a', 'Sesión iniciada correctamente', 'success', 3000);
 }
@@ -639,13 +852,72 @@ btnEntrar.addEventListener('click', intentarLogin);
 inputEmail.addEventListener('keypress', (e) => { if (e.key === 'Enter') inputPass.focus(); });
 inputPass.addEventListener('keypress', (e) => { if (e.key === 'Enter') intentarLogin(); });
 
+setTimeout(() => {
+  if (!inputEmail.value) inputEmail.focus();
+  else inputPass.focus();
+}, 200);
+
 linkRecuperar.addEventListener('click', (e) => {
   e.preventDefault();
   alert('Para recuperar tu contraseña, contactá al administrador del sistema:\n\nadmin@salta.gob.ar');
 });
 
+/* ============================================================
+   AUTO-LOGOUT POR INACTIVIDAD
+   ============================================================ */
+function iniciarTimerInactividad() {
+  detenerTimerInactividad();
+  resetearTimerInactividad();
+
+  ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(ev => {
+    document.addEventListener(ev, resetearTimerInactividad, { passive: true });
+  });
+}
+
+function resetearTimerInactividad() {
+  clearTimeout(timerInactividad);
+  clearInterval(cuentaRegresiva);
+  const aviso = document.getElementById('aviso-inactividad');
+  if (aviso) aviso.classList.remove('activo');
+
+  timerInactividad = setTimeout(() => {
+    iniciarAvisoInactividad();
+  }, (INACTIVIDAD_MINUTOS - 1) * 60 * 1000);
+}
+
+function iniciarAvisoInactividad() {
+  let segundos = AVISO_INACTIVIDAD_SEG;
+  const aviso = document.getElementById('aviso-inactividad');
+  const contador = document.getElementById('segundos-inactividad');
+  aviso.classList.add('activo');
+  contador.textContent = segundos;
+
+  cuentaRegresiva = setInterval(() => {
+    segundos--;
+    contador.textContent = segundos;
+    if (segundos <= 0) {
+      clearInterval(cuentaRegresiva);
+      aviso.classList.remove('activo');
+      supabaseClient.auth.signOut();
+      mostrarToast('🔒 Sesión cerrada', 'Por inactividad', 'warning', 4000);
+    }
+  }, 1000);
+}
+
+document.getElementById('btn-seguir-activo').addEventListener('click', () => {
+  resetearTimerInactividad();
+});
+
+function detenerTimerInactividad() {
+  clearTimeout(timerInactividad);
+  clearInterval(cuentaRegresiva);
+  const aviso = document.getElementById('aviso-inactividad');
+  if (aviso) aviso.classList.remove('activo');
+}
+
 btnSalir.addEventListener('click', async () => {
   if (!confirm('¿Cerrar sesión?')) return;
+  detenerTimerInactividad();
   await supabaseClient.auth.signOut();
 });
 
@@ -654,6 +926,7 @@ function mostrarSesion(sesionActiva) {
     vistaLogin.style.display = 'none';
     vistaPanel.style.display = 'block';
     cargarSolicitudes();
+    iniciarTimerInactividad();
   } else {
     vistaLogin.style.display = 'block';
     vistaPanel.style.display = 'none';
@@ -663,6 +936,9 @@ function mostrarSesion(sesionActiva) {
     usuarioActual = null;
     idsConocidos.clear();
     primeraCarga = true;
+    detenerTimerInactividad();
+    mostrarUltimoAcceso();
+    actualizarUIBloqueo();
   }
 }
 
@@ -697,18 +973,9 @@ document.getElementById('btn-guardar-pass').addEventListener('click', async () =
   const nueva = passNueva.value;
   const repetir = passRepetir.value;
 
-  if (!nueva || !repetir) {
-    alert('Completá ambos campos.');
-    return;
-  }
-  if (nueva.length < 8) {
-    alert('La contraseña debe tener al menos 8 caracteres.');
-    return;
-  }
-  if (nueva !== repetir) {
-    alert('Las contraseñas no coinciden.');
-    return;
-  }
+  if (!nueva || !repetir) { alert('Completá ambos campos.'); return; }
+  if (nueva.length < 8) { alert('La contraseña debe tener al menos 8 caracteres.'); return; }
+  if (nueva !== repetir) { alert('Las contraseñas no coinciden.'); return; }
 
   const btn = document.getElementById('btn-guardar-pass');
   btn.disabled = true;
@@ -719,10 +986,7 @@ document.getElementById('btn-guardar-pass').addEventListener('click', async () =
   btn.disabled = false;
   btn.textContent = 'Guardar';
 
-  if (error) {
-    alert('No se pudo cambiar la contraseña: ' + error.message);
-    return;
-  }
+  if (error) { alert('No se pudo cambiar la contraseña: ' + error.message); return; }
 
   modalPass.classList.remove('activo');
   mostrarToast('🔑 Contraseña actualizada', 'Tu nueva contraseña ya está activa', 'success', 4000);
@@ -817,7 +1081,6 @@ async function cargarSolicitudes() {
 
   const nuevas = data || [];
 
-  // Detección de trámites nuevos para el toast
   if (primeraCarga) {
     nuevas.forEach(s => idsConocidos.add(s.id));
     primeraCarga = false;
@@ -829,12 +1092,6 @@ async function cargarSolicitudes() {
         const nombre = obtenerNombreSolicitud(s) || 'Solicitante';
         mostrarToast('📬 Nuevo trámite', `${nombre} cargó "${s.tramite_titulo || s.tramite}"`, 'success', 6000);
       });
-      // Sonido (opcional, muy sutil)
-      try {
-        const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
-        audio.volume = 0.2;
-        audio.play().catch(() => {});
-      } catch (e) {}
     }
   }
 
@@ -843,9 +1100,6 @@ async function cargarSolicitudes() {
   renderTabla();
 }
 
-/* ============================================================
-   CONTADORES + ESTADÍSTICAS
-   ============================================================ */
 function actualizarContadores() {
   const pendientes = solicitudesCache.filter(s => s.estado === 'pendiente').length;
   const procesados = solicitudesCache.filter(s => s.estado === 'procesado').length;
@@ -873,9 +1127,6 @@ document.getElementById('btn-actualizar').addEventListener('click', () => {
   mostrarToast('🔄 Actualizado', 'Lista actualizada', 'success', 2000);
 });
 
-/* ============================================================
-   REALTIME
-   ============================================================ */
 supabaseClient
   .channel('solicitudes-cambios')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes' }, cargarSolicitudes)
@@ -911,7 +1162,6 @@ function obtenerTelefonoSolicitud(s) {
 }
 
 function detectarDuplicados() {
-  // Retorna un Set con los IDs que tienen un duplicado (mismo DNI + mismo trámite)
   const mapa = {};
   const duplicados = new Set();
   solicitudesCache.forEach(s => {
@@ -941,7 +1191,6 @@ function aplicarFiltros() {
   const fechaHasta = document.getElementById('fecha-hasta').value;
   const busqueda = normalizarTexto(document.getElementById('filtro-busqueda').value);
 
-  const ahora = new Date();
   const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
   const hace7dias = new Date(); hace7dias.setDate(hace7dias.getDate() - 7);
   const hace30dias = new Date(); hace30dias.setDate(hace30dias.getDate() - 30);
@@ -952,7 +1201,6 @@ function aplicarFiltros() {
     if (tipoDep && obtenerTipoDependencia(s.comisaria_asignada) !== tipoDep) return false;
     if (tramite && s.tramite !== tramite) return false;
 
-    // Filtro por fecha
     if (s.created_at) {
       const f = new Date(s.created_at);
       if (fechaFiltro === 'hoy' && f < hoy) return false;
@@ -1111,7 +1359,7 @@ document.getElementById('btn-limpiar').addEventListener('click', () => {
 });
 
 /* ============================================================
-   ORDENAMIENTO POR COLUMNAS
+   ORDENAMIENTO
    ============================================================ */
 document.querySelectorAll('th.ordenable').forEach(th => {
   th.addEventListener('click', () => {
@@ -1312,17 +1560,9 @@ async function mostrarDetalle(s) {
     if (fotoSol) camposSol.push([et.foto_solicitante, fotoSol, true]);
   }
 
-  // Motivo de denegación (si existe)
-  if (s.motivo_denegacion) {
-    camposSol.push([et.motivo_denegacion, s.motivo_denegacion]);
-  }
-  // Validación
-  if (s.validado_por) {
-    camposSol.push([et.validado_por, s.validado_por]);
-  }
-  if (s.validado_en) {
-    camposSol.push([et.validado_en, new Date(s.validado_en).toLocaleString('es-AR')]);
-  }
+  if (s.motivo_denegacion) camposSol.push([et.motivo_denegacion, s.motivo_denegacion]);
+  if (s.validado_por) camposSol.push([et.validado_por, s.validado_por]);
+  if (s.validado_en) camposSol.push([et.validado_en, new Date(s.validado_en).toLocaleString('es-AR')]);
 
   const seccionSol = await crearSeccion('👤 Solicitante', camposSol);
   const listaSol = seccionSol.querySelector('.detalle-lista');
@@ -1561,6 +1801,3 @@ document.getElementById('modal-foto').addEventListener('click', (e) => {
 
 </body>
 </html>
-
-<!-- Toasts -->
-<div id="toast-container"></div>
