@@ -505,6 +505,1062 @@
     </div>
   </div>
 </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="comisarias-config.js"></script>
+<script>
+const vistaLogin = document.getElementById('vista-login');
+const vistaPanel = document.getElementById('vista-panel');
+const btnSalir = document.getElementById('btn-salir');
+const errorLogin = document.getElementById('error-login');
+const inputEmail = document.getElementById('login-email');
+const inputPass = document.getElementById('login-pass');
+const btnEntrar = document.getElementById('btn-entrar');
+const capsWarning = document.getElementById('caps-warning');
+const togglePass = document.getElementById('toggle-password');
+const recordarEmail = document.getElementById('recordar-email');
+const linkRecuperar = document.getElementById('link-recuperar');
+const toastContainer = document.getElementById('toast-container');
+
+const BUCKET_FOTOS = 'fotos-tramites';
+const POR_PAGINA = 20;
+
+let paginaActual = 1;
+let ordenActual = { campo: 'created_at', dir: 'desc' };
+let usuarioActual = null;
+let solicitudesCache = [];
+let idsConocidos = new Set();
+let primeraCarga = true;
+
+/* ============================================================
+   TOASTS
+   ============================================================ */
+function mostrarToast(titulo, mensaje, tipo = 'success', duracion = 5000) {
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (tipo !== 'success' ? ' ' + tipo : '');
+  toast.innerHTML = `<span class="toast-titulo">${titulo}</span>${mensaje}`;
+  toastContainer.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(400px)';
+    toast.style.transition = 'all 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, duracion);
+}
+
+/* ============================================================
+   RECORDAR EMAIL
+   ============================================================ */
+const EMAIL_GUARDADO = localStorage.getItem('panel_email_recordado');
+if (EMAIL_GUARDADO) {
+  inputEmail.value = EMAIL_GUARDADO;
+  recordarEmail.checked = true;
+  setTimeout(() => inputPass.focus(), 100);
+}
+
+/* ============================================================
+   MOSTRAR/OCULTAR CONTRASEÑA
+   ============================================================ */
+togglePass.addEventListener('click', () => {
+  const esPass = inputPass.type === 'password';
+  inputPass.type = esPass ? 'text' : 'password';
+  togglePass.textContent = esPass ? '🙈' : '👁️';
+  togglePass.title = esPass ? 'Ocultar contraseña' : 'Mostrar contraseña';
+  inputPass.focus();
+});
+
+/* ============================================================
+   CAPS LOCK
+   ============================================================ */
+function checkCapsLock(e) {
+  if (e.getModifierState) {
+    const capsOn = e.getModifierState('CapsLock');
+    if (capsOn) capsWarning.classList.add('activo');
+    else capsWarning.classList.remove('activo');
+  }
+}
+inputPass.addEventListener('keydown', checkCapsLock);
+inputPass.addEventListener('keyup', checkCapsLock);
+inputPass.addEventListener('blur', () => capsWarning.classList.remove('activo'));
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+async function intentarLogin() {
+  const email = inputEmail.value.trim();
+  const pass = inputPass.value;
+  errorLogin.classList.remove('activo');
+  errorLogin.textContent = '';
+
+  if (!email || !pass) {
+    errorLogin.textContent = 'Completá usuario y contraseña.';
+    errorLogin.classList.add('activo');
+    return;
+  }
+  if (!email.includes('@') || !email.includes('.')) {
+    errorLogin.textContent = 'El email no es válido.';
+    errorLogin.classList.add('activo');
+    return;
+  }
+  if (pass.length < 6) {
+    errorLogin.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+    errorLogin.classList.add('activo');
+    return;
+  }
+
+  btnEntrar.disabled = true;
+  const textoOriginal = btnEntrar.textContent;
+  btnEntrar.textContent = 'Verificando...';
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+
+  btnEntrar.disabled = false;
+  btnEntrar.textContent = textoOriginal;
+
+  if (error) {
+    let mensaje = 'Usuario o contraseña incorrectos.';
+    if (error.message && error.message.toLowerCase().includes('email')) {
+      mensaje = 'El email no está registrado o es inválido.';
+    }
+    errorLogin.textContent = mensaje;
+    errorLogin.classList.add('activo');
+    return;
+  }
+
+  usuarioActual = data.user ? data.user.email : email;
+
+  if (recordarEmail.checked) localStorage.setItem('panel_email_recordado', email);
+  else localStorage.removeItem('panel_email_recordado');
+
+  mostrarToast('✅ Bienvenido/a', 'Sesión iniciada correctamente', 'success', 3000);
+}
+
+btnEntrar.addEventListener('click', intentarLogin);
+inputEmail.addEventListener('keypress', (e) => { if (e.key === 'Enter') inputPass.focus(); });
+inputPass.addEventListener('keypress', (e) => { if (e.key === 'Enter') intentarLogin(); });
+
+linkRecuperar.addEventListener('click', (e) => {
+  e.preventDefault();
+  alert('Para recuperar tu contraseña, contactá al administrador del sistema:\n\nadmin@salta.gob.ar');
+});
+
+btnSalir.addEventListener('click', async () => {
+  if (!confirm('¿Cerrar sesión?')) return;
+  await supabaseClient.auth.signOut();
+});
+
+function mostrarSesion(sesionActiva) {
+  if (sesionActiva) {
+    vistaLogin.style.display = 'none';
+    vistaPanel.style.display = 'block';
+    cargarSolicitudes();
+  } else {
+    vistaLogin.style.display = 'block';
+    vistaPanel.style.display = 'none';
+    inputPass.value = '';
+    inputPass.type = 'password';
+    togglePass.textContent = '👁️';
+    usuarioActual = null;
+    idsConocidos.clear();
+    primeraCarga = true;
+  }
+}
+
+supabaseClient.auth.getSession().then(({ data: { session } }) => {
+  if (session && session.user) usuarioActual = session.user.email;
+  mostrarSesion(!!session);
+});
+supabaseClient.auth.onAuthStateChange((_event, session) => {
+  if (session && session.user) usuarioActual = session.user.email;
+  mostrarSesion(!!session);
+});
+
+/* ============================================================
+   CAMBIAR CONTRASEÑA
+   ============================================================ */
+const modalPass = document.getElementById('modal-pass');
+const passNueva = document.getElementById('pass-nueva');
+const passRepetir = document.getElementById('pass-repetir');
+
+document.getElementById('btn-cambiar-pass').addEventListener('click', () => {
+  modalPass.classList.add('activo');
+  passNueva.value = '';
+  passRepetir.value = '';
+  setTimeout(() => passNueva.focus(), 100);
+});
+
+document.getElementById('btn-cancelar-pass').addEventListener('click', () => {
+  modalPass.classList.remove('activo');
+});
+
+document.getElementById('btn-guardar-pass').addEventListener('click', async () => {
+  const nueva = passNueva.value;
+  const repetir = passRepetir.value;
+
+  if (!nueva || !repetir) {
+    alert('Completá ambos campos.');
+    return;
+  }
+  if (nueva.length < 8) {
+    alert('La contraseña debe tener al menos 8 caracteres.');
+    return;
+  }
+  if (nueva !== repetir) {
+    alert('Las contraseñas no coinciden.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-guardar-pass');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const { error } = await supabaseClient.auth.updateUser({ password: nueva });
+
+  btn.disabled = false;
+  btn.textContent = 'Guardar';
+
+  if (error) {
+    alert('No se pudo cambiar la contraseña: ' + error.message);
+    return;
+  }
+
+  modalPass.classList.remove('activo');
+  mostrarToast('🔑 Contraseña actualizada', 'Tu nueva contraseña ya está activa', 'success', 4000);
+});
+
+modalPass.addEventListener('click', (e) => {
+  if (e.target.id === 'modal-pass') modalPass.classList.remove('activo');
+});
+
+/* ============================================================
+   FILTRO COMISARÍA
+   ============================================================ */
+const filtroComisaria = document.getElementById('filtro-comisaria');
+DEPENDENCIAS_POLICIALES.forEach(dep => {
+  const opt = document.createElement('option');
+  opt.value = dep.nombre;
+  opt.textContent = dep.nombre;
+  filtroComisaria.appendChild(opt);
+});
+
+function obtenerTipoDependencia(nombre) {
+  if (!nombre) return '';
+  const n = String(nombre).trim();
+  if (/^subcomisar[íi]a/i.test(n)) return 'Subcomisaría';
+  if (/^comisar[íi]a/i.test(n)) return 'Comisaría';
+  if (/^destacamento/i.test(n)) return 'Destacamento';
+  if (/^puerto\s+pol/i.test(n)) return 'Puerto Policial';
+  if (/^puesto/i.test(n)) return 'Puesto';
+  if (/^base\s+operativa/i.test(n)) return 'Base Operativa';
+  return 'Otro';
+}
+
+/* ============================================================
+   ETIQUETAS
+   ============================================================ */
+const etiquetasDetalle = {
+  nombre: 'Nombre completo', dni: 'DNI', fechaNacimiento: 'Fecha de nacimiento',
+  email: 'Email de contacto', telefono: 'Teléfono / WhatsApp',
+  domicilio: 'Domicilio', localidad: 'Localidad', tiempoResidencia: 'Tiempo de residencia',
+  motivo: 'Motivo del trámite', nombreSolicitante: 'Nombre del solicitante',
+  dniSolicitante: 'DNI del solicitante', nombreConviviente: 'Nombre del conviviente',
+  dniConviviente: 'DNI del conviviente', parentesco: 'Parentesco con el conviviente',
+  domicilioComun: 'Domicilio en común', estadoCivil: 'Estado civil',
+  situacionLaboral: 'Situación laboral', personasACargo: 'Personas a cargo',
+  testigo1Nombre: 'Nombre del testigo 1', testigo1Dni: 'DNI del testigo 1',
+  testigo2Nombre: 'Nombre del testigo 2', testigo2Dni: 'DNI del testigo 2',
+  foto_solicitante: 'Foto del DNI - Solicitante',
+  foto_testigo1: 'Foto del DNI - Testigo 1',
+  foto_testigo2: 'Foto del DNI - Testigo 2',
+  nombreMenor: 'Nombre del menor', dniMenor: 'DNI del menor',
+  fechaNacimientoMenor: 'Fecha de nacimiento del menor',
+  nacionalidadMenor: 'Nacionalidad del menor',
+  nombreProgenitor: 'Nombre del progenitor que autoriza',
+  dniProgenitor: 'DNI del progenitor que autoriza',
+  vinculoProgenitor: 'Vínculo con el menor',
+  destino: 'Destino del viaje', motivoViaje: 'Motivo del viaje',
+  fechaSalida: 'Fecha de salida', fechaRegreso: 'Fecha de regreso',
+  empresaTransporte: 'Empresa de transporte',
+  empresaOtra: 'Empresa de transporte (otra)',
+  tipoViaje: 'Tipo de viaje',
+  nombreAcompanante: 'Nombre del acompañante',
+  dniAcompanante: 'DNI del acompañante',
+  vinculoAcompanante: 'Vínculo del acompañante',
+  nombreOtroProgenitor: 'Nombre del otro progenitor',
+  dniOtroProgenitor: 'DNI del otro progenitor',
+  foto_menor: 'Foto del DNI - Menor',
+  foto_progenitor: 'Foto del DNI - Progenitor autorizante',
+  tipoCertificado: 'Tipo de certificado',
+  tipoDocumento: 'Tipo de documento',
+  numeroDocumento: 'Número del documento',
+  fechaExtravio: 'Fecha aproximada del extravío',
+  circunstancia: 'Circunstancia',
+  lugarExtravio: 'Lugar aproximado del extravío',
+  detalleExtravio: 'Detalle adicional',
+  tipoBeneficio: 'Tipo de beneficio',
+  tiempoEstadia: 'Tiempo de estadía',
+  motivo_denegacion: 'Motivo de denegación',
+  validado_por: 'Validado por',
+  validado_en: 'Fecha de validación',
+  notas_internas: 'Notas internas',
+};
+
+/* ============================================================
+   CARGA DE SOLICITUDES
+   ============================================================ */
+async function cargarSolicitudes() {
+  const { data, error } = await supabaseClient
+    .from('solicitudes')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+
+  const nuevas = data || [];
+
+  // Detección de trámites nuevos para el toast
+  if (primeraCarga) {
+    nuevas.forEach(s => idsConocidos.add(s.id));
+    primeraCarga = false;
+  } else {
+    const recienLlegadas = nuevas.filter(s => !idsConocidos.has(s.id));
+    if (recienLlegadas.length > 0) {
+      recienLlegadas.forEach(s => {
+        idsConocidos.add(s.id);
+        const nombre = obtenerNombreSolicitud(s) || 'Solicitante';
+        mostrarToast('📬 Nuevo trámite', `${nombre} cargó "${s.tramite_titulo || s.tramite}"`, 'success', 6000);
+      });
+      // Sonido (opcional, muy sutil)
+      try {
+        const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+        audio.volume = 0.2;
+        audio.play().catch(() => {});
+      } catch (e) {}
+    }
+  }
+
+  solicitudesCache = nuevas;
+  actualizarContadores();
+  renderTabla();
+}
+
+/* ============================================================
+   CONTADORES + ESTADÍSTICAS
+   ============================================================ */
+function actualizarContadores() {
+  const pendientes = solicitudesCache.filter(s => s.estado === 'pendiente').length;
+  const procesados = solicitudesCache.filter(s => s.estado === 'procesado').length;
+  const denegados = solicitudesCache.filter(s => s.estado === 'denegado').length;
+  const urgentes = solicitudesCache.filter(s => s.urgente === true).length;
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const hace7dias = new Date();
+  hace7dias.setDate(hace7dias.getDate() - 7);
+
+  const countHoy = solicitudesCache.filter(s => s.created_at && new Date(s.created_at) >= hoy).length;
+  const countSemana = solicitudesCache.filter(s => s.created_at && new Date(s.created_at) >= hace7dias).length;
+
+  document.getElementById('count-pendientes').textContent = pendientes;
+  document.getElementById('count-procesados').textContent = procesados;
+  document.getElementById('count-denegados').textContent = denegados;
+  document.getElementById('count-hoy').textContent = countHoy;
+  document.getElementById('count-semana').textContent = countSemana;
+  document.getElementById('count-urgentes').textContent = urgentes;
+}
+
+document.getElementById('btn-actualizar').addEventListener('click', () => {
+  cargarSolicitudes();
+  mostrarToast('🔄 Actualizado', 'Lista actualizada', 'success', 2000);
+});
+
+/* ============================================================
+   REALTIME
+   ============================================================ */
+supabaseClient
+  .channel('solicitudes-cambios')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes' }, cargarSolicitudes)
+  .subscribe();
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function normalizarTexto(t) {
+  return String(t || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().trim();
+}
+
+function obtenerDniSolicitud(s) {
+  const d = s.datos || {};
+  return d.dni || d.dniSolicitante || d.dniMenor || d.testigo1Dni || '';
+}
+
+function obtenerNombreSolicitud(s) {
+  const d = s.datos || {};
+  return d.nombre || d.nombreSolicitante || d.nombreConviviente || d.nombreMenor || '';
+}
+
+function obtenerEmailSolicitud(s) {
+  const d = s.datos || {};
+  return d.email || '';
+}
+
+function obtenerTelefonoSolicitud(s) {
+  const d = s.datos || {};
+  return d.telefono || '';
+}
+
+function detectarDuplicados() {
+  // Retorna un Set con los IDs que tienen un duplicado (mismo DNI + mismo trámite)
+  const mapa = {};
+  const duplicados = new Set();
+  solicitudesCache.forEach(s => {
+    const dni = obtenerDniSolicitud(s);
+    if (!dni) return;
+    const clave = `${dni}|${s.tramite}`;
+    if (mapa[clave]) {
+      duplicados.add(mapa[clave]);
+      duplicados.add(s.id);
+    } else {
+      mapa[clave] = s.id;
+    }
+  });
+  return duplicados;
+}
+
+/* ============================================================
+   RENDER TABLA
+   ============================================================ */
+function aplicarFiltros() {
+  const estado = document.getElementById('filtro-estado').value;
+  const tipoDep = document.getElementById('filtro-tipo-dependencia').value;
+  const comisaria = document.getElementById('filtro-comisaria').value;
+  const tramite = document.getElementById('filtro-tramite').value;
+  const fechaFiltro = document.getElementById('filtro-fecha').value;
+  const fechaDesde = document.getElementById('fecha-desde').value;
+  const fechaHasta = document.getElementById('fecha-hasta').value;
+  const busqueda = normalizarTexto(document.getElementById('filtro-busqueda').value);
+
+  const ahora = new Date();
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const hace7dias = new Date(); hace7dias.setDate(hace7dias.getDate() - 7);
+  const hace30dias = new Date(); hace30dias.setDate(hace30dias.getDate() - 30);
+
+  return solicitudesCache.filter(s => {
+    if (estado && s.estado !== estado) return false;
+    if (comisaria && s.comisaria_asignada !== comisaria) return false;
+    if (tipoDep && obtenerTipoDependencia(s.comisaria_asignada) !== tipoDep) return false;
+    if (tramite && s.tramite !== tramite) return false;
+
+    // Filtro por fecha
+    if (s.created_at) {
+      const f = new Date(s.created_at);
+      if (fechaFiltro === 'hoy' && f < hoy) return false;
+      if (fechaFiltro === 'semana' && f < hace7dias) return false;
+      if (fechaFiltro === 'mes' && f < hace30dias) return false;
+      if (fechaFiltro === 'rango') {
+        if (fechaDesde && f < new Date(fechaDesde + 'T00:00:00')) return false;
+        if (fechaHasta && f > new Date(fechaHasta + 'T23:59:59')) return false;
+      }
+    } else if (fechaFiltro) {
+      return false;
+    }
+
+    if (busqueda) {
+      const nombre = normalizarTexto(obtenerNombreSolicitud(s));
+      const dni = normalizarTexto(obtenerDniSolicitud(s));
+      const email = normalizarTexto(obtenerEmailSolicitud(s));
+      const tel = normalizarTexto(obtenerTelefonoSolicitud(s));
+      if (!nombre.includes(busqueda) && !dni.includes(busqueda) &&
+          !email.includes(busqueda) && !tel.includes(busqueda)) return false;
+    }
+    return true;
+  });
+}
+
+function ordenarLista(lista) {
+  const { campo, dir } = ordenActual;
+  return lista.sort((a, b) => {
+    let va, vb;
+    if (campo === 'solicitante') {
+      va = obtenerNombreSolicitud(a);
+      vb = obtenerNombreSolicitud(b);
+    } else if (campo === 'comisaria_asignada') {
+      va = a.comisaria_asignada || '';
+      vb = b.comisaria_asignada || '';
+    } else {
+      va = a[campo] || '';
+      vb = b[campo] || '';
+    }
+
+    if (campo === 'created_at') {
+      va = new Date(va).getTime();
+      vb = new Date(vb).getTime();
+    } else {
+      va = String(va).toLowerCase();
+      vb = String(vb).toLowerCase();
+    }
+
+    if (va < vb) return dir === 'asc' ? -1 : 1;
+    if (va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
+
+function renderTabla() {
+  const filtradas = ordenarLista(aplicarFiltros());
+  const duplicados = detectarDuplicados();
+
+  const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA));
+  if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+
+  const inicio = (paginaActual - 1) * POR_PAGINA;
+  const fin = Math.min(inicio + POR_PAGINA, filtradas.length);
+  const paginadas = filtradas.slice(inicio, fin);
+
+  const tbody = document.getElementById('tabla-solicitudes');
+  tbody.innerHTML = '';
+  document.getElementById('mensaje-vacio').style.display = filtradas.length ? 'none' : 'block';
+
+  paginadas.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.className = 'fila-solicitud';
+    if (s.urgente) tr.classList.add('urgente');
+
+    const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
+    const nombreSolicitante = obtenerNombreSolicitud(s) || '-';
+    const estadoTexto = s.estado === 'procesado' ? 'Procesado' :
+                        s.estado === 'denegado' ? 'Denegado' : 'Pendiente';
+
+    const esDuplicado = duplicados.has(s.id);
+    const banderaUrgente = s.urgente ? '<span class="bandera-urgente" title="Urgente">🚨</span>' : '';
+    const badgeDuplicado = esDuplicado ? '<span class="badge-duplicado" title="Mismo DNI ya cargó este tipo de trámite">⚠️ DUPLICADO</span>' : '';
+
+    tr.innerHTML = `
+      <td>${fecha}</td>
+      <td>${banderaUrgente}${s.tramite_titulo || s.tramite || '-'}</td>
+      <td>${nombreSolicitante}${badgeDuplicado}</td>
+      <td>${s.comisaria_asignada || '-'}</td>
+      <td><span class="etiqueta ${s.estado}">${estadoTexto}</span></td>
+    `;
+    tr.addEventListener('click', () => mostrarDetalle(s));
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('info-paginacion').textContent =
+    filtradas.length === 0
+      ? 'Mostrando 0 de 0'
+      : `Mostrando ${inicio + 1}-${fin} de ${filtradas.length}`;
+
+  document.getElementById('btn-pag-prev').disabled = paginaActual <= 1;
+  document.getElementById('btn-pag-next').disabled = paginaActual >= totalPaginas;
+}
+
+/* ============================================================
+   LISTENERS DE FILTROS
+   ============================================================ */
+function resetPaginaYRender() {
+  paginaActual = 1;
+  renderTabla();
+}
+
+document.getElementById('filtro-estado').addEventListener('change', resetPaginaYRender);
+document.getElementById('filtro-tramite').addEventListener('change', resetPaginaYRender);
+document.getElementById('filtro-busqueda').addEventListener('input', resetPaginaYRender);
+
+document.getElementById('filtro-fecha').addEventListener('change', (e) => {
+  const esRango = e.target.value === 'rango';
+  document.getElementById('rango-fechas').style.display = esRango ? 'flex' : 'none';
+  resetPaginaYRender();
+});
+
+document.getElementById('fecha-desde').addEventListener('change', resetPaginaYRender);
+document.getElementById('fecha-hasta').addEventListener('change', resetPaginaYRender);
+
+document.getElementById('filtro-tipo-dependencia').addEventListener('change', (e) => {
+  const tipo = e.target.value;
+  filtroComisaria.value = '';
+  Array.from(filtroComisaria.options).forEach(opt => {
+    if (!opt.value) return;
+    const esDelTipo = !tipo || obtenerTipoDependencia(opt.value) === tipo;
+    opt.hidden = !esDelTipo;
+    opt.disabled = !esDelTipo;
+  });
+  resetPaginaYRender();
+});
+
+filtroComisaria.addEventListener('change', resetPaginaYRender);
+
+document.getElementById('btn-limpiar').addEventListener('click', () => {
+  document.getElementById('filtro-busqueda').value = '';
+  document.getElementById('filtro-estado').value = '';
+  document.getElementById('filtro-tramite').value = '';
+  document.getElementById('filtro-fecha').value = '';
+  document.getElementById('fecha-desde').value = '';
+  document.getElementById('fecha-hasta').value = '';
+  document.getElementById('rango-fechas').style.display = 'none';
+  document.getElementById('filtro-tipo-dependencia').value = '';
+  filtroComisaria.value = '';
+  Array.from(filtroComisaria.options).forEach(opt => {
+    if (!opt.value) return;
+    opt.hidden = false;
+    opt.disabled = false;
+  });
+  resetPaginaYRender();
+  mostrarToast('🧹 Filtros limpiados', '', 'success', 2000);
+});
+
+/* ============================================================
+   ORDENAMIENTO POR COLUMNAS
+   ============================================================ */
+document.querySelectorAll('th.ordenable').forEach(th => {
+  th.addEventListener('click', () => {
+    const campo = th.dataset.sort;
+    if (ordenActual.campo === campo) {
+      ordenActual.dir = ordenActual.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      ordenActual.campo = campo;
+      ordenActual.dir = 'asc';
+    }
+    document.querySelectorAll('th.ordenable').forEach(x => {
+      x.classList.remove('asc', 'desc');
+      if (x.dataset.sort === campo) x.classList.add(ordenActual.dir);
+    });
+    resetPaginaYRender();
+  });
+});
+
+/* ============================================================
+   PAGINACIÓN
+   ============================================================ */
+document.getElementById('btn-pag-prev').addEventListener('click', () => {
+  if (paginaActual > 1) {
+    paginaActual--;
+    renderTabla();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+document.getElementById('btn-pag-next').addEventListener('click', () => {
+  const filtradas = aplicarFiltros();
+  const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA));
+  if (paginaActual < totalPaginas) {
+    paginaActual++;
+    renderTabla();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+/* ============================================================
+   DETALLE
+   ============================================================ */
+let solicitudAbierta = null;
+
+async function crearSeccion(titulo, campos) {
+  const seccion = document.createElement('div');
+  seccion.className = 'detalle-seccion';
+
+  const h = document.createElement('h4');
+  h.className = 'detalle-seccion-titulo';
+  h.innerHTML = titulo;
+  seccion.appendChild(h);
+
+  const lista = document.createElement('div');
+  lista.className = 'detalle-lista';
+
+  for (const [label, valor, esFoto] of campos) {
+    if (valor === undefined || valor === null || valor === '') continue;
+    const item = document.createElement('div');
+    item.className = 'detalle-item';
+
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+
+    const dd = document.createElement('dd');
+    if (esFoto) {
+      const img = document.createElement('img');
+      img.alt = label;
+      let urlFinal = valor;
+      if (!valor.startsWith('http')) {
+        const { data: signedData, error: signedError } = await supabaseClient
+          .storage
+          .from(BUCKET_FOTOS)
+          .createSignedUrl(valor, 3600);
+        if (!signedError && signedData && signedData.signedUrl) urlFinal = signedData.signedUrl;
+        else urlFinal = '';
+      }
+      if (urlFinal) {
+        img.src = urlFinal;
+        img.addEventListener('click', () => abrirFotoGrande(urlFinal));
+        dd.appendChild(img);
+      } else {
+        dd.textContent = 'No se pudo cargar la imagen';
+      }
+    } else {
+      dd.textContent = valor;
+    }
+    item.appendChild(dt);
+    item.appendChild(dd);
+    lista.appendChild(item);
+  }
+
+  seccion.appendChild(lista);
+  return seccion;
+}
+
+function crearSeparador() {
+  const sep = document.createElement('div');
+  sep.className = 'detalle-separador';
+  return sep;
+}
+
+function crearItemEstado(estado) {
+  const item = document.createElement('div');
+  item.className = 'detalle-item';
+  const dt = document.createElement('dt');
+  dt.textContent = 'Estado actual';
+  const dd = document.createElement('dd');
+  const estadoTexto = estado === 'procesado' ? 'Procesado' :
+                      estado === 'denegado' ? 'Denegado' : 'Pendiente';
+  dd.innerHTML = `<span class="etiqueta ${estado}">${estadoTexto}</span>`;
+  item.appendChild(dt);
+  item.appendChild(dd);
+  return item;
+}
+
+async function mostrarDetalle(s) {
+  solicitudAbierta = s;
+  const tituloEl = document.getElementById('detalle-titulo');
+  const urgenteIcono = s.urgente ? '<span style="color:#fca5a5;">🚨 URGENTE</span>' : '';
+  tituloEl.innerHTML = (s.tramite_titulo || s.tramite) + ' ' + urgenteIcono;
+
+  const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
+  document.getElementById('detalle-fecha').textContent = 'Solicitud recibida el ' + fecha;
+
+  const cont = document.getElementById('detalle-contenido');
+  cont.innerHTML = '';
+
+  const d = s.datos || {};
+  const et = etiquetasDetalle;
+  const camposSol = [];
+  camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
+
+  if (s.tramite === 'autorizacion') {
+    if (d.nombreMenor) camposSol.push([et.nombreMenor, d.nombreMenor]);
+    if (d.dniMenor) camposSol.push([et.dniMenor, d.dniMenor]);
+    if (d.fechaNacimientoMenor) camposSol.push([et.fechaNacimientoMenor, d.fechaNacimientoMenor]);
+    if (d.nacionalidadMenor) camposSol.push([et.nacionalidadMenor, d.nacionalidadMenor]);
+    if (d.nombreProgenitor) camposSol.push([et.nombreProgenitor, d.nombreProgenitor]);
+    if (d.dniProgenitor) camposSol.push([et.dniProgenitor, d.dniProgenitor]);
+    if (d.vinculoProgenitor) camposSol.push([et.vinculoProgenitor, d.vinculoProgenitor]);
+    if (d.email) camposSol.push([et.email, d.email]);
+    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
+    if (d.destino) camposSol.push([et.destino, d.destino]);
+    if (d.motivoViaje) camposSol.push([et.motivoViaje, d.motivoViaje]);
+    if (d.fechaSalida) camposSol.push([et.fechaSalida, d.fechaSalida]);
+    if (d.fechaRegreso) camposSol.push([et.fechaRegreso, d.fechaRegreso]);
+    if (d.empresaTransporte) camposSol.push([et.empresaTransporte, d.empresaTransporte]);
+    if (d.empresaOtra) camposSol.push([et.empresaOtra, d.empresaOtra]);
+    if (d.tipoViaje) camposSol.push([et.tipoViaje, d.tipoViaje === 'solo' ? 'Viaja SOLO' : 'Viaja ACOMPAÑADO']);
+    if (d.nombreAcompanante) camposSol.push([et.nombreAcompanante, d.nombreAcompanante]);
+    if (d.dniAcompanante) camposSol.push([et.dniAcompanante, d.dniAcompanante]);
+    if (d.vinculoAcompanante) camposSol.push([et.vinculoAcompanante, d.vinculoAcompanante]);
+    if (d.nombreOtroProgenitor) camposSol.push([et.nombreOtroProgenitor, d.nombreOtroProgenitor]);
+    if (d.dniOtroProgenitor) camposSol.push([et.dniOtroProgenitor, d.dniOtroProgenitor]);
+    if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
+    if (d.localidad) camposSol.push([et.localidad, d.localidad]);
+    if (d.foto_menor) camposSol.push([et.foto_menor, d.foto_menor, true]);
+    if (d.foto_progenitor) camposSol.push([et.foto_progenitor, d.foto_progenitor, true]);
+  } else if (s.tramite === 'extravio') {
+    if (d.nombre) camposSol.push([et.nombre, d.nombre]);
+    if (d.dni) camposSol.push([et.dni, d.dni]);
+    if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
+    if (d.email) camposSol.push([et.email, d.email]);
+    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
+    if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
+    if (d.localidad) camposSol.push([et.localidad, d.localidad]);
+    if (d.tipoDocumento) camposSol.push([et.tipoDocumento, d.tipoDocumento]);
+    if (d.numeroDocumento) camposSol.push([et.numeroDocumento, d.numeroDocumento]);
+    if (d.fechaExtravio) camposSol.push([et.fechaExtravio, d.fechaExtravio]);
+    if (d.circunstancia) camposSol.push([et.circunstancia, d.circunstancia]);
+    if (d.lugarExtravio) camposSol.push([et.lugarExtravio, d.lugarExtravio]);
+    if (d.detalleExtravio) camposSol.push([et.detalleExtravio, d.detalleExtravio]);
+    if (d.foto_solicitante) camposSol.push([et.foto_solicitante, d.foto_solicitante, true]);
+  } else {
+    const nombreSol = d.nombre || d.nombreSolicitante || '';
+    const dniSol = d.dni || d.dniSolicitante || '';
+    if (nombreSol) camposSol.push([et.nombre, nombreSol]);
+    if (dniSol) camposSol.push([et.dni, dniSol]);
+    if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
+    if (d.email) camposSol.push([et.email, d.email]);
+    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
+    if (d.nombreConviviente) camposSol.push([et.nombreConviviente, d.nombreConviviente]);
+    if (d.dniConviviente) camposSol.push([et.dniConviviente, d.dniConviviente]);
+    if (d.parentesco) camposSol.push([et.parentesco, d.parentesco]);
+    if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
+    if (d.domicilioComun) camposSol.push([et.domicilioComun, d.domicilioComun]);
+    if (d.localidad) camposSol.push([et.localidad, d.localidad]);
+    if (d.tiempoResidencia) camposSol.push([et.tiempoResidencia, d.tiempoResidencia]);
+    if (d.tiempoEstadia) camposSol.push([et.tiempoEstadia, d.tiempoEstadia]);
+    if (d.estadoCivil) camposSol.push([et.estadoCivil, d.estadoCivil]);
+    if (d.situacionLaboral) camposSol.push([et.situacionLaboral, d.situacionLaboral]);
+    if (d.personasACargo) camposSol.push([et.personasACargo, d.personasACargo]);
+    if (d.tipoCertificado) camposSol.push([et.tipoCertificado, d.tipoCertificado]);
+    if (d.tipoBeneficio) camposSol.push([et.tipoBeneficio, d.tipoBeneficio]);
+    if (d.motivo) camposSol.push([et.motivo, d.motivo]);
+    const fotoSol = d.foto_solicitante || d.fotoSolicitante;
+    if (fotoSol) camposSol.push([et.foto_solicitante, fotoSol, true]);
+  }
+
+  // Motivo de denegación (si existe)
+  if (s.motivo_denegacion) {
+    camposSol.push([et.motivo_denegacion, s.motivo_denegacion]);
+  }
+  // Validación
+  if (s.validado_por) {
+    camposSol.push([et.validado_por, s.validado_por]);
+  }
+  if (s.validado_en) {
+    camposSol.push([et.validado_en, new Date(s.validado_en).toLocaleString('es-AR')]);
+  }
+
+  const seccionSol = await crearSeccion('👤 Solicitante', camposSol);
+  const listaSol = seccionSol.querySelector('.detalle-lista');
+  listaSol.appendChild(crearItemEstado(s.estado));
+  cont.appendChild(seccionSol);
+
+  const tramitesConTestigos = ['residencia', 'convivencia', 'carencia'];
+  if (tramitesConTestigos.includes(s.tramite)) {
+    const camposT1 = [];
+    if (d.testigo1Nombre) camposT1.push([et.testigo1Nombre, d.testigo1Nombre]);
+    if (d.testigo1Dni) camposT1.push([et.testigo1Dni, d.testigo1Dni]);
+    if (d.foto_testigo1) camposT1.push([et.foto_testigo1, d.foto_testigo1, true]);
+    if (camposT1.length) {
+      cont.appendChild(crearSeparador());
+      cont.appendChild(await crearSeccion('👤 Testigo 1', camposT1));
+    }
+    const camposT2 = [];
+    if (d.testigo2Nombre) camposT2.push([et.testigo2Nombre, d.testigo2Nombre]);
+    if (d.testigo2Dni) camposT2.push([et.testigo2Dni, d.testigo2Dni]);
+    if (d.foto_testigo2) camposT2.push([et.foto_testigo2, d.foto_testigo2, true]);
+    if (camposT2.length) {
+      cont.appendChild(crearSeparador());
+      cont.appendChild(await crearSeccion('👤 Testigo 2', camposT2));
+    }
+  }
+
+  document.getElementById('detalle').style.display = 'block';
+  document.getElementById('detalle').scrollIntoView({ behavior: 'smooth' });
+}
+
+document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
+  document.getElementById('detalle').style.display = 'none';
+});
+
+/* ============================================================
+   CAMBIAR ESTADO
+   ============================================================ */
+async function cambiarEstado(nuevoEstado) {
+  if (!solicitudAbierta) return;
+
+  let motivo = null;
+  if (nuevoEstado === 'denegado') {
+    motivo = prompt('Motivo de la denegación (obligatorio):', '');
+    if (motivo === null) return;
+    if (!motivo.trim()) {
+      alert('Tenés que escribir un motivo para denegar.');
+      return;
+    }
+  }
+
+  const update = {
+    estado: nuevoEstado,
+    validado_por: usuarioActual,
+    validado_en: new Date().toISOString(),
+  };
+  if (nuevoEstado === 'denegado' && motivo) update.motivo_denegacion = motivo.trim();
+  if (nuevoEstado !== 'denegado') update.motivo_denegacion = null;
+
+  const { error } = await supabaseClient
+    .from('solicitudes')
+    .update(update)
+    .eq('id', solicitudAbierta.id);
+
+  if (error) {
+    console.error(error);
+    alert('No se pudo actualizar: ' + error.message);
+    return;
+  }
+
+  document.getElementById('detalle').style.display = 'none';
+  await cargarSolicitudes();
+
+  const emoji = nuevoEstado === 'procesado' ? '✅' : nuevoEstado === 'denegado' ? '❌' : '⏱';
+  mostrarToast(`${emoji} Trámite actualizado`, `Estado: ${nuevoEstado}`, 'success', 3000);
+}
+
+document.getElementById('btn-validar').addEventListener('click', () => cambiarEstado('procesado'));
+document.getElementById('btn-denegar').addEventListener('click', () => cambiarEstado('denegado'));
+document.getElementById('btn-pendiente').addEventListener('click', () => cambiarEstado('pendiente'));
+
+/* ============================================================
+   MARCAR URGENTE
+   ============================================================ */
+document.getElementById('btn-urgente').addEventListener('click', async () => {
+  if (!solicitudAbierta) return;
+  const nuevoValor = !solicitudAbierta.urgente;
+  const { error } = await supabaseClient
+    .from('solicitudes')
+    .update({ urgente: nuevoValor })
+    .eq('id', solicitudAbierta.id);
+  if (error) { alert('Error: ' + error.message); return; }
+  solicitudAbierta.urgente = nuevoValor;
+  await cargarSolicitudes();
+  mostrarToast(nuevoValor ? '🚨 Marcado urgente' : '✅ Ya no es urgente', '', 'warning', 3000);
+});
+
+/* ============================================================
+   IMPRIMIR
+   ============================================================ */
+document.getElementById('btn-imprimir').addEventListener('click', async () => {
+  if (!solicitudAbierta) return;
+  const s = solicitudAbierta;
+  const ventana = window.open('', '_blank');
+  const titulo = s.tramite_titulo || s.tramite;
+  const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
+
+  let html = `
+    <!DOCTYPE html>
+    <html><head>
+    <meta charset="UTF-8">
+    <title>${titulo}</title>
+    <style>
+      body{font-family:Arial,sans-serif; padding:30px; max-width:800px; margin:0 auto; color:#1f2937;}
+      h1{text-align:center; color:#0d2a4d; font-size:1.3rem; margin-bottom:4px; border-bottom:2px solid #c9a961; padding-bottom:12px;}
+      .subt{text-align:center; color:#6b7280; font-size:0.85rem; margin-bottom:24px;}
+      dl{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+      dt{font-size:0.72rem; color:#6b7280; text-transform:uppercase; letter-spacing:0.03em; font-weight:600;}
+      dd{margin:2px 0 0; font-size:0.9rem;}
+      dd img{max-width:280px; border:1px solid #ddd; border-radius:6px; margin-top:6px;}
+      .firma{margin-top:60px; display:flex; justify-content:space-between;}
+      .firma div{border-top:1px solid #333; padding-top:6px; width:40%; text-align:center; font-size:0.8rem;}
+      @media print{body{padding:10px;}}
+    </style>
+    </head><body>
+    <h1>${titulo}</h1>
+    <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
+    <p class="subt">Solicitud recibida el ${fecha}</p>
+    <dl>
+      <div><dt>Comisaría asignada</dt><dd>${s.comisaria_asignada || '-'}</dd></div>
+      <div><dt>Estado</dt><dd>${s.estado || 'pendiente'}</dd></div>
+  `;
+
+  const d = s.datos || {};
+  for (const [campo, valor] of Object.entries(d)) {
+    if (!valor) continue;
+    const label = etiquetasDetalle[campo] || campo;
+    if (campo.startsWith('foto_')) {
+      let urlPrint = valor;
+      if (!valor.startsWith('http')) {
+        const { data: signedData } = await supabaseClient
+          .storage.from(BUCKET_FOTOS).createSignedUrl(valor, 600);
+        if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
+      }
+      html += `<div style="grid-column:1/-1;"><dt>${label}</dt><dd><img src="${urlPrint}"></dd></div>`;
+    } else {
+      html += `<div><dt>${label}</dt><dd>${valor}</dd></div>`;
+    }
+  }
+
+  if (s.motivo_denegacion) {
+    html += `<div style="grid-column:1/-1;"><dt>Motivo de denegación</dt><dd>${s.motivo_denegacion}</dd></div>`;
+  }
+
+  html += `
+    </dl>
+    <div class="firma">
+      <div>Firma del solicitante</div>
+      <div>Firma y sello - Autoridad policial</div>
+    </div>
+    </body></html>
+  `;
+
+  ventana.document.write(html);
+  ventana.document.close();
+  setTimeout(() => ventana.print(), 500);
+});
+
+/* ============================================================
+   EXPORTAR CSV
+   ============================================================ */
+document.getElementById('btn-exportar').addEventListener('click', () => {
+  const filtradas = ordenarLista(aplicarFiltros());
+  if (!filtradas.length) {
+    alert('No hay solicitudes para exportar con los filtros actuales.');
+    return;
+  }
+
+  const filas = [[
+    'Fecha', 'Trámite', 'Solicitante', 'DNI', 'Email', 'Teléfono',
+    'Domicilio', 'Comisaría', 'Estado', 'Urgente',
+    'Validado por', 'Fecha validación', 'Motivo denegación'
+  ]];
+
+  filtradas.forEach(s => {
+    const d = s.datos || {};
+    filas.push([
+      s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-',
+      s.tramite_titulo || s.tramite || '-',
+      obtenerNombreSolicitud(s) || '-',
+      obtenerDniSolicitud(s) || '-',
+      d.email || '-',
+      d.telefono || '-',
+      d.domicilio || d.domicilioComun || '-',
+      s.comisaria_asignada || '-',
+      s.estado || 'pendiente',
+      s.urgente ? 'SÍ' : 'NO',
+      s.validado_por || '-',
+      s.validado_en ? new Date(s.validado_en).toLocaleString('es-AR') : '-',
+      s.motivo_denegacion || '-'
+    ]);
+  });
+
+  const csv = filas.map(fila =>
+    fila.map(celda => `"${String(celda).replace(/"/g, '""')}"`).join(';')
+  ).join('\r\n');
+
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `solicitudes_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  mostrarToast('📥 Exportado', `${filtradas.length} trámites exportados`, 'success', 3000);
+});
+
+/* ============================================================
+   MODAL FOTO
+   ============================================================ */
+function abrirFotoGrande(src) {
+  document.getElementById('foto-grande').src = src;
+  document.getElementById('modal-foto').classList.add('activo');
+}
+
+document.getElementById('cerrar-modal').addEventListener('click', () => {
+  document.getElementById('modal-foto').classList.remove('activo');
+});
+
+document.getElementById('modal-foto').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-foto') {
+    document.getElementById('modal-foto').classList.remove('activo');
+  }
+});
+</script>
+
+</body>
+</html>
 
 <!-- Toasts -->
 <div id="toast-container"></div>
