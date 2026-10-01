@@ -696,20 +696,43 @@ async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
                       : nuevoEstado === 'denegado' ? 'DENEGADO'
                       : 'EN REVISIÓN';
 
+    // Mensaje extra
     let mensajeExtra = '';
-    let fechaLimite = '';
-
     if (nuevoEstado === 'denegado' && motivo) {
       mensajeExtra = `Motivo de la denegación: ${motivo}`;
     } else if (nuevoEstado === 'procesado') {
       const expira = sumarDiasHabiles(new Date(), DIAS_HABILES_EXPIRACION);
       expira.setHours(23, 59, 59, 999);
-      fechaLimite = expira.toLocaleDateString('es-AR', {
-        day: '2-digit', month: '2-digit', year: 'numeric'
-      });
+      const fechaLimite = expira.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
       mensajeExtra = `Tenés tiempo hasta el ${fechaLimite} para retirarlo. Pasada esa fecha, el certificado se elimina automáticamente.`;
     } else if (nuevoEstado === 'pendiente') {
       mensajeExtra = 'Tu trámite quedó nuevamente en revisión.';
+    }
+
+    // Bloque HTML del código (solo se arma si está aprobado)
+    let bloqueCodigo = '';
+    if (nuevoEstado === 'procesado' && codigo !== '—') {
+      bloqueCodigo = `
+        <div style="background:#fffbeb;border:2px dashed #c9a961;border-radius:10px;padding:20px;text-align:center;margin:20px 0;">
+          <p style="font-size:12px;color:#8a6400;font-weight:700;margin:0 0 10px;">🔐 TU CÓDIGO ÚNICO DE TRÁMITE</p>
+          <p style="font-family:monospace;font-size:26px;font-weight:700;color:#0d2a4d;background:#ffffff;padding:14px;border-radius:6px;display:inline-block;margin:0;letter-spacing:0.15em;">${codigo}</p>
+          <p style="font-size:13px;color:#4b5563;margin:14px 0 0;">Presentá este código en la comisaría para retirar tu certificado.</p>
+        </div>`;
+    }
+
+    // Bloque HTML de la fecha límite
+    let bloqueFechaLimite = '';
+    if (nuevoEstado === 'procesado') {
+      const expira = sumarDiasHabiles(new Date(), DIAS_HABILES_EXPIRACION);
+      expira.setHours(23, 59, 59, 999);
+      const fechaLimiteTexto = expira.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      bloqueFechaLimite = `
+        <div style="background:#fef2f2;border-left:4px solid #dc2626;padding:14px;border-radius:6px;margin:18px 0;">
+          <p style="font-size:14px;color:#7f1d1d;margin:0;">
+            ⏰ <strong>Fecha límite de retiro: ${fechaLimiteTexto}</strong><br>
+            Si no te presentás antes de esa fecha, el certificado se elimina automáticamente.
+          </p>
+        </div>`;
     }
 
     const templateParams = {
@@ -720,7 +743,8 @@ async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
       mensaje_extra: mensajeExtra,
       comisaria: comisaria,
       codigo: codigo,
-      fecha_limite: fechaLimite,
+      bloque_codigo: bloqueCodigo,
+      bloque_fecha_limite: bloqueFechaLimite,
     };
 
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
