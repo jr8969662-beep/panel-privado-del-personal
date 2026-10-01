@@ -592,7 +592,23 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="comisarias-config.js"></script>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+/* ============================================================
+   CONFIGURACIÓN DE EMAILJS
+   ============================================================ */
+const EMAILJS_PUBLIC_KEY = '64rdi6i-PC71o8Yqh';
+const EMAILJS_SERVICE_ID = 'service_8etpsse';
+const EMAILJS_TEMPLATE_ID = 'template_sk1q9yr';
+
+if (window.emailjs) {
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+}
+
+/* ============================================================
+   VARIABLES GLOBALES
+   ============================================================ */
 const vistaLogin = document.getElementById('vista-login');
 const vistaPanel = document.getElementById('vista-panel');
 const btnSalir = document.getElementById('btn-salir');
@@ -615,7 +631,8 @@ let usuarioActual = null;
 let solicitudesCache = [];
 let idsConocidos = new Set();
 let primeraCarga = true;
-  /* ============================================================
+
+/* ============================================================
    TOASTS
    ============================================================ */
 function mostrarToast(titulo, mensaje, tipo = 'success', duracion = 5000) {
@@ -629,6 +646,50 @@ function mostrarToast(titulo, mensaje, tipo = 'success', duracion = 5000) {
     toast.style.transition = 'all 0.3s';
     setTimeout(() => toast.remove(), 300);
   }, duracion);
+}
+
+/* ============================================================
+   ENVÍO DE CORREO AL CIUDADANO (EmailJS)
+   ============================================================ */
+async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
+  try {
+    const d = solicitud.datos || {};
+    const email = d.email || d.emailContacto;
+    if (!email) {
+      console.warn('La solicitud no tiene email, no se envía notificación.');
+      return;
+    }
+
+    const nombre = d.nombre || d.nombreSolicitante || d.nombreConviviente || d.nombreMenor || 'ciudadano/a';
+    const tramite = solicitud.tramite_titulo || solicitud.tramite || 'Trámite';
+    const comisaria = solicitud.comisaria_asignada || 'la dependencia asignada';
+
+    const estadoTexto = nuevoEstado === 'procesado' ? 'APROBADO'
+                      : nuevoEstado === 'denegado' ? 'DENEGADO'
+                      : 'EN REVISIÓN';
+
+    let mensajeExtra = '';
+    if (nuevoEstado === 'denegado' && motivo) {
+      mensajeExtra = `Motivo de la denegación: ${motivo}`;
+    } else if (nuevoEstado === 'pendiente') {
+      mensajeExtra = 'Tu trámite quedó nuevamente en revisión.';
+    }
+
+    const templateParams = {
+      email: email,
+      nombre: nombre,
+      tramite: tramite,
+      estado: estadoTexto,
+      mensaje_extra: mensajeExtra,
+      comisaria: comisaria,
+    };
+
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    mostrarToast('📧 Correo enviado', `Notificación enviada a ${email}`, 'success', 3500);
+  } catch (e) {
+    console.error('Error EmailJS:', e);
+    mostrarToast('⚠️ Correo no enviado', e?.text || e?.message || 'Error desconocido', 'warning', 5000);
+  }
 }
 
 /* RECORDAR EMAIL */
@@ -1800,7 +1861,7 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
   document.getElementById('detalle').style.display = 'none';
 });
 
-/* CAMBIAR ESTADO */
+/* CAMBIAR ESTADO — con envío de correo al ciudadano */
 async function cambiarEstado(nuevoEstado) {
   if (!solicitudAbierta) return;
   let motivo = null;
@@ -1816,8 +1877,13 @@ async function cambiarEstado(nuevoEstado) {
   };
   if (nuevoEstado === 'denegado' && motivo) update.motivo_denegacion = motivo.trim();
   if (nuevoEstado !== 'denegado') update.motivo_denegacion = null;
+
   const { error } = await supabaseClient.from('solicitudes').update(update).eq('id', solicitudAbierta.id);
   if (error) { console.error(error); alert('No se pudo actualizar: ' + error.message); return; }
+
+  // 🔔 Disparar correo al ciudadano (no bloquea si falla)
+  enviarCorreoEstado(solicitudAbierta, nuevoEstado, motivo);
+
   document.getElementById('detalle').style.display = 'none';
   await cargarSolicitudes();
   const emoji = nuevoEstado === 'procesado' ? '✅' : nuevoEstado === 'denegado' ? '❌' : '⏱';
