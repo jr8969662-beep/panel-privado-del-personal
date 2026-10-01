@@ -207,6 +207,8 @@
   .badge-duplicado{background:rgba(185,28,28,0.4);color:#fca5a5;
     border:1px solid rgba(252,165,165,0.6);padding:2px 8px;border-radius:10px;
     font-size:0.68rem;font-weight:700;margin-left:6px;cursor:help;}
+  .codigo-tabla{font-family:'Courier New',monospace;font-size:0.9rem;font-weight:700;
+    color:var(--dorado-brilloso);letter-spacing:0.08em;user-select:all;}
   .paginacion{display:flex;justify-content:space-between;align-items:center;
     margin-top:14px;gap:12px;flex-wrap:wrap;}
   .paginacion .info-pag{font-size:0.82rem;color:rgba(255,255,255,0.7);}
@@ -260,6 +262,9 @@
   #btn-cerrar-detalle:hover{background:rgba(255,255,255,0.25);}
   #btn-urgente{background:rgba(185,28,28,0.7);color:#fff;border:1px solid rgba(252,165,165,0.5);}
   #btn-urgente:hover{background:rgba(185,28,28,0.9);}
+  #btn-retirado{background:#0d9488;color:#fff;border:1px solid rgba(94,234,212,0.4);}
+  #btn-retirado:hover{background:#0f766e;}
+  #btn-retirado:disabled{opacity:0.5;cursor:not-allowed;}
 
   .vacio{padding:40px 20px;text-align:center;color:rgba(255,255,255,0.7);font-size:0.9rem;}
   .vacio .vacio-icono{font-size:3rem;margin-bottom:12px;opacity:0.5;}
@@ -302,7 +307,6 @@
   .modal-caja .modal-btns button{padding:10px 18px;border:none;border-radius:6px;
     cursor:pointer;font-size:0.88rem;font-weight:600;transition:all 0.2s;font-family:inherit;}
 
-  /* CERTIFICADOS OFICIALES (para vista previa) */
   .certificado-oficial{background:#fff;color:#1f2937;padding:40px 50px;
     font-family:'Times New Roman', Georgia, serif;line-height:1.8;
     text-align:justify;max-width:850px;margin:0 auto;
@@ -453,7 +457,7 @@
     </div>
 
     <div class="filtros">
-      <input type="text" id="filtro-busqueda" placeholder="🔍 Buscar por nombre, DNI, email o teléfono...">
+      <input type="text" id="filtro-busqueda" placeholder="🔍 Buscar por código, nombre, DNI, email o teléfono...">
       <select id="filtro-estado">
         <option value="">Todos los estados</option>
         <option value="pendiente">Pendientes</option>
@@ -504,6 +508,7 @@
           <tr>
             <th class="ordenable" data-sort="created_at">Fecha</th>
             <th class="ordenable" data-sort="tramite_titulo">Trámite</th>
+            <th class="ordenable" data-sort="codigo">Código</th>
             <th class="ordenable" data-sort="solicitante">Solicitante</th>
             <th class="ordenable" data-sort="comisaria_asignada">Comisaría</th>
             <th class="ordenable" data-sort="estado">Estado</th>
@@ -533,6 +538,7 @@
         <button id="btn-denegar">✕ Denegar</button>
         <button id="btn-pendiente">⏱ Marcar pendiente</button>
         <button id="btn-urgente">🚨 Marcar urgente</button>
+        <button id="btn-retirado">📦 Marcar como retirado</button>
         <button id="btn-imprimir">🖨 Imprimir</button>
         <button id="btn-cerrar-detalle">Cerrar</button>
       </div>
@@ -592,7 +598,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="comisarias-config.js"></script>
-<!-- EmailJS SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 /* ============================================================
@@ -624,6 +629,7 @@ const toastContainer = document.getElementById('toast-container');
 
 const BUCKET_FOTOS = 'fotos-tramites';
 const POR_PAGINA = 20;
+const DIAS_HABILES_EXPIRACION = 5;
 
 let paginaActual = 1;
 let ordenActual = { campo: 'created_at', dir: 'desc' };
@@ -631,6 +637,27 @@ let usuarioActual = null;
 let solicitudesCache = [];
 let idsConocidos = new Set();
 let primeraCarga = true;
+
+/* ============================================================
+   HELPERS DE FECHAS
+   ============================================================ */
+function sumarDiasHabiles(fecha, dias) {
+  const f = new Date(fecha);
+  let sumados = 0;
+  while (sumados < dias) {
+    f.setDate(f.getDate() + 1);
+    const dow = f.getDay();
+    if (dow !== 0 && dow !== 6) sumados++;
+  }
+  return f;
+}
+
+function formatearFecha(fechaISO) {
+  if (!fechaISO) return '—';
+  return new Date(fechaISO).toLocaleDateString('es-AR', {
+    day: '2-digit', month: '2-digit', year: 'numeric'
+  });
+}
 
 /* ============================================================
    TOASTS
@@ -649,7 +676,7 @@ function mostrarToast(titulo, mensaje, tipo = 'success', duracion = 5000) {
 }
 
 /* ============================================================
-   ENVÍO DE CORREO AL CIUDADANO (EmailJS)
+   ENVÍO DE CORREO AL CIUDADANO (EmailJS) — sin QR, con código y fecha límite
    ============================================================ */
 async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
   try {
@@ -663,14 +690,24 @@ async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
     const nombre = d.nombre || d.nombreSolicitante || d.nombreConviviente || d.nombreMenor || 'ciudadano/a';
     const tramite = solicitud.tramite_titulo || solicitud.tramite || 'Trámite';
     const comisaria = solicitud.comisaria_asignada || 'la dependencia asignada';
+    const codigo = solicitud.codigo || '—';
 
     const estadoTexto = nuevoEstado === 'procesado' ? 'APROBADO'
                       : nuevoEstado === 'denegado' ? 'DENEGADO'
                       : 'EN REVISIÓN';
 
     let mensajeExtra = '';
+    let fechaLimite = '';
+
     if (nuevoEstado === 'denegado' && motivo) {
       mensajeExtra = `Motivo de la denegación: ${motivo}`;
+    } else if (nuevoEstado === 'procesado') {
+      const expira = sumarDiasHabiles(new Date(), DIAS_HABILES_EXPIRACION);
+      expira.setHours(23, 59, 59, 999);
+      fechaLimite = expira.toLocaleDateString('es-AR', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+      mensajeExtra = `Tenés tiempo hasta el ${fechaLimite} para retirarlo. Pasada esa fecha, el certificado se elimina automáticamente.`;
     } else if (nuevoEstado === 'pendiente') {
       mensajeExtra = 'Tu trámite quedó nuevamente en revisión.';
     }
@@ -682,6 +719,8 @@ async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
       estado: estadoTexto,
       mensaje_extra: mensajeExtra,
       comisaria: comisaria,
+      codigo: codigo,
+      fecha_limite: fechaLimite,
     };
 
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
@@ -1152,8 +1191,21 @@ const etiquetasDetalle = {
   notas_internas: 'Notas internas',
 };
 
-/* CARGA DE SOLICITUDES */
+/* ============================================================
+   CARGA DE SOLICITUDES + LIMPIEZA AUTOMÁTICA DE EXPIRADOS
+   ============================================================ */
 async function cargarSolicitudes() {
+  // 🧹 Limpieza: borrar procesados expirados y NO retirados
+  try {
+    const { error: errLimpieza } = await supabaseClient
+      .from('solicitudes')
+      .delete()
+      .eq('estado', 'procesado')
+      .eq('retirado', false)
+      .lt('fecha_expiracion', new Date().toISOString());
+    if (errLimpieza) console.warn('Error en limpieza automática:', errLimpieza);
+  } catch (e) { console.warn('Error en limpieza automática:', e); }
+
   const { data, error } = await supabaseClient
     .from('solicitudes').select('*').order('created_at', { ascending: false });
   if (error) { console.error(error); return; }
@@ -1230,7 +1282,7 @@ function detectarDuplicados() {
   return duplicados;
 }
 
-/* FILTROS + RENDER */
+/* FILTROS */
 function aplicarFiltros() {
   const estado = document.getElementById('filtro-estado').value;
   const tipoDep = document.getElementById('filtro-tipo-dependencia').value;
@@ -1263,8 +1315,10 @@ function aplicarFiltros() {
       const dni = normalizarTexto(obtenerDniSolicitud(s));
       const email = normalizarTexto(obtenerEmailSolicitud(s));
       const tel = normalizarTexto(obtenerTelefonoSolicitud(s));
+      const codigo = normalizarTexto(s.codigo || '');
       if (!nombre.includes(busqueda) && !dni.includes(busqueda) &&
-          !email.includes(busqueda) && !tel.includes(busqueda)) return false;
+          !email.includes(busqueda) && !tel.includes(busqueda) &&
+          !codigo.includes(busqueda)) return false;
     }
     return true;
   });
@@ -1276,6 +1330,7 @@ function ordenarLista(lista) {
     let va, vb;
     if (campo === 'solicitante') { va = obtenerNombreSolicitud(a); vb = obtenerNombreSolicitud(b); }
     else if (campo === 'comisaria_asignada') { va = a.comisaria_asignada || ''; vb = b.comisaria_asignada || ''; }
+    else if (campo === 'codigo') { va = a.codigo || ''; vb = b.codigo || ''; }
     else { va = a[campo] || ''; vb = b[campo] || ''; }
     if (campo === 'created_at') { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
     else { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); }
@@ -1310,6 +1365,7 @@ function renderTabla() {
     tr.innerHTML = `
       <td>${fecha}</td>
       <td>${banderaUrgente}${s.tramite_titulo || s.tramite || '-'}</td>
+      <td><span class="codigo-tabla">${s.codigo || '-'}</span></td>
       <td>${nombreSolicitante}${badgeDuplicado}</td>
       <td>${s.comisaria_asignada || '-'}</td>
       <td><span class="etiqueta ${s.estado}">${estadoTexto}</span></td>
@@ -1403,7 +1459,7 @@ document.getElementById('btn-pag-next').addEventListener('click', () => {
 });
 
 /* ============================================================
-   GENERADORES DE CERTIFICADOS OFICIALES
+   GENERADORES DE CERTIFICADOS OFICIALES (para imprimir)
    ============================================================ */
 function formatearDni(dni) {
   if (!dni) return '—';
@@ -1750,12 +1806,44 @@ async function mostrarDetalle(s) {
   tituloEl.innerHTML = (s.tramite_titulo || s.tramite) + ' ' + urgenteIcono;
   const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
   document.getElementById('detalle-fecha').textContent = 'Solicitud recibida el ' + fecha;
+
+  // Botón retirado: habilitar solo si está procesado y no retirado
+  const btnRetirado = document.getElementById('btn-retirado');
+  if (s.estado === 'procesado' && !s.retirado) {
+    btnRetirado.disabled = false;
+    btnRetirado.style.display = '';
+  } else if (s.retirado) {
+    btnRetirado.disabled = true;
+    btnRetirado.textContent = '📦 Ya retirado';
+    btnRetirado.style.display = '';
+  } else {
+    btnRetirado.disabled = true;
+    btnRetirado.style.display = 'none';
+  }
+
   const cont = document.getElementById('detalle-contenido');
   cont.innerHTML = '';
   const d = s.datos || {};
   const et = etiquetasDetalle;
   const camposSol = [];
   camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
+  if (s.codigo) camposSol.push(['🔐 Código único del trámite', s.codigo]);
+
+  // Estado de retiro / expiración
+  if (s.estado === 'procesado' && s.fecha_expiracion) {
+    if (s.retirado) {
+      camposSol.push(['📦 Estado de retiro', `✅ Retirado el ${formatearFecha(s.retirado_en || s.validado_en)}`]);
+    } else {
+      const expira = new Date(s.fecha_expiracion);
+      const hoy = new Date();
+      const diasRestantes = Math.ceil((expira - hoy) / (1000 * 60 * 60 * 24));
+      if (diasRestantes < 0) {
+        camposSol.push(['📅 Estado de retiro', '⚠️ Expirado (se eliminará en la próxima limpieza)']);
+      } else {
+        camposSol.push(['📅 Fecha límite de retiro', `⏰ Expira el ${formatearFecha(s.fecha_expiracion)} (${diasRestantes} día${diasRestantes === 1 ? '' : 's'} restante${diasRestantes === 1 ? '' : 's'})`]);
+      }
+    }
+  }
 
   if (s.tramite === 'autorizacion') {
     if (d.nombreMenor) camposSol.push([et.nombreMenor, d.nombreMenor]);
@@ -1861,7 +1949,7 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
   document.getElementById('detalle').style.display = 'none';
 });
 
-/* CAMBIAR ESTADO — con envío de correo al ciudadano */
+/* CAMBIAR ESTADO — con envío de correo y fecha de expiración */
 async function cambiarEstado(nuevoEstado) {
   if (!solicitudAbierta) return;
   let motivo = null;
@@ -1870,18 +1958,33 @@ async function cambiarEstado(nuevoEstado) {
     if (motivo === null) return;
     if (!motivo.trim()) { alert('Tenés que escribir un motivo para denegar.'); return; }
   }
+
   const update = {
     estado: nuevoEstado,
     validado_por: usuarioActual,
     validado_en: new Date().toISOString(),
   };
+
+  // Si se aprueba, calcular fecha de expiración (5 días hábiles)
+  if (nuevoEstado === 'procesado') {
+    const expira = sumarDiasHabiles(new Date(), DIAS_HABILES_EXPIRACION);
+    expira.setHours(23, 59, 59, 999);
+    update.fecha_expiracion = expira.toISOString();
+    update.retirado = false;
+  } else {
+    update.fecha_expiracion = null;
+  }
+
   if (nuevoEstado === 'denegado' && motivo) update.motivo_denegacion = motivo.trim();
   if (nuevoEstado !== 'denegado') update.motivo_denegacion = null;
 
   const { error } = await supabaseClient.from('solicitudes').update(update).eq('id', solicitudAbierta.id);
   if (error) { console.error(error); alert('No se pudo actualizar: ' + error.message); return; }
 
-  // 🔔 Disparar correo al ciudadano (no bloquea si falla)
+  // Refrescar objeto local para que el correo tenga la fecha de expiración
+  solicitudAbierta.estado = nuevoEstado;
+  solicitudAbierta.fecha_expiracion = update.fecha_expiracion;
+
   enviarCorreoEstado(solicitudAbierta, nuevoEstado, motivo);
 
   document.getElementById('detalle').style.display = 'none';
@@ -1906,9 +2009,21 @@ document.getElementById('btn-urgente').addEventListener('click', async () => {
   mostrarToast(nuevoValor ? '🚨 Marcado urgente' : '✅ Ya no es urgente', '', 'warning', 3000);
 });
 
-/* ============================================================
-   IMPRIMIR
-   ============================================================ */
+/* MARCAR COMO RETIRADO */
+document.getElementById('btn-retirado').addEventListener('click', async () => {
+  if (!solicitudAbierta) return;
+  if (!confirm('¿Confirmás que el ciudadano retiró el certificado?')) return;
+  const { error } = await supabaseClient
+    .from('solicitudes')
+    .update({ retirado: true, retirado_en: new Date().toISOString() })
+    .eq('id', solicitudAbierta.id);
+  if (error) { alert('Error: ' + error.message); return; }
+  document.getElementById('detalle').style.display = 'none';
+  await cargarSolicitudes();
+  mostrarToast('📦 Certificado retirado', 'Ya no se va a eliminar automáticamente', 'success', 3500);
+});
+
+/* IMPRIMIR */
 document.getElementById('btn-imprimir').addEventListener('click', async () => {
   if (!solicitudAbierta) return;
   const s = solicitudAbierta;
@@ -1948,6 +2063,9 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
     .cert-firmas-una{margin-top:70px;display:flex;justify-content:center;}
     .cert-firmas-una .cert-firma{width:220px;}
     .cert-lugar-fecha{text-align:right;font-size:0.95rem;margin:24px 0 18px;color:#1f2937;font-style:italic;}
+    .codigo-impreso{background:#fffbeb;border:2px dashed #c9a961;border-radius:10px;padding:16px;text-align:center;margin:20px 0;}
+    .codigo-impreso .etiqueta-codigo{font-size:11px;color:#8a6400;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:6px;}
+    .codigo-impreso .valor-codigo{font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:#0d2a4d;letter-spacing:0.15em;background:#fff;padding:10px 18px;border-radius:6px;display:inline-block;}
     @media print{body{padding:10px;}}
   `;
 
@@ -1955,14 +2073,23 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
 
   if (tramitesOficiales.includes(s.tramite)) {
     const certHTML = generarCertificadoOficial(s.tramite, d, comisaria);
+    const bloqueCodigo = s.codigo ? `
+      <div class="codigo-impreso">
+        <div class="etiqueta-codigo">🔐 Código único del trámite</div>
+        <div class="valor-codigo">${s.codigo}</div>
+      </div>` : '';
     html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
-      <style>${cssBase}</style></head><body>${certHTML}</body></html>`;
+      <style>${cssBase}</style></head><body>${bloqueCodigo}${certHTML}</body></html>`;
   } else {
     const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
     let listaHTML = `
       <h1>${titulo}</h1>
       <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
       <p class="subt">Solicitud recibida el ${fecha}</p>
+      ${s.codigo ? `<div class="codigo-impreso">
+        <div class="etiqueta-codigo">🔐 Código único del trámite</div>
+        <div class="valor-codigo">${s.codigo}</div>
+      </div>` : ''}
       <dl>
         <div><dt>Comisaría asignada</dt><dd>${s.comisaria_asignada || '-'}</dd></div>
         <div><dt>Estado</dt><dd>${s.estado || 'pendiente'}</dd></div>
@@ -2006,14 +2133,15 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
   const filtradas = ordenarLista(aplicarFiltros());
   if (!filtradas.length) { alert('No hay solicitudes para exportar con los filtros actuales.'); return; }
   const filas = [[
-    'Fecha', 'Trámite', 'Solicitante', 'DNI', 'Email', 'Teléfono',
-    'Domicilio', 'Comisaría', 'Estado', 'Urgente',
-    'Validado por', 'Fecha validación', 'Motivo denegación'
+    'Fecha', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email', 'Teléfono',
+    'Domicilio', 'Comisaría', 'Estado', 'Urgente', 'Retirado',
+    'Validado por', 'Fecha validación', 'Fecha expiración', 'Motivo denegación'
   ]];
   filtradas.forEach(s => {
     const d = s.datos || {};
     filas.push([
       s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-',
+      s.codigo || '-',
       s.tramite_titulo || s.tramite || '-',
       obtenerNombreSolicitud(s) || '-',
       obtenerDniSolicitud(s) || '-',
@@ -2022,8 +2150,10 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
       s.comisaria_asignada || '-',
       s.estado || 'pendiente',
       s.urgente ? 'SÍ' : 'NO',
+      s.retirado ? 'SÍ' : 'NO',
       s.validado_por || '-',
       s.validado_en ? new Date(s.validado_en).toLocaleString('es-AR') : '-',
+      s.fecha_expiracion ? new Date(s.fecha_expiracion).toLocaleString('es-AR') : '-',
       s.motivo_denegacion || '-'
     ]);
   });
