@@ -2028,6 +2028,9 @@ async function asignarComisariaPorJurisdiccion(domicilio, localidad) {
         if (Array.isArray(valor)) {
           return { opciones: valor, origen: 'correccion_barrio_multiple', barrio: barrio };
         }
+        if (valor && typeof valor === 'object') {
+          return { comisaria: valor.comisaria, lat: valor.lat || null, lon: valor.lon || null, origen: 'correccion_barrio', barrio: barrio };
+        }
         return { comisaria: valor, origen: 'correccion_barrio', barrio: barrio };
       }
     }
