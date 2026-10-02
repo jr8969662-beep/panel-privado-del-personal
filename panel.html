@@ -470,7 +470,7 @@
     </div>
 
     <div class="filtros">
-      <input type="text" id="filtro-busqueda" placeholder="🔍 Buscar por código, nombre, DNI, email o teléfono...">
+      <input type="text" id="filtro-busqueda" placeholder="🔍 Buscar por código, nombre, DNI o email...">
       <select id="filtro-estado">
         <option value="">Todos los estados</option>
         <option value="pendiente">Pendientes</option>
@@ -1214,7 +1214,7 @@ function obtenerTipoDependencia(nombre) {
 /* ETIQUETAS */
 const etiquetasDetalle = {
   nombre: 'Nombre completo', dni: 'DNI', fechaNacimiento: 'Fecha de nacimiento',
-  email: 'Email de contacto', telefono: 'Teléfono / WhatsApp',
+  email: 'Email de contacto',
   domicilio: 'Domicilio', localidad: 'Localidad', tiempoResidencia: 'Tiempo de residencia',
   motivo: 'Motivo del trámite', nombreSolicitante: 'Nombre del solicitante',
   dniSolicitante: 'DNI del solicitante', nombreConviviente: 'Nombre del conviviente',
@@ -1337,7 +1337,6 @@ function obtenerNombreSolicitud(s) {
   return d.nombre || d.nombreSolicitante || d.nombreConviviente || d.nombreMenor || '';
 }
 function obtenerEmailSolicitud(s) { return (s.datos || {}).email || ''; }
-function obtenerTelefonoSolicitud(s) { return (s.datos || {}).telefono || ''; }
 
 function detectarDuplicados() {
   const mapa = {}; const duplicados = new Set();
@@ -1383,10 +1382,9 @@ function aplicarFiltros() {
       const nombre = normalizarTexto(obtenerNombreSolicitud(s));
       const dni = normalizarTexto(obtenerDniSolicitud(s));
       const email = normalizarTexto(obtenerEmailSolicitud(s));
-      const tel = normalizarTexto(obtenerTelefonoSolicitud(s));
       const codigo = normalizarTexto(s.codigo || '');
       if (!nombre.includes(busqueda) && !dni.includes(busqueda) &&
-          !email.includes(busqueda) && !tel.includes(busqueda) &&
+          !email.includes(busqueda) &&
           !codigo.includes(busqueda)) return false;
     }
     return true;
@@ -2071,7 +2069,6 @@ async function mostrarDetalle(s) {
     if (d.dniProgenitor) camposSol.push([et.dniProgenitor, d.dniProgenitor]);
     if (d.vinculoProgenitor) camposSol.push([et.vinculoProgenitor, d.vinculoProgenitor]);
     if (d.email) camposSol.push([et.email, d.email]);
-    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
     if (d.destino) camposSol.push([et.destino, d.destino]);
     if (d.motivoViaje) camposSol.push([et.motivoViaje, d.motivoViaje]);
     if (d.fechaSalida) camposSol.push([et.fechaSalida, d.fechaSalida]);
@@ -2093,7 +2090,6 @@ async function mostrarDetalle(s) {
     if (d.dni) camposSol.push([et.dni, d.dni]);
     if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
     if (d.email) camposSol.push([et.email, d.email]);
-    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
     if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
     if (d.localidad) camposSol.push([et.localidad, d.localidad]);
     if (d.tipoDocumento) camposSol.push([et.tipoDocumento, d.tipoDocumento]);
@@ -2110,7 +2106,6 @@ async function mostrarDetalle(s) {
     if (dniSol) camposSol.push([et.dni, dniSol]);
     if (d.fechaNacimiento) camposSol.push([et.fechaNacimiento, d.fechaNacimiento]);
     if (d.email) camposSol.push([et.email, d.email]);
-    if (d.telefono) camposSol.push([et.telefono, d.telefono]);
     if (d.nombreConviviente) camposSol.push([et.nombreConviviente, d.nombreConviviente]);
     if (d.dniConviviente) camposSol.push([et.dniConviviente, d.dniConviviente]);
     if (d.parentesco) camposSol.push([et.parentesco, d.parentesco]);
@@ -2351,7 +2346,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
   const filtradas = ordenarLista(aplicarFiltros());
   if (!filtradas.length) { alert('No hay solicitudes para exportar con los filtros actuales.'); return; }
   const filas = [[
-    'Fecha', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email', 'Teléfono',
+    'Fecha', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email',
     'Domicilio', 'Comisaría', 'Estado', 'Urgente', 'Retirado',
     'Validado por', 'Fecha validación', 'Fecha expiración', 'Motivo denegación'
   ]];
@@ -2363,7 +2358,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
       s.tramite_titulo || s.tramite || '-',
       obtenerNombreSolicitud(s) || '-',
       obtenerDniSolicitud(s) || '-',
-      d.email || '-', d.telefono || '-',
+      d.email || '-',
       d.domicilio || d.domicilioComun || '-',
       s.comisaria_asignada || '-',
       s.estado || 'pendiente',
