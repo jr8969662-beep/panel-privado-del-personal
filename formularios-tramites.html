@@ -2174,7 +2174,7 @@ async function mostrarAvisoComisaria(form, estado, dato) {
       lat: centro.lat,
       lng: centro.lng,
       comisariaFija: dato.comisaria,
-      esMultiple: false,
+      esMultiple: true,
       texto,
       nombreEl
     });
@@ -2206,9 +2206,28 @@ async function mostrarAvisoComisaria(form, estado, dato) {
 
   } else if (estado === 'error') {
     aviso.classList.add('activo', 'error');
-    texto.textContent = '⚠️ No se pudo determinar la comisaría';
+    texto.textContent = '⚠️ No se pudo determinar la comisaría automáticamente. Marcá tu ubicación en el mapa:';
     nombreEl.textContent = 'Se asignará manualmente';
     form.dataset.comisariaAsignada = '';
+
+    const info = dato || {};
+    let centro = { lat: -24.786744, lng: -65.408122 };
+    if (info.lat && info.lon) {
+      centro = { lat: info.lat, lng: info.lon };
+    } else if (info.domicilio && info.localidad) {
+      try {
+        const ubic = await geocodificarConNominatim(info.domicilio, info.localidad);
+        if (ubic && ubic.lat && ubic.lon) centro = { lat: ubic.lat, lng: ubic.lon };
+      } catch (e) { console.warn('No se pudo geocodificar:', e); }
+    }
+    crearMapaConfirmacion(aviso, form, {
+      lat: centro.lat,
+      lng: centro.lng,
+      comisariaFija: null,
+      esMultiple: true,
+      texto,
+      nombreEl
+    });
   } else {
     aviso.classList.remove('activo');
     form.dataset.comisariaAsignada = '';
@@ -2252,9 +2271,9 @@ Object.entries(forms).forEach(([tramite, form]) => {
           localidad: selectLocalidad.value
         });
       } else {
-        mostrarAvisoComisaria(form, 'error');
+        mostrarAvisoComisaria(form, 'error', { domicilio: inputDomicilio.value.trim(), localidad: selectLocalidad.value });
       }
-    } catch (err) { console.error(err); mostrarAvisoComisaria(form, 'error'); }
+    } catch (err) { console.error(err); mostrarAvisoComisaria(form, 'error', { domicilio: inputDomicilio.value.trim(), localidad: selectLocalidad.value }); }
   }
 
   function debounceCalcular() {
