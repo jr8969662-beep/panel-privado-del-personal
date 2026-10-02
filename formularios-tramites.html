@@ -1917,7 +1917,8 @@ function puntoEnPoligono(lat, lon, coordenadas) {
 function buscarComisariaPorCoordenadas(lat, lon) {
   for (const [numDDP, poligonos] of Object.entries(POLIGONOS_DDP)) {
     for (const poligono of poligonos) {
-      if (puntoEnPoligono(lat, lon, poligono.c)) {
+      if (puntoEnPoligono(lat, lon, poligono.c) &&
+          !(poligono.h || []).some((hueco) => puntoEnPoligono(lat, lon, hueco))) {
         return { ddp: parseInt(numDDP), nombre: poligono.n, lat: lat, lon: lon };
       }
     }
