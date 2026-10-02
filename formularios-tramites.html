@@ -250,6 +250,7 @@
   .nota{font-size:0.78rem;color:rgba(255,255,255,0.6);margin-top:10px;line-height:1.5;}
 
   .captura-foto{border:1px dashed rgba(201,169,97,0.4);border-radius:8px;padding:14px;margin-top:8px;background:rgba(0,0,0,0.2);}
+  .captura-foto.destacada{border:2px solid var(--dorado);box-shadow:0 0 0 3px rgba(201,169,97,0.18),0 6px 20px rgba(201,169,97,0.22);background:rgba(201,169,97,0.06);}
   .captura-visor{position:relative;width:100%;max-width:340px;margin:0 auto;}
   .captura-visor video,.captura-visor img{width:100%;border-radius:6px;background:#000;display:block;}
   .captura-visor video[hidden],.captura-visor img[hidden]{display:none;}
@@ -456,8 +457,8 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Foto del DNI (solicitante)</label>
-    <div class="captura-foto" data-target="res-solicitante">
+    <h3 class="seccion">📸 Escaneá tu DNI</h3>
+    <div class="captura-foto destacada" data-target="res-solicitante">
       <div class="captura-visor">
         <video autoplay playsinline muted></video>
         <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
@@ -573,8 +574,8 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Foto del DNI (solicitante)</label>
-    <div class="captura-foto" data-target="con-solicitante">
+    <h3 class="seccion">📸 Escaneá tu DNI</h3>
+    <div class="captura-foto destacada" data-target="con-solicitante">
       <div class="captura-visor">
         <video autoplay playsinline muted></video>
         <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
@@ -714,8 +715,8 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Foto del DNI (solicitante)</label>
-    <div class="captura-foto" data-target="car-solicitante">
+    <h3 class="seccion">📸 Escaneá tu DNI</h3>
+    <div class="captura-foto destacada" data-target="car-solicitante">
       <div class="captura-visor">
         <video autoplay playsinline muted></video>
         <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
@@ -833,34 +834,9 @@
   <!-- Formulario: Autorización de Viaje de Menor -->
   <form id="form-autorizacion">
     <h2>Autorización de Viaje de Menor</h2>
-    <h3 class="seccion" style="border-top:none;margin-top:0;padding-top:0;">Datos del Menor</h3>
-    <div class="fila">
-      <div><label>Nombre completo del menor</label><input type="text" name="nombreMenor" required></div>
-      <div><label>DNI del menor</label><input type="text" name="dniMenor" pattern="[0-9]{7,8}" required></div>
-    </div>
-    <div class="fila">
-      <div><label>Fecha de nacimiento</label><input type="date" name="fechaNacimientoMenor" required></div>
-      <div><label>Nacionalidad</label><input type="text" name="nacionalidadMenor" value="Argentina" required></div>
-    </div>
     <h3 class="seccion">Datos del Progenitor que Autoriza</h3>
-    <div class="fila">
-      <div><label>Nombre completo del progenitor</label><input type="text" name="nombreProgenitor" required></div>
-      <div><label>DNI del progenitor</label><input type="text" name="dniProgenitor" pattern="[0-9]{7,8}" required></div>
-    </div>
-    <div class="fila">
-      <div>
-        <label>Vínculo con el menor</label>
-        <select name="vinculoProgenitor" required>
-          <option value="">Seleccionar</option>
-          <option>Padre</option><option>Madre</option><option>Tutor/a</option>
-        </select>
-      </div>
-      <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
-    </div>
-    <label>Teléfono / WhatsApp</label>
-    <input type="tel" name="telefono" placeholder="Ej: 3874123456" required>
-    <label>Foto del DNI (progenitor autorizante)</label>
-    <div class="captura-foto" data-target="aut-progenitor">
+    <h3 class="seccion">📸 Escaneá tu DNI</h3>
+    <div class="captura-foto destacada" data-target="aut-progenitor">
       <div class="captura-visor">
         <video autoplay playsinline muted></video>
         <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
@@ -883,6 +859,31 @@
       </div>
       <p class="captura-estado">Sin foto capturada</p>
       <p class="escaneo-estado"></p>
+    </div>
+    <div class="fila">
+      <div><label>Nombre completo del progenitor</label><input type="text" name="nombreProgenitor" required></div>
+      <div><label>DNI del progenitor</label><input type="text" name="dniProgenitor" pattern="[0-9]{7,8}" required></div>
+    </div>
+    <div class="fila">
+      <div>
+        <label>Vínculo con el menor</label>
+        <select name="vinculoProgenitor" required>
+          <option value="">Seleccionar</option>
+          <option>Padre</option><option>Madre</option><option>Tutor/a</option>
+        </select>
+      </div>
+      <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
+    </div>
+    <label>Teléfono / WhatsApp</label>
+    <input type="tel" name="telefono" placeholder="Ej: 3874123456" required>
+    <h3 class="seccion" style="border-top:none;margin-top:0;padding-top:0;">Datos del Menor</h3>
+    <div class="fila">
+      <div><label>Nombre completo del menor</label><input type="text" name="nombreMenor" required></div>
+      <div><label>DNI del menor</label><input type="text" name="dniMenor" pattern="[0-9]{7,8}" required></div>
+    </div>
+    <div class="fila">
+      <div><label>Fecha de nacimiento</label><input type="date" name="fechaNacimientoMenor" required></div>
+      <div><label>Nacionalidad</label><input type="text" name="nacionalidadMenor" value="Argentina" required></div>
     </div>
     <h3 class="seccion">Datos del Viaje</h3>
     <div class="fila">
@@ -992,8 +993,8 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Foto del DNI (solicitante)</label>
-    <div class="captura-foto" data-target="ant-solicitante">
+    <h3 class="seccion">📸 Escaneá tu DNI</h3>
+    <div class="captura-foto destacada" data-target="ant-solicitante">
       <div class="captura-visor">
         <video autoplay playsinline muted></video>
         <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
@@ -1052,8 +1053,8 @@
     </div>
     <label>Teléfono / WhatsApp</label>
     <input type="tel" name="telefono" placeholder="Ej: 3874123456" required>
-    <label>Foto del DNI (solicitante)</label>
-    <div class="captura-foto" data-target="dom-solicitante">
+    <h3 class="seccion">📸 Escaneá tu DNI</h3>
+    <div class="captura-foto destacada" data-target="dom-solicitante">
       <div class="captura-visor">
         <video autoplay playsinline muted></video>
         <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
@@ -1107,8 +1108,8 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Foto del DNI (solicitante)</label>
-    <div class="captura-foto" data-target="ext-solicitante">
+    <h3 class="seccion">📸 Escaneá tu DNI</h3>
+    <div class="captura-foto destacada" data-target="ext-solicitante">
       <div class="captura-visor">
         <video autoplay playsinline muted></video>
         <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
@@ -1186,8 +1187,8 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Foto del DNI (solicitante)</label>
-    <div class="captura-foto" data-target="sup-solicitante">
+    <h3 class="seccion">📸 Escaneá tu DNI</h3>
+    <div class="captura-foto destacada" data-target="sup-solicitante">
       <div class="captura-visor">
         <video autoplay playsinline muted></video>
         <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
@@ -1307,8 +1308,8 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Foto del DNI (solicitante)</label>
-    <div class="captura-foto" data-target="est-solicitante">
+    <h3 class="seccion">📸 Escaneá tu DNI</h3>
+    <div class="captura-foto destacada" data-target="est-solicitante">
       <div class="captura-visor">
         <video autoplay playsinline muted></video>
         <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
