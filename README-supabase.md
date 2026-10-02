@@ -183,6 +183,72 @@ grant execute on function public.consultar_tramite(text, text) to anon, authenti
 Devuelve **0 filas** tanto si el código no existe como si el DNI no coincide, y **nunca** expone
 `datos` (fotos, email, domicilio).
 
+## 9. Recordatorio por email antes del vencimiento
+Cuando un trámite pasa a **procesado**, se le asigna `fecha_expiracion` (5 días hábiles).
+Esta función manda un email **~2 días antes** de que venza, para que el ciudadano retire su
+certificado. Corre **1 vez por día** con **pg_cron**.
+
+### 9.1 Columnas nuevas (SQL Editor, una vez)
+```sql
+alter table public.solicitudes add column if not exists recordatorio_enviado boolean default false;
+alter table public.solicitudes add column if not exists fecha_recordatorio timestamptz;
+
+create index if not exists solicitudes_recordatorio_idx
+  on public.solicitudes (fecha_expiracion)
+  where estado = 'procesado' and retirado is not true and recordatorio_enviado is not true;
+```
+
+### 9.2 Desplegar la Edge Function
+Requiere la CLI de Supabase (`npm i -g supabase`, luego `supabase login`).
+```bash
+supabase functions deploy recordatorio-vencimiento --no-verify-jwt
+supabase secrets set CRON_SECRET=un-texto-largo-y-aleatorio \
+  EMAILJS_SERVICE_ID=service_8etpsse \
+  EMAILJS_TEMPLATE_ID=template_sk1q9yr \
+  EMAILJS_PUBLIC_KEY=64rdi6i-PC71o8Yqh
+```
+`SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` las inyecta Supabase solas; el resto son las que
+seteás arriba. La función exige el header `x-cron-secret` (si no coincide, responde 401).
+
+### 9.3 Activar pg_cron y pg_net
+1. Supabase → **Database → Extensions**.
+2. Activá **`pg_cron`** y **`pg_net`** (o por SQL: `create extension if not exists pg_cron; create extension if not exists pg_net;`).
+3. Programá el job (SQL Editor) — reemplazá `<PROJECT-REF>` (está en `supabase-config.js`) y `<TU_CRON_SECRET>`:
+```sql
+select cron.schedule(
+  'recordatorio-vencimiento-diario',
+  '0 12 * * *',   -- 12:00 UTC = 09:00 en Argentina (UTC-3)
+  $$
+  select net.http_post(
+    url     := 'https://<PROJECT-REF>.supabase.co/functions/v1/recordatorio-vencimiento',
+    headers := jsonb_build_object(
+      'Content-Type',  'application/json',
+      'x-cron-secret', '<TU_CRON_SECRET>'
+    ),
+    body    := '{}'::jsonb
+  );
+  $$
+);
+```
+
+### 9.4 Verificar / probar
+```sql
+select * from cron.job;                                                   -- el job programado
+select * from cron.job_run_details order by start_time desc limit 5;      -- historial
+select status, content from net._http_response order by created desc;      -- respuesta de la función
+select cron.unschedule('recordatorio-vencimiento-diario');                 -- borrarlo
+```
+Prueba manual (sin esperar al cron):
+```bash
+curl -i -X POST "https://<PROJECT-REF>.supabase.co/functions/v1/recordatorio-vencimiento" \
+  -H "x-cron-secret: <TU_CRON_SECRET>"
+```
+Debe responder `200` con `{ "total": N, "enviados": M, "errores": [] }`.
+
+> Notas: EmailJS tiene tope (~200 emails/mes) y quizás debas agregar `{{fecha_limite}}`/`{{dias}}`
+> (o usar `{{mensaje_extra}}`) en la plantilla `template_sk1q9yr`. El `CRON_SECRET` queda guardado
+> en la tabla de cron de la base (necesario para que pg_net lo envíe). No se usa la service_role en el SQL.
+
 ## Cómo queda el flujo
 1. La persona completa un formulario con su domicilio y saca las fotos de DNI necesarias.
 2. Al enviar, se crea una fila en la tabla `solicitudes` de Supabase, con `estado: "pendiente"`
