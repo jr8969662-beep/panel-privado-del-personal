@@ -245,9 +245,26 @@ curl -i -X POST "https://<PROJECT-REF>.supabase.co/functions/v1/recordatorio-ven
 ```
 Debe responder `200` con `{ "total": N, "enviados": M, "errores": [] }`.
 
-> Notas: EmailJS tiene tope (~200 emails/mes) y quizás debas agregar `{{fecha_limite}}`/`{{dias}}`
-> (o usar `{{mensaje_extra}}`) en la plantilla `template_sk1q9yr`. El `CRON_SECRET` queda guardado
-> en la tabla de cron de la base (necesario para que pg_net lo envíe). No se usa la service_role en el SQL.
+> Nota sobre la plantilla: **no hace falta tocar la plantilla de EmailJS**. El recordatorio reusa
+> `template_sk1q9yr` y todo el texto va armado en `{{mensaje_extra}}` (con comisaría, fecha límite y
+> días restantes). El `CRON_SECRET` queda guardado en la tabla de cron de la base (necesario para que
+> pg_net lo envíe). No se usa la service_role en el SQL.
+
+### 9.5 Tope de EmailJS y migración
+El plan **gratuito de EmailJS permite 200 emails/mes**, y las notificaciones del panel cuentan para
+el mismo tope. **No conviene pagar EmailJS**: cuando te acerques al límite (~150/mes), migrá a un
+servicio con más free: **Resend** (3.000/mes gratis) o **Brevo** (300/día, ~9.000/mes).
+
+Pasos básicos de migración (para no olvidar):
+1. Crear la cuenta en Resend o Brevo y obtener la **API key**. En Resend, verificar el dominio
+   (o usar el remitente de prueba mientras probás).
+2. Guardar la key como secreto de la función:
+   `supabase secrets set RESEND_API_KEY=...` (o `BREVO_API_KEY=...`).
+3. En `supabase/functions/recordatorio-vencimiento/index.ts`, reemplazar el `fetch` a EmailJS por el
+   del nuevo servicio (Resend: `POST https://api.resend.com/emails` con `Authorization: Bearer <key>`),
+   armando `from`, `to`, `subject` y un `html` con el texto que hoy va en `mensaje_extra`.
+4. Redesplegar: `supabase functions deploy recordatorio-vencimiento --no-verify-jwt`.
+5. (Opcional) Migrar también las notificaciones del panel, que hoy usan EmailJS en `panel.html`.
 
 ## Cómo queda el flujo
 1. La persona completa un formulario con su domicilio y saca las fotos de DNI necesarias.
