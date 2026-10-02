@@ -2085,6 +2085,8 @@ function crearMapaConfirmacion(aviso, form, opciones) {
       draggable: esMultiple,
       title: esMultiple ? 'Arrastrame a tu domicilio' : 'Tu domicilio'
     }).addTo(mapaLeafletActivo);
+    form.dataset.geoLat = lat.toFixed(6);
+    form.dataset.geoLon = lng.toFixed(6);
 
     if (!esMultiple && comisariaFija) {
       marcadorLeafletActivo.bindPopup(`<strong>${comisariaFija}</strong><br>Ubicación verificada`).openPopup();
@@ -2092,6 +2094,8 @@ function crearMapaConfirmacion(aviso, form, opciones) {
 
     async function recalcularConCoordenadas(nuevaLat, nuevaLng) {
       coordsEl.textContent = `📍 Ubicación actual: ${nuevaLat.toFixed(5)}, ${nuevaLng.toFixed(5)}`;
+      form.dataset.geoLat = nuevaLat.toFixed(6);
+      form.dataset.geoLon = nuevaLng.toFixed(6);
       if (!poligonosCargados) await cargarTodosLosPoligonos();
       const comisaria = buscarComisariaPorCoordenadas(nuevaLat, nuevaLng);
       if (comisaria && comisaria.nombre) {
@@ -2372,12 +2376,17 @@ Object.entries(forms).forEach(([tramite, form]) => {
       const codigoTramite = await generarCodigoUnico();
 
       btnEnviar.textContent = 'Guardando trámite...';
+      const geo = {
+        lat: form.dataset.geoLat ? Number(form.dataset.geoLat) : null,
+        lon: form.dataset.geoLon ? Number(form.dataset.geoLon) : null,
+        origen: (asignacion && asignacion.origen) || 'desconocido',
+      };
       const { error } = await supabaseClient.from('solicitudes').insert([{
         tramite: tramite,
         tramite_titulo: titulos[tramite],
         comisaria_asignada: comisariaAsignada,
         estado: 'pendiente',
-        datos: registro,
+        datos: { ...registro, __geo: geo },
         codigo: codigoTramite,
       }]);
       if (error) throw error;
