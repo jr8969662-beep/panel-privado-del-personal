@@ -155,3 +155,125 @@ async function asignarComisariaPorDireccion(domicilio) {
     direccionEncontrada: ubicacion.direccionEncontrada,
   };
 }
+
+/* ------------------------------------------------------------
+   NOMBRES OFICIALES DE DEPENDENCIAS
+   Convierte el nombre técnico del KML (ej. "DUR1-S3-Cría 11° (Ex-cria 103)")
+   en un nombre legible ("Comisaría N°11 - 17 de Octubre (DDP 1)").
+   El sufijo de barrio se toma de DEPENDENCIAS_POLICIALES solo cuando el match
+   es confiable (por número viejo "Ex" o por número actual); si no, se omite.
+   ------------------------------------------------------------ */
+
+function tipoDeDependencia(texto) {
+  if (/^sub\s*comisar/i.test(texto)) return 'Subcomisaría';
+  if (/^comisar/i.test(texto)) return 'Comisaría';
+  if (/destacamento/i.test(texto)) return 'Destacamento';
+  if (/^puesto/i.test(texto)) return 'Puesto';
+  return null;
+}
+
+/* Número de una entrada de DEPENDENCIAS_POLICIALES, solo si va pegado al tipo
+   ("Comisaria N°11 - ..."). No toma números de nombres ("Destacamento 20 de Febrero"). */
+function numeroEnDependencias(texto) {
+  const m = String(texto).match(/^\s*(?:sub\s*)?(?:comisaria|comisar[íi]a|destacamento|puesto(?:\s+policial)?)\s*n?[°º]?\.?\s*(\d{1,3})\b/i);
+  if (!m) return null;
+  if (/^\s*de\s/i.test(String(texto).slice(m.index + m[0].length))) return null;
+  return m[1];
+}
+
+let _mapaDependenciasPorNumero = null;
+function dependenciasPorNumero() {
+  if (_mapaDependenciasPorNumero) return _mapaDependenciasPorNumero;
+  const mapa = {};
+  for (const dep of DEPENDENCIAS_POLICIALES) {
+    const num = numeroEnDependencias(dep.nombre);
+    if (num && !(num in mapa)) mapa[num] = dep.nombre;
+  }
+  _mapaDependenciasPorNumero = mapa;
+  return mapa;
+}
+
+/* Toma el barrio/localidad del final de una entrada, descartando calles. */
+function descriptorDeDependencia(entrada) {
+  const segmentos = String(entrada).split(' - ').map((s) => s.trim());
+  const esCalle = (s) => /N[°º]|\bs\/n\b|\bkm\b|\bentre\b|\by\b/i.test(s) || /^salta$/i.test(s);
+  for (let i = segmentos.length - 1; i >= 1; i--) {
+    if (!esCalle(segmentos[i])) return segmentos[i].replace(/^(b[°º]|barrio|v[°º]|villa)\s+/i, '').trim();
+  }
+  return null;
+}
+
+function normalizarNombreDependencia(nombre, ddp) {
+  let n = String(nombre || '').trim();
+  if (!n) return '';
+  n = n.replace(/^DUR\s*[I1]?\d*\s*-\s*S\s*\d*\s*-\s*/i, '').trim();
+
+  const tipos = [
+    [/^sub\s*[-\s]?\s*cr[íi]as?\.?\s*/i, 'Subcomisaría'],
+    [/^sub\s*comisar[íi]as?\.?\s*/i, 'Subcomisaría'],
+    [/^cr[íi]as?\.?\s*/i, 'Comisaría'],
+    [/^comisar[íi]as?\.?\s*/i, 'Comisaría'],
+    [/^destacamento\.?\s*/i, 'Destacamento'],
+    [/^dsto\.?\s*/i, 'Destacamento'],
+    [/^dest\.?\s*/i, 'Destacamento'],
+    [/^pto\.?\s*pol\.?\s*/i, 'Puesto Policial'],
+    [/^puesto\s+pol\.?\s*/i, 'Puesto Policial'],
+    [/^puesto\s+/i, 'Puesto'],
+    [/^base\s+op(?:erativa)?\.?\s*/i, 'Base Operativa'],
+  ];
+  let tipo = null;
+  let resto = n;
+  for (const [re, etiqueta] of tipos) {
+    if (re.test(n)) { tipo = etiqueta; resto = n.replace(re, '').trim(); break; }
+  }
+
+  // Referencia vieja "(Ex ...)": solo sirve si es numérica.
+  const exRaw = (n.match(/\(\s*ex[^)]*\)/i) || [])[0] || null;
+  const exNumero = exRaw ? ((exRaw.match(/(\d{1,3})/) || [])[1] || null) : null;
+  const exNoNumerico = !!exRaw && !exNumero;
+
+  // Número propio: no se toma si va seguido de " de " (evita "9 de Julio").
+  let numero = null;
+  const m = resto.match(/^n?[°º]?\s*(\d{1,3})\s*°?\.?\s*/i);
+  if (m) {
+    const sobrante = resto.slice(m[0].length);
+    if (!/^de\s/i.test(sobrante)) { numero = m[1]; resto = sobrante.trim(); }
+  }
+  resto = resto.replace(/\s*\(\s*ex[^)]*\)\s*/gi, ' ').replace(/\s+/g, ' ').trim();
+
+  const clave = exNumero || numero;
+  const entradaDep = (!exNoNumerico && clave) ? dependenciasPorNumero()[String(clave)] : null;
+
+  let base;
+  let descriptor = null;
+  if (entradaDep) {
+    const tipoDep = tipoDeDependencia(entradaDep);
+    if (tipo && tipoDep && tipoDep !== tipo) {
+      // Manda el tipo de DEPENDENCIAS_POLICIALES (lista oficial)
+      const nombreDep = String(entradaDep).split(' - ')[0]
+        .replace(/^(sub\s*comisaria|comisaria|destacamento|puesto\s*policial|puesto)\s*/i, '').trim();
+      base = `${tipoDep} ${nombreDep}`.replace(/\s+/g, ' ').trim();
+    } else {
+      base = (tipo && numero) ? `${tipo} N°${numero}${resto ? ' ' + resto : ''}` : (tipo || resto || n);
+      if (tipo && !numero && resto) base = `${tipo} ${resto}`;
+      descriptor = descriptorDeDependencia(entradaDep);
+    }
+  } else {
+    base = (tipo && numero) ? `${tipo} N°${numero}${resto ? ' ' + resto : ''}` : (tipo || resto || n);
+    if (tipo && !numero && resto) base = `${tipo} ${resto}`;
+  }
+
+  if (descriptor) base += ' - ' + descriptor;
+  return ddp ? `${base} (DDP ${ddp})` : base;
+}
+
+/* Tipo de dependencia a partir de un nombre ya sea técnico u oficial. */
+function tipoDependencia(nombre) {
+  const n = normalizarNombreDependencia(String(nombre || '').trim());
+  if (/^subcomisar/i.test(n)) return 'Subcomisaría';
+  if (/^comisar/i.test(n)) return 'Comisaría';
+  if (/^destacamento/i.test(n)) return 'Destacamento';
+  if (/^puesto/i.test(n)) return 'Puesto';
+  if (/^base operativa/i.test(n)) return 'Base Operativa';
+  return 'Otro';
+}

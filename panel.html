@@ -1177,25 +1177,25 @@ modalPass.addEventListener('click', (e) => {
   if (e.target.id === 'modal-pass') modalPass.classList.remove('activo');
 });
 
-/* FILTRO COMISARÍA */
+/* FILTRO COMISARÍA (se llena con los nombres oficiales reales que llegan) */
 const filtroComisaria = document.getElementById('filtro-comisaria');
-DEPENDENCIAS_POLICIALES.forEach(dep => {
-  const opt = document.createElement('option');
-  opt.value = dep.nombre;
-  opt.textContent = dep.nombre;
-  filtroComisaria.appendChild(opt);
-});
+
+function poblarFiltroComisaria() {
+  const seleccion = filtroComisaria.value;
+  const valores = [...new Set(solicitudesCache.map(s => s.comisaria_asignada).filter(Boolean))]
+    .sort((a, b) => String(a).localeCompare(String(b), 'es'));
+  filtroComisaria.innerHTML = '<option value="">Todas las comisarías</option>';
+  valores.forEach(valor => {
+    const opt = document.createElement('option');
+    opt.value = valor;
+    opt.textContent = valor;
+    filtroComisaria.appendChild(opt);
+  });
+  filtroComisaria.value = valores.includes(seleccion) ? seleccion : '';
+}
 
 function obtenerTipoDependencia(nombre) {
-  if (!nombre) return '';
-  const n = String(nombre).trim();
-  if (/^subcomisar[íi]a/i.test(n)) return 'Subcomisaría';
-  if (/^comisar[íi]a/i.test(n)) return 'Comisaría';
-  if (/^destacamento/i.test(n)) return 'Destacamento';
-  if (/^puerto\s+pol/i.test(n)) return 'Puerto Policial';
-  if (/^puesto/i.test(n)) return 'Puesto';
-  if (/^base\s+operativa/i.test(n)) return 'Base Operativa';
-  return 'Otro';
+  return tipoDependencia(nombre);
 }
 
 /* ETIQUETAS */
@@ -1279,6 +1279,7 @@ async function cargarSolicitudes() {
     }
   }
   solicitudesCache = nuevas;
+  poblarFiltroComisaria();
   actualizarContadores();
   renderTabla();
 }

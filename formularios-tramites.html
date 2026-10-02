@@ -2012,7 +2012,7 @@ async function asignarComisariaPorJurisdiccion(domicilio, localidad) {
   if (!ubicacion) return { error: 'No se pudo ubicar el domicilio' };
   const comisaria = buscarComisariaPorCoordenadas(ubicacion.lat, ubicacion.lon);
   if (!comisaria) return { error: 'El domicilio no está dentro de ninguna jurisdicción conocida', lat: ubicacion.lat, lon: ubicacion.lon };
-  return { comisaria: comisaria.nombre, ddp: comisaria.ddp, lat: ubicacion.lat, lon: ubicacion.lon, origen: 'poligono' };
+  return { comisaria: normalizarNombreDependencia(comisaria.nombre, comisaria.ddp), ddp: comisaria.ddp, lat: ubicacion.lat, lon: ubicacion.lon, origen: 'poligono' };
 }
 
 let mapaLeafletActivo = null;
