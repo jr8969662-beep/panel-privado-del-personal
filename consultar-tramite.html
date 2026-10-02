@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consultar mi trámite - Mi Comisaría</title>
+<style>
+  :root{
+    --azul-fondo:#0a1e3d;
+    --azul-oscuro:#0d2a4d;
+    --azul:#1a3a6b;
+    --azul-claro:#2c5aa0;
+    --dorado:#c9a961;
+    --dorado-claro:#e6c988;
+    --dorado-brilloso:#f0d78c;
+    --verde:#15803d;
+    --rojo:#b91c1c;
+    --amarillo:#ca8a04;
+  }
+  *{box-sizing:border-box;}
+  html{background:var(--azul-fondo);min-height:100%;}
+  body{
+    font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    background:var(--azul-fondo);
+    margin:0;color:#fff;min-height:100vh;display:flex;flex-direction:column;
+  }
+  header{
+    background:linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul) 100%);
+    color:#fff;padding:28px 24px 26px;position:relative;overflow:hidden;
+    border-bottom:3px solid var(--dorado);box-shadow:0 4px 16px rgba(13,42,77,0.12);text-align:center;
+  }
+  header::after{
+    content:'';position:absolute;top:-50%;right:-10%;width:400px;height:400px;
+    background:radial-gradient(circle, rgba(201,169,97,0.15) 0%, transparent 70%);
+    border-radius:50%;pointer-events:none;
+  }
+  header .header-inner{
+    max-width:760px;margin:0 auto;position:relative;z-index:2;display:flex;
+    align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;
+  }
+  header .header-logo{
+    width:64px;height:64px;background-image:url('logo-policia.png.jpeg');
+    background-size:contain;background-repeat:no-repeat;background-position:center;
+    filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));flex-shrink:0;
+  }
+  header .header-texto{text-align:left;}
+  header h1{margin:0;font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,0.3);}
+  header h1::after{content:'';display:block;width:60px;height:3px;background:linear-gradient(90deg, var(--dorado), var(--dorado-claro));margin:8px 0 0;border-radius:2px;}
+  header p{margin:8px 0 0;font-size:0.92rem;color:var(--dorado-claro);font-weight:500;letter-spacing:0.02em;}
+
+  main{max-width:640px;margin:36px auto;padding:0 16px 40px;width:100%;flex:1;}
+
+  .card{background:rgba(255,255,255,0.04);border:1px solid rgba(201,169,97,0.3);border-radius:12px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,0.25);}
+  .card h2{margin:0 0 6px;color:var(--dorado-claro);font-size:1.15rem;}
+  label{display:block;margin:16px 0 6px;font-size:0.88rem;font-weight:600;color:var(--dorado-claro);}
+  input{
+    width:100%;padding:12px;border:1px solid rgba(201,169,97,0.35);border-radius:6px;
+    font-size:1rem;font-family:inherit;background:rgba(0,0,0,0.35);color:#fff;
+  }
+  input:focus{outline:none;border-color:var(--dorado);box-shadow:0 0 0 3px rgba(201,169,97,0.2);background:rgba(0,0,0,0.5);}
+  .btns{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  button{padding:11px 20px;border:none;border-radius:6px;font-size:0.9rem;font-family:inherit;cursor:pointer;font-weight:600;transition:all 0.2s;}
+  .btn-primario{background:linear-gradient(135deg, var(--azul) 0%, var(--azul-claro) 100%);color:#fff;border:1px solid rgba(201,169,97,0.3);}
+  .btn-primario:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(201,169,97,0.3);}
+  .btn-secundario{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);}
+  .btn-secundario:hover{background:rgba(255,255,255,0.2);border-color:var(--dorado);}
+  a.btn-secundario{display:inline-block;text-decoration:none;line-height:1.2;}
+  button[disabled]{opacity:0.5;cursor:not-allowed;transform:none;}
+  .nota{font-size:0.82rem;color:rgba(255,255,255,0.65);line-height:1.5;margin:6px 0 0;}
+  .msg{margin:16px 0 0;padding:12px 14px;border-radius:8px;font-size:0.88rem;}
+  .msg.error{background:rgba(185,28,28,0.25);border:1px solid rgba(252,165,165,0.5);color:#fca5a5;}
+  .msg.info{background:rgba(44,90,160,0.25);border:1px solid rgba(201,169,97,0.4);color:var(--dorado-claro);}
+
+  .result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .badge{padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;}
+  .badge.pendiente{background:rgba(202,138,4,0.3);color:#fde68a;border:1px solid rgba(253,230,138,0.5);}
+  .badge.procesado{background:rgba(21,128,61,0.3);color:#86efac;border:1px solid rgba(134,239,172,0.5);}
+  .badge.denegado{background:rgba(185,28,28,0.3);color:#fca5a5;border:1px solid rgba(252,165,165,0.5);}
+  .resumen{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0;}
+  .resumen dt{font-size:0.78rem;color:rgba(255,255,255,0.6);align-self:center;}
+  .resumen dd{margin:0;font-size:0.95rem;color:#fff;}
+  .detalle{margin-top:16px;padding-top:14px;border-top:1px solid rgba(201,169,97,0.25);}
+  .detalle p{margin:6px 0;font-size:0.92rem;line-height:1.5;}
+  .destacado{color:var(--dorado-brilloso);font-weight:700;}
+
+  .print-area{display:none;}
+
+  @media print{
+    body>header,body>main,body>script{display:none !important;}
+    .print-area{display:block !important;background:#fff;color:#000;padding:24px;font-family:'Segoe UI', Arial, sans-serif;}
+    .print-area h1{font-size:1.2rem;text-align:center;color:#0d2a4d;margin:0 0 4px;}
+    .print-area .sub{text-align:center;font-size:0.8rem;color:#555;margin:0 0 18px;}
+    .print-area table{width:100%;border-collapse:collapse;}
+    .print-area td{padding:8px 6px;border-bottom:1px solid #ddd;font-size:0.9rem;vertical-align:top;}
+    .print-area td.k{color:#555;width:40%;}
+    .print-area .firma{margin-top:60px;display:flex;justify-content:space-between;}
+    .print-area .firma div{border-top:1px solid #333;padding-top:6px;width:45%;text-align:center;font-size:0.8rem;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-logo"></div>
+    <div class="header-texto">
+      <h1>Consultar mi trámite</h1>
+      <p>Policía de Salta · Estado de tu solicitud</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="consulta-card">
+    <h2>¿Cómo va tu trámite?</h2>
+    <p class="nota">Ingresá el <strong>código único de 8 dígitos</strong> que te dimos al enviar el trámite y los <strong>últimos 4 dígitos de tu DNI</strong>.</p>
+    <form id="form-consulta" novalidate>
+      <label for="codigo">Código único (8 dígitos)</label>
+      <input id="codigo" type="text" inputmode="numeric" autocomplete="off" pattern="[0-9]{8}" maxlength="8" placeholder="Ej: 12345678" required>
+      <label for="dni4">Últimos 4 dígitos del DNI</label>
+      <input id="dni4" type="text" inputmode="numeric" autocomplete="off" pattern="[0-9]{4}" maxlength="4" placeholder="Ej: 4321" required>
+      <div class="btns">
+        <button type="submit" class="btn-primario" id="btn-consultar">Consultar</button>
+        <a class="btn-secundario" href="formularios-tramites.html">← Volver al formulario</a>
+      </div>
+      <p id="msg" class="msg" hidden></p>
+    </form>
+  </section>
+
+  <section class="card" id="resultado" hidden>
+    <div class="result-head">
+      <h2>Resultado</h2>
+      <span id="badge-estado" class="badge"></span>
+    </div>
+    <dl class="resumen">
+      <dt>Código</dt><dd id="r-codigo">-</dd>
+      <dt>Trámite</dt><dd id="r-tramite">-</dd>
+      <dt>Comisaría asignada</dt><dd id="r-comisaria">-</dd>
+      <dt>Fecha de recepción</dt><dd id="r-fecha">-</dd>
+    </dl>
+    <div id="bloque-procesado" class="detalle" hidden>
+      <p><strong>Fecha límite de retiro:</strong> <span id="r-limite" class="destacado">-</span></p>
+      <p id="r-dias"></p>
+    </div>
+    <div id="bloque-denegado" class="detalle" hidden>
+      <p><strong>Motivo de denegación:</strong> <span id="r-motivo"></span></p>
+    </div>
+    <div class="btns">
+      <button type="button" class="btn-primario" id="btn-imprimir">🖨 Imprimir resumen</button>
+      <button type="button" class="btn-secundario" id="btn-otra">Consultar otro</button>
+    </div>
+  </section>
+
+  <section class="card" id="no-encontrado" hidden>
+    <h2>No encontrado</h2>
+    <p class="nota">No encontramos un trámite con ese código y esos últimos 4 dígitos de DNI. Verificá los datos e intentá de nuevo.</p>
+    <div class="btns">
+      <button type="button" class="btn-secundario" id="btn-reintentar">Reintentar</button>
+    </div>
+  </section>
+</main>
+
+<div id="print-area" class="print-area" aria-hidden="true"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+const TITULOS_ESTADO = { pendiente: 'Pendiente', procesado: 'Procesado', denegado: 'Denegado' };
+
+const formConsulta = document.getElementById('form-consulta');
+const inputCodigo = document.getElementById('codigo');
+const inputDni4 = document.getElementById('dni4');
+const btnConsultar = document.getElementById('btn-consultar');
+const msg = document.getElementById('msg');
+const cardConsulta = document.getElementById('consulta-card');
+const cardResultado = document.getElementById('resultado');
+const cardNoEncontrado = document.getElementById('no-encontrado');
+const printArea = document.getElementById('print-area');
+
+let ultimoResultado = null;
+
+function mostrarMsg(texto, tipo) {
+  msg.textContent = texto;
+  msg.className = 'msg ' + (tipo || 'info');
+  msg.hidden = false;
+}
+function ocultarMsg() { msg.hidden = true; msg.textContent = ''; }
+
+function formatearFecha(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function mostrarResultado(r) {
+  ultimoResultado = r;
+  document.getElementById('r-codigo').textContent = r.codigo || '-';
+  document.getElementById('r-tramite').textContent = r.tramite_titulo || r.tramite || '-';
+  document.getElementById('r-comisaria').textContent = r.comisaria_asignada || '-';
+  document.getElementById('r-fecha').textContent = formatearFecha(r.fecha_recepcion);
+
+  const badge = document.getElementById('badge-estado');
+  const estado = r.estado || 'pendiente';
+  badge.className = 'badge ' + estado;
+  badge.textContent = TITULOS_ESTADO[estado] || estado;
+
+  const bloqueProcesado = document.getElementById('bloque-procesado');
+  const bloqueDenegado = document.getElementById('bloque-denegado');
+  bloqueProcesado.hidden = true;
+  bloqueDenegado.hidden = true;
+
+  if (estado === 'procesado') {
+    bloqueProcesado.hidden = false;
+    document.getElementById('r-limite').textContent = formatearFecha(r.fecha_expiracion) || '-';
+    const dias = Number(r.dias_restantes);
+    if (r.retirado) {
+      document.getElementById('r-dias').textContent = '✅ Este certificado ya fue retirado.';
+    } else if (Number.isFinite(dias)) {
+      document.getElementById('r-dias').textContent = dias > 0
+        ? `⏰ Te quedan ${dias} día${dias === 1 ? '' : 's'} para retirarlo. Pasada esa fecha se elimina automáticamente.`
+        : '⚠️ El plazo venció. Consultá en la comisaría.';
+    } else {
+      document.getElementById('r-dias').textContent = '';
+    }
+  } else if (estado === 'denegado') {
+    bloqueDenegado.hidden = false;
+    document.getElementById('r-motivo').textContent = r.motivo_denegacion || 'Sin motivo informado.';
+  }
+
+  cardConsulta.hidden = true;
+  cardNoEncontrado.hidden = true;
+  cardResultado.hidden = false;
+}
+
+function mostrarNoEncontrado() {
+  cardConsulta.hidden = true;
+  cardResultado.hidden = true;
+  cardNoEncontrado.hidden = false;
+}
+
+formConsulta.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  ocultarMsg();
+
+  const codigo = inputCodigo.value.trim();
+  const dni4 = inputDni4.value.trim();
+  if (!/^[0-9]{8}$/.test(codigo)) { mostrarMsg('El código debe tener 8 dígitos.', 'error'); inputCodigo.focus(); return; }
+  if (!/^[0-9]{4}$/.test(dni4)) { mostrarMsg('Ingresá los últimos 4 dígitos del DNI.', 'error'); inputDni4.focus(); return; }
+
+  btnConsultar.disabled = true;
+  btnConsultar.textContent = 'Consultando...';
+  try {
+    const { data, error } = await supabaseClient.rpc('consultar_tramite', { p_codigo: codigo, p_dni4: dni4 });
+    if (error) { mostrarMsg('No se pudo consultar. Revisá tu conexión e intentá de nuevo.', 'error'); return; }
+    if (!data || data.length === 0) { mostrarNoEncontrado(); return; }
+    mostrarResultado(data[0]);
+  } catch (err) {
+    mostrarMsg('No se pudo consultar. Revisá tu conexión e intentá de nuevo.', 'error');
+  } finally {
+    btnConsultar.disabled = false;
+    btnConsultar.textContent = 'Consultar';
+  }
+});
+
+document.getElementById('btn-otra').addEventListener('click', () => {
+  cardResultado.hidden = true;
+  cardConsulta.hidden = false;
+  inputCodigo.value = '';
+  inputDni4.value = '';
+  ocultarMsg();
+  inputCodigo.focus();
+});
+document.getElementById('btn-reintentar').addEventListener('click', () => {
+  cardNoEncontrado.hidden = true;
+  cardConsulta.hidden = false;
+  inputCodigo.focus();
+});
+
+document.getElementById('btn-imprimir').addEventListener('click', () => {
+  if (!ultimoResultado) return;
+  const r = ultimoResultado;
+  printArea.textContent = '';
+
+  const h1 = document.createElement('h1');
+  h1.textContent = 'Mi Comisaría - Resumen de trámite';
+  const sub = document.createElement('p');
+  sub.className = 'sub';
+  sub.textContent = 'Policía de Salta · DMI (JP) · Consulta de estado';
+  printArea.appendChild(h1);
+  printArea.appendChild(sub);
+
+  const filas = [
+    ['Código único', r.codigo || '-'],
+    ['Trámite', r.tramite_titulo || r.tramite || '-'],
+    ['Estado', TITULOS_ESTADO[r.estado] || r.estado || '-'],
+    ['Comisaría asignada', r.comisaria_asignada || '-'],
+    ['Fecha de recepción', formatearFecha(r.fecha_recepcion)],
+  ];
+  if (r.estado === 'procesado') {
+    filas.push(['Fecha límite de retiro', formatearFecha(r.fecha_expiracion)]);
+    if (r.retirado) filas.push(['Retiro', 'Ya retirado']);
+    else if (Number.isFinite(Number(r.dias_restantes))) filas.push(['Días restantes', String(r.dias_restantes)]);
+  }
+  if (r.estado === 'denegado') filas.push(['Motivo de denegación', r.motivo_denegacion || 'Sin motivo informado.']);
+
+  const tabla = document.createElement('table');
+  filas.forEach(([k, v]) => {
+    const tr = document.createElement('tr');
+    const tdK = document.createElement('td'); tdK.className = 'k'; tdK.textContent = k;
+    const tdV = document.createElement('td'); tdV.textContent = v;
+    tr.appendChild(tdK); tr.appendChild(tdV); tabla.appendChild(tr);
+  });
+  printArea.appendChild(tabla);
+
+  const firmas = document.createElement('div');
+  firmas.className = 'firma';
+  const f1 = document.createElement('div'); f1.textContent = 'Firma del solicitante';
+  const f2 = document.createElement('div'); f2.textContent = 'Firma y sello - Autoridad policial';
+  firmas.appendChild(f1); firmas.appendChild(f2);
+  printArea.appendChild(firmas);
+
+  const pie = document.createElement('p');
+  pie.className = 'sub';
+  pie.style.marginTop = '18px';
+  pie.textContent = 'Este resumen es informativo. El certificado debe retirarse y ser validado en la dependencia policial.';
+  printArea.appendChild(pie);
+
+  window.print();
+});
+</script>
+</body>
+</html>

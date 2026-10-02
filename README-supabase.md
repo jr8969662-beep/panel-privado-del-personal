@@ -120,6 +120,7 @@ No hay registro público: el personal solo puede entrar con un usuario que vos c
 ## 6. Subir los archivos
 Estos son los archivos del proyecto (ya no se usa nada de Firebase):
 - `formularios-tramites.html` (formulario público)
+- `consultar-tramite.html` (consulta de estado para el ciudadano)
 - `panel.html` (panel privado del personal)
 - `supabase-config.js` (tus credenciales)
 - `comisarias-config.js` (dependencias + nombres oficiales + CORRECCIONES_BARRIO)
@@ -144,6 +145,43 @@ igual como "a asignar por el personal" para que lo resuelva el personal.
 
 La ubicación usada y de dónde salió la asignación (`poligono`, `correccion_barrio`, `manual`)
 quedan guardadas en `datos.__geo` de la solicitud.
+
+## 8. Consultar mi trámite (consulta pública)
+La página `consultar-tramite.html` deja que el ciudadano vea el estado con su **código de 8 dígitos**
+y los **últimos 4 del DNI**. Como el público (anon) **no puede leer** la tabla `solicitudes`, la
+consulta se hace con una función que valida adentro y devuelve solo campos mínimos. Corré esto una vez
+en **SQL Editor**:
+
+```sql
+create or replace function public.consultar_tramite(p_codigo text, p_dni4 text)
+returns table (
+  codigo text, tramite text, tramite_titulo text, estado text, comisaria_asignada text,
+  fecha_recepcion timestamptz, fecha_expiracion timestamptz, motivo_denegacion text,
+  dias_restantes int, retirado boolean
+)
+language sql security definer
+set search_path = public
+as $$
+  select s.codigo, s.tramite, s.tramite_titulo, s.estado, s.comisaria_asignada,
+         s.created_at, s.fecha_expiracion, s.motivo_denegacion,
+         case when s.fecha_expiracion is not null
+              then greatest(0, ceil(extract(epoch from (s.fecha_expiracion - now())) / 86400.0))::int
+              else null end,
+         coalesce(s.retirado, false)
+  from public.solicitudes s
+  where s.codigo = p_codigo
+    and right(regexp_replace(
+          coalesce(s.datos->>'dni', s.datos->>'dniSolicitante',
+                   s.datos->>'dniProgenitor', s.datos->>'dniMenor'), '\D', '', 'g'), 4) = p_dni4
+  limit 1;
+$$;
+
+revoke all on function public.consultar_tramite(text, text) from public;
+grant execute on function public.consultar_tramite(text, text) to anon, authenticated;
+```
+
+Devuelve **0 filas** tanto si el código no existe como si el DNI no coincide, y **nunca** expone
+`datos` (fotos, email, domicilio).
 
 ## Cómo queda el flujo
 1. La persona completa un formulario con su domicilio y saca las fotos de DNI necesarias.
