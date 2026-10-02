@@ -456,16 +456,6 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Domicilio actual (calle, número, barrio)</label>
-    <input type="text" name="domicilio" required>
-    <label>Localidad</label>
-    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
-    <div class="comisaria-asignada" data-comisaria-aviso>
-      <span class="texto">📍 Calculando comisaría...</span>
-      <strong class="nombre"></strong>
-    </div>
-    <label>Motivo del trámite</label>
-    <textarea name="motivo" required></textarea>
     <label>Foto del DNI (solicitante)</label>
     <div class="captura-foto" data-target="res-solicitante">
       <div class="captura-visor">
@@ -491,6 +481,16 @@
       <p class="captura-estado">Sin foto capturada</p>
       <p class="escaneo-estado"></p>
     </div>
+    <label>Domicilio actual (calle, número, barrio)</label>
+    <input type="text" name="domicilio" required>
+    <label>Localidad</label>
+    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
+    <div class="comisaria-asignada" data-comisaria-aviso>
+      <span class="texto">📍 Calculando comisaría...</span>
+      <strong class="nombre"></strong>
+    </div>
+    <label>Motivo del trámite</label>
+    <textarea name="motivo" required></textarea>
     <h3 class="seccion">Testigos (obligatorios: 2)</h3>
     <div class="bloque-testigo" data-testigo="1" data-activo="true">
       <div class="fila campos-testigo">
@@ -714,27 +714,6 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Domicilio (calle, número, barrio)</label>
-    <input type="text" name="domicilio" required>
-    <label>Localidad</label>
-    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
-    <div class="comisaria-asignada" data-comisaria-aviso>
-      <span class="texto">📍 Calculando comisaría...</span>
-      <strong class="nombre"></strong>
-    </div>
-    <div class="fila">
-      <div>
-        <label>Situación laboral actual</label>
-        <select name="situacionLaboral" required>
-          <option value="">Seleccionar</option>
-          <option>Desempleado/a</option><option>Changas / trabajo informal</option>
-          <option>Empleado/a</option><option>Jubilado/a - pensionado/a</option>
-        </select>
-      </div>
-      <div><label>Personas a cargo</label><input type="number" name="personasACargo" min="0" value="0" required></div>
-    </div>
-    <label>Motivo del trámite</label>
-    <textarea name="motivo" required></textarea>
     <label>Foto del DNI (solicitante)</label>
     <div class="captura-foto" data-target="car-solicitante">
       <div class="captura-visor">
@@ -760,6 +739,27 @@
       <p class="captura-estado">Sin foto capturada</p>
       <p class="escaneo-estado"></p>
     </div>
+    <label>Domicilio (calle, número, barrio)</label>
+    <input type="text" name="domicilio" required>
+    <label>Localidad</label>
+    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
+    <div class="comisaria-asignada" data-comisaria-aviso>
+      <span class="texto">📍 Calculando comisaría...</span>
+      <strong class="nombre"></strong>
+    </div>
+    <div class="fila">
+      <div>
+        <label>Situación laboral actual</label>
+        <select name="situacionLaboral" required>
+          <option value="">Seleccionar</option>
+          <option>Desempleado/a</option><option>Changas / trabajo informal</option>
+          <option>Empleado/a</option><option>Jubilado/a - pensionado/a</option>
+        </select>
+      </div>
+      <div><label>Personas a cargo</label><input type="number" name="personasACargo" min="0" value="0" required></div>
+    </div>
+    <label>Motivo del trámite</label>
+    <textarea name="motivo" required></textarea>
     <h3 class="seccion">Testigos (obligatorios: 2)</h3>
     <div class="bloque-testigo" data-testigo="1" data-activo="true">
       <div class="fila campos-testigo">
@@ -859,6 +859,31 @@
     </div>
     <label>Teléfono / WhatsApp</label>
     <input type="tel" name="telefono" placeholder="Ej: 3874123456" required>
+    <label>Foto del DNI (progenitor autorizante)</label>
+    <div class="captura-foto" data-target="aut-progenitor">
+      <div class="captura-visor">
+        <video autoplay playsinline muted></video>
+        <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
+        <div class="scan-indicador"><span>Buscando código</span><span class="scan-dot"></span><span class="scan-dot"></span><span class="scan-dot"></span></div>
+        <button type="button" class="btn-flash" title="Activar/desactivar flash">🔦</button>
+        <img hidden alt="Foto del DNI capturada">
+      </div>
+      <canvas hidden></canvas>
+      <input type="hidden" name="foto_progenitor" value="">
+      <div class="aviso-foto">
+        ⚠️ <span class="motivo-texto">No pudimos leer el código del DNI.</span>
+        <div class="acciones">
+          <button type="button" class="btn-repetir-aviso">Reintentar</button>
+          <button type="button" class="btn-usar-igual">Tomar foto igual</button>
+        </div>
+      </div>
+      <div class="captura-botones">
+        <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+        <button type="button" class="btn-secundario btn-cancelar" hidden>Cancelar</button>
+      </div>
+      <p class="captura-estado">Sin foto capturada</p>
+      <p class="escaneo-estado"></p>
+    </div>
     <h3 class="seccion">Datos del Viaje</h3>
     <div class="fila">
       <div><label>Destino (Ciudad/Provincia/País)</label><input type="text" name="destino" required></div>
@@ -939,31 +964,6 @@
       <p class="captura-estado">Sin foto capturada</p>
       <p class="escaneo-estado"></p>
     </div>
-    <label>Foto del DNI (progenitor autorizante)</label>
-    <div class="captura-foto" data-target="aut-progenitor">
-      <div class="captura-visor">
-        <video autoplay playsinline muted></video>
-        <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
-        <div class="scan-indicador"><span>Buscando código</span><span class="scan-dot"></span><span class="scan-dot"></span><span class="scan-dot"></span></div>
-        <button type="button" class="btn-flash" title="Activar/desactivar flash">🔦</button>
-        <img hidden alt="Foto del DNI capturada">
-      </div>
-      <canvas hidden></canvas>
-      <input type="hidden" name="foto_progenitor" value="">
-      <div class="aviso-foto">
-        ⚠️ <span class="motivo-texto">No pudimos leer el código del DNI.</span>
-        <div class="acciones">
-          <button type="button" class="btn-repetir-aviso">Reintentar</button>
-          <button type="button" class="btn-usar-igual">Tomar foto igual</button>
-        </div>
-      </div>
-      <div class="captura-botones">
-        <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
-        <button type="button" class="btn-secundario btn-cancelar" hidden>Cancelar</button>
-      </div>
-      <p class="captura-estado">Sin foto capturada</p>
-      <p class="escaneo-estado"></p>
-    </div>
     <label>Domicilio (calle, número, barrio)</label>
     <input type="text" name="domicilio" required>
     <label>Localidad</label>
@@ -992,23 +992,6 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Domicilio (calle, número, barrio)</label>
-    <input type="text" name="domicilio" required>
-    <label>Localidad</label>
-    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
-    <div class="comisaria-asignada" data-comisaria-aviso>
-      <span class="texto">📍 Calculando comisaría...</span>
-      <strong class="nombre"></strong>
-    </div>
-    <label>Tipo de certificado</label>
-    <select name="tipoCertificado" required>
-      <option value="">Seleccionar</option>
-      <option>Provincial (Policía de Salta)</option>
-      <option>Nacional (Registro Nacional de Reincidencia)</option>
-      <option>Ambos (Provincial y Nacional)</option>
-    </select>
-    <label>Motivo del trámite</label>
-    <textarea name="motivo" required placeholder="Ej: Solicitud laboral, trámite educativo, etc."></textarea>
     <label>Foto del DNI (solicitante)</label>
     <div class="captura-foto" data-target="ant-solicitante">
       <div class="captura-visor">
@@ -1034,6 +1017,23 @@
       <p class="captura-estado">Sin foto capturada</p>
       <p class="escaneo-estado"></p>
     </div>
+    <label>Domicilio (calle, número, barrio)</label>
+    <input type="text" name="domicilio" required>
+    <label>Localidad</label>
+    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
+    <div class="comisaria-asignada" data-comisaria-aviso>
+      <span class="texto">📍 Calculando comisaría...</span>
+      <strong class="nombre"></strong>
+    </div>
+    <label>Tipo de certificado</label>
+    <select name="tipoCertificado" required>
+      <option value="">Seleccionar</option>
+      <option>Provincial (Policía de Salta)</option>
+      <option>Nacional (Registro Nacional de Reincidencia)</option>
+      <option>Ambos (Provincial y Nacional)</option>
+    </select>
+    <label>Motivo del trámite</label>
+    <textarea name="motivo" required placeholder="Ej: Solicitud laboral, trámite educativo, etc."></textarea>
     <div class="btns">
       <button type="submit" class="btn-primario">Generar certificado</button>
       <button type="button" class="btn-secundario volver">Volver</button>
@@ -1052,16 +1052,6 @@
     </div>
     <label>Teléfono / WhatsApp</label>
     <input type="tel" name="telefono" placeholder="Ej: 3874123456" required>
-    <label>Domicilio (calle, número, barrio)</label>
-    <input type="text" name="domicilio" required>
-    <label>Localidad</label>
-    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
-    <div class="comisaria-asignada" data-comisaria-aviso>
-      <span class="texto">📍 Calculando comisaría...</span>
-      <strong class="nombre"></strong>
-    </div>
-    <label>Motivo del trámite</label>
-    <textarea name="motivo" required placeholder="Ej: Trámite bancario, gestión de servicios, etc."></textarea>
     <label>Foto del DNI (solicitante)</label>
     <div class="captura-foto" data-target="dom-solicitante">
       <div class="captura-visor">
@@ -1087,6 +1077,16 @@
       <p class="captura-estado">Sin foto capturada</p>
       <p class="escaneo-estado"></p>
     </div>
+    <label>Domicilio (calle, número, barrio)</label>
+    <input type="text" name="domicilio" required>
+    <label>Localidad</label>
+    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
+    <div class="comisaria-asignada" data-comisaria-aviso>
+      <span class="texto">📍 Calculando comisaría...</span>
+      <strong class="nombre"></strong>
+    </div>
+    <label>Motivo del trámite</label>
+    <textarea name="motivo" required placeholder="Ej: Trámite bancario, gestión de servicios, etc."></textarea>
     <div class="btns">
       <button type="submit" class="btn-primario">Generar certificado</button>
       <button type="button" class="btn-secundario volver">Volver</button>
@@ -1106,6 +1106,31 @@
     <div class="fila">
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
+    </div>
+    <label>Foto del DNI (solicitante)</label>
+    <div class="captura-foto" data-target="ext-solicitante">
+      <div class="captura-visor">
+        <video autoplay playsinline muted></video>
+        <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
+        <div class="scan-indicador"><span>Buscando código</span><span class="scan-dot"></span><span class="scan-dot"></span><span class="scan-dot"></span></div>
+        <button type="button" class="btn-flash" title="Activar/desactivar flash">🔦</button>
+        <img hidden alt="Foto del DNI capturada">
+      </div>
+      <canvas hidden></canvas>
+      <input type="hidden" name="foto_solicitante" value="">
+      <div class="aviso-foto">
+        ⚠️ <span class="motivo-texto">No pudimos leer el código del DNI.</span>
+        <div class="acciones">
+          <button type="button" class="btn-repetir-aviso">Reintentar</button>
+          <button type="button" class="btn-usar-igual">Tomar foto igual</button>
+        </div>
+      </div>
+      <div class="captura-botones">
+        <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
+        <button type="button" class="btn-secundario btn-cancelar" hidden>Cancelar</button>
+      </div>
+      <p class="captura-estado">Sin foto capturada</p>
+      <p class="escaneo-estado"></p>
     </div>
     <label>Domicilio (calle, número, barrio)</label>
     <input type="text" name="domicilio" required>
@@ -1141,31 +1166,6 @@
     <input type="text" name="lugarExtravio" placeholder="Ej: Barrio Centro, Salta" required>
     <label>Detalle adicional (opcional)</label>
     <textarea name="detalleExtravio" placeholder="Contá brevemente cómo ocurrió"></textarea>
-    <label>Foto del DNI (solicitante)</label>
-    <div class="captura-foto" data-target="ext-solicitante">
-      <div class="captura-visor">
-        <video autoplay playsinline muted></video>
-        <div class="marco-dni"><div class="marco-dni-texto">Encuadrá el DNI dentro del marco</div></div>
-        <div class="scan-indicador"><span>Buscando código</span><span class="scan-dot"></span><span class="scan-dot"></span><span class="scan-dot"></span></div>
-        <button type="button" class="btn-flash" title="Activar/desactivar flash">🔦</button>
-        <img hidden alt="Foto del DNI capturada">
-      </div>
-      <canvas hidden></canvas>
-      <input type="hidden" name="foto_solicitante" value="">
-      <div class="aviso-foto">
-        ⚠️ <span class="motivo-texto">No pudimos leer el código del DNI.</span>
-        <div class="acciones">
-          <button type="button" class="btn-repetir-aviso">Reintentar</button>
-          <button type="button" class="btn-usar-igual">Tomar foto igual</button>
-        </div>
-      </div>
-      <div class="captura-botones">
-        <button type="button" class="btn-secundario btn-camara">Activar cámara</button>
-        <button type="button" class="btn-secundario btn-cancelar" hidden>Cancelar</button>
-      </div>
-      <p class="captura-estado">Sin foto capturada</p>
-      <p class="escaneo-estado"></p>
-    </div>
     <div class="btns">
       <button type="submit" class="btn-primario">Generar constancia</button>
       <button type="button" class="btn-secundario volver">Volver</button>
@@ -1186,19 +1186,6 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Domicilio (calle, número, barrio)</label>
-    <input type="text" name="domicilio" required>
-    <label>Localidad</label>
-    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
-    <div class="comisaria-asignada" data-comisaria-aviso>
-      <span class="texto">📍 Calculando comisaría...</span>
-      <strong class="nombre"></strong>
-    </div>
-    <label>Tipo de beneficio</label>
-    <select name="tipoBeneficio" required>
-      <option value="">Seleccionar</option>
-      <option>Jubilación</option><option>Pensión</option><option>Otro</option>
-    </select>
     <label>Foto del DNI (solicitante)</label>
     <div class="captura-foto" data-target="sup-solicitante">
       <div class="captura-visor">
@@ -1224,6 +1211,19 @@
       <p class="captura-estado">Sin foto capturada</p>
       <p class="escaneo-estado"></p>
     </div>
+    <label>Domicilio (calle, número, barrio)</label>
+    <input type="text" name="domicilio" required>
+    <label>Localidad</label>
+    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
+    <div class="comisaria-asignada" data-comisaria-aviso>
+      <span class="texto">📍 Calculando comisaría...</span>
+      <strong class="nombre"></strong>
+    </div>
+    <label>Tipo de beneficio</label>
+    <select name="tipoBeneficio" required>
+      <option value="">Seleccionar</option>
+      <option>Jubilación</option><option>Pensión</option><option>Otro</option>
+    </select>
     <h3 class="seccion">Testigos (obligatorios: 2)</h3>
     <div class="bloque-testigo" data-testigo="1" data-activo="true">
       <div class="fila campos-testigo">
@@ -1307,18 +1307,6 @@
       <div><label>Email (para avisarte cuando esté listo)</label><input type="email" name="email" placeholder="tucorreo@ejemplo.com" required></div>
       <div><label>Teléfono / WhatsApp</label><input type="tel" name="telefono" placeholder="Ej: 3874123456" required></div>
     </div>
-    <label>Domicilio de estadía (calle, número, barrio)</label>
-    <input type="text" name="domicilio" required>
-    <label>Localidad</label>
-    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
-    <div class="comisaria-asignada" data-comisaria-aviso>
-      <span class="texto">📍 Calculando comisaría...</span>
-      <strong class="nombre"></strong>
-    </div>
-    <label>Tiempo de estadía</label>
-    <input type="text" name="tiempoEstadia" placeholder="Ej: 3 meses" required>
-    <label>Motivo del trámite</label>
-    <textarea name="motivo" required></textarea>
     <label>Foto del DNI (solicitante)</label>
     <div class="captura-foto" data-target="est-solicitante">
       <div class="captura-visor">
@@ -1344,6 +1332,18 @@
       <p class="captura-estado">Sin foto capturada</p>
       <p class="escaneo-estado"></p>
     </div>
+    <label>Domicilio de estadía (calle, número, barrio)</label>
+    <input type="text" name="domicilio" required>
+    <label>Localidad</label>
+    <select name="localidad" class="select-localidad" required><option value="">Seleccionar</option></select>
+    <div class="comisaria-asignada" data-comisaria-aviso>
+      <span class="texto">📍 Calculando comisaría...</span>
+      <strong class="nombre"></strong>
+    </div>
+    <label>Tiempo de estadía</label>
+    <input type="text" name="tiempoEstadia" placeholder="Ej: 3 meses" required>
+    <label>Motivo del trámite</label>
+    <textarea name="motivo" required></textarea>
     <div class="btns">
       <button type="submit" class="btn-primario">Generar certificado</button>
       <button type="button" class="btn-secundario volver">Volver</button>
