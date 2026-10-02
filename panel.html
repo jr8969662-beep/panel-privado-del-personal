@@ -207,6 +207,19 @@
   .badge-duplicado{background:rgba(185,28,28,0.4);color:#fca5a5;
     border:1px solid rgba(252,165,165,0.6);padding:2px 8px;border-radius:10px;
     font-size:0.68rem;font-weight:700;margin-left:6px;cursor:help;}
+  .badge-correccion{background:rgba(202,138,4,0.35);color:#fde68a;
+    border:1px solid rgba(253,230,138,0.6);padding:2px 7px;border-radius:10px;
+    font-size:0.68rem;font-weight:700;margin-left:6px;cursor:help;}
+  .aviso-correccion{background:rgba(202,138,4,0.12);border:1px solid rgba(253,230,138,0.55);
+    border-left:4px solid #fde68a;border-radius:8px;padding:14px 16px;margin-bottom:16px;}
+  .aviso-correccion h4{margin:0 0 8px;font-size:0.9rem;color:#fde68a;}
+  .aviso-correccion ul{margin:0 0 10px;padding-left:18px;}
+  .aviso-correccion li{font-size:0.84rem;color:rgba(255,255,255,0.88);margin:3px 0;line-height:1.45;}
+  .aviso-correccion .meta{font-size:0.75rem;color:rgba(255,255,255,0.6);margin:6px 0 10px;}
+  .aviso-correccion .acciones{display:flex;gap:10px;flex-wrap:wrap;}
+  .aviso-correccion button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:0.82rem;}
+  #btn-aceptar-correccion{background:#15803d;color:#fff;}
+  #btn-rechazar-correccion{background:#e5e9ef;color:#1f2937;}
   .codigo-tabla{font-family:'Courier New',monospace;font-size:0.9rem;font-weight:700;
     color:var(--dorado-brilloso);letter-spacing:0.08em;user-select:all;}
   .paginacion{display:flex;justify-content:space-between;align-items:center;
@@ -1429,6 +1442,15 @@ function renderTabla() {
       tdTramite.appendChild(bandera);
     }
     tdTramite.appendChild(document.createTextNode(s.tramite_titulo || s.tramite || '-'));
+    const correccionFila = (s.datos && s.datos._correccion) || null;
+    if (correccionFila) {
+      const estadoCorr = correccionFila.estado || 'pendiente';
+      const badgeCorr = document.createElement('span');
+      badgeCorr.className = 'badge-correccion';
+      badgeCorr.title = 'El ciudadano corrigió datos (' + estadoCorr + ')';
+      badgeCorr.textContent = estadoCorr === 'aceptada' ? '✏️✓' : estadoCorr === 'rechazada' ? '✏️✕' : '✏️';
+      tdTramite.appendChild(badgeCorr);
+    }
     tr.appendChild(tdTramite);
 
     const tdCodigo = document.createElement('td');
@@ -1893,6 +1915,100 @@ function crearItemEstado(estado) {
   return item;
 }
 
+function crearAvisoCorreccion(s) {
+  const corr = (s.datos && s.datos._correccion) || {};
+  const caja = document.createElement('div');
+  caja.className = 'aviso-correccion';
+
+  const titulo = document.createElement('h4');
+  titulo.textContent = '⚠️ El ciudadano corrigió datos';
+  caja.appendChild(titulo);
+
+  const lista = document.createElement('ul');
+  const agregar = (texto) => {
+    const li = document.createElement('li');
+    li.textContent = texto;
+    lista.appendChild(li);
+  };
+  if (corr.geo_corregida && corr.geo_corregida.lat != null) {
+    const orig = (corr.geo_original && corr.geo_original.lat != null)
+      ? ` (original: ${corr.geo_original.lat}, ${corr.geo_original.lon})` : '';
+    agregar(`📍 Ubicación corregida: ${corr.geo_corregida.lat}, ${corr.geo_corregida.lon}${orig}`);
+  }
+  if (corr.comisaria_corregida) {
+    agregar(`🏢 Comisaría pedida: ${corr.comisaria_corregida} (original: ${corr.comisaria_original || '-'})`);
+  }
+  caja.appendChild(lista);
+
+  const meta = document.createElement('p');
+  meta.className = 'meta';
+  meta.textContent = 'Fecha de la corrección: ' + (corr.fecha ? new Date(corr.fecha).toLocaleString('es-AR') : '-');
+  caja.appendChild(meta);
+
+  const estado = corr.estado || 'pendiente';
+  if (estado === 'pendiente') {
+    const acciones = document.createElement('div');
+    acciones.className = 'acciones';
+    const btnAceptar = document.createElement('button');
+    btnAceptar.id = 'btn-aceptar-correccion';
+    btnAceptar.type = 'button';
+    btnAceptar.textContent = '✓ Aceptar corrección';
+    btnAceptar.addEventListener('click', () => resolverCorreccion(true));
+    const btnRechazar = document.createElement('button');
+    btnRechazar.id = 'btn-rechazar-correccion';
+    btnRechazar.type = 'button';
+    btnRechazar.textContent = '✕ Rechazar';
+    btnRechazar.addEventListener('click', () => resolverCorreccion(false));
+    acciones.appendChild(btnAceptar);
+    acciones.appendChild(btnRechazar);
+    caja.appendChild(acciones);
+  } else {
+    const resuelto = document.createElement('p');
+    resuelto.className = 'meta';
+    const por = corr.resuelta_por ? ' por ' + corr.resuelta_por : '';
+    const cuando = corr.resuelta_en ? ' el ' + new Date(corr.resuelta_en).toLocaleString('es-AR') : '';
+    resuelto.textContent = (estado === 'aceptada' ? '✅ Corrección aceptada' : '❌ Corrección rechazada') + por + cuando;
+    caja.appendChild(resuelto);
+  }
+  return caja;
+}
+
+async function resolverCorreccion(aceptar) {
+  if (!solicitudAbierta) return;
+  const corr = (solicitudAbierta.datos && solicitudAbierta.datos._correccion) || null;
+  if (!corr) return;
+  const ahora = new Date().toISOString();
+  const datosNuevos = {
+    ...(solicitudAbierta.datos || {}),
+    _correccion: {
+      ...corr,
+      estado: aceptar ? 'aceptada' : 'rechazada',
+      resuelta_en: ahora,
+      resuelta_por: usuarioActual || '',
+    },
+  };
+  const cambios = { datos: datosNuevos };
+  if (aceptar) {
+    cambios.comisaria_asignada = corr.comisaria_corregida || solicitudAbierta.comisaria_asignada;
+    cambios.validado_por = usuarioActual || null;
+    cambios.validado_en = ahora;
+  }
+  const { error } = await supabaseClient.from('solicitudes').update(cambios).eq('id', solicitudAbierta.id);
+  if (error) {
+    console.error(error);
+    alert('No se pudo guardar la decisión. Revisá tu conexión e intentá de nuevo.');
+    return;
+  }
+  document.getElementById('detalle').style.display = 'none';
+  await cargarSolicitudes();
+  mostrarToast(
+    aceptar ? '✅ Corrección aceptada' : '✕ Corrección rechazada',
+    aceptar ? 'Se actualizó la comisaría asignada' : 'Se mantiene la comisaría original',
+    'success',
+    3500
+  );
+}
+
 async function mostrarDetalle(s) {
   solicitudAbierta = s;
   const tituloEl = document.getElementById('detalle-titulo');
@@ -1924,6 +2040,7 @@ async function mostrarDetalle(s) {
   const cont = document.getElementById('detalle-contenido');
   cont.innerHTML = '';
   const d = s.datos || {};
+  if (d._correccion) cont.appendChild(crearAvisoCorreccion(s));
   const et = etiquetasDetalle;
   const camposSol = [];
   camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
