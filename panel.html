@@ -2195,7 +2195,7 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
         <div><dt>Estado</dt><dd>${escapeHtml(s.estado || 'pendiente')}</dd></div>
     `;
     for (const [campo, valor] of Object.entries(d)) {
-      if (campo.startsWith('__')) continue;
+      if (campo.startsWith('_')) continue;
       if (!valor) continue;
       const label = etiquetasDetalle[campo] || campo;
       if (campo.startsWith('foto_')) {

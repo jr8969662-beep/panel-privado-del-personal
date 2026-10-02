@@ -2490,12 +2490,28 @@ Object.entries(forms).forEach(([tramite, form]) => {
         lon: form.dataset.geoLon ? Number(form.dataset.geoLon) : null,
         origen: (asignacion && asignacion.origen) || 'desconocido',
       };
+
+      // Corrección declarada por el ciudadano
+      const tipoCorreccion = form.dataset.correccionTipo || '';
+      const comisariaCorregida = (form.dataset.comisariaCorregida || '').trim();
+      const corrigeUbicacion = tipoCorreccion === 'ubicacion' || tipoCorreccion === 'ambas';
+      const corrigeComisaria = (tipoCorreccion === 'comisaria' || tipoCorreccion === 'ambas') && !!comisariaCorregida;
+      const correccion = (corrigeUbicacion || corrigeComisaria) ? {
+        tipos: [...(corrigeUbicacion ? ['ubicacion'] : []), ...(corrigeComisaria ? ['comisaria'] : [])],
+        comisaria_original: comisariaAsignada,
+        comisaria_corregida: corrigeComisaria ? comisariaCorregida : null,
+        geo_original: { lat: (asignacion && asignacion.lat) || null, lon: (asignacion && asignacion.lon) || null },
+        geo_corregida: corrigeUbicacion ? { lat: geo.lat, lon: geo.lon } : null,
+        fecha: new Date().toISOString(),
+        estado: 'pendiente',
+      } : null;
+
       const { error } = await supabaseClient.from('solicitudes').insert([{
         tramite: tramite,
         tramite_titulo: titulos[tramite],
         comisaria_asignada: comisariaAsignada,
         estado: 'pendiente',
-        datos: { ...registro, __geo: geo },
+        datos: { ...registro, __geo: geo, ...(correccion ? { _correccion: correccion } : {}) },
         codigo: codigoTramite,
       }]);
       if (error) throw error;
