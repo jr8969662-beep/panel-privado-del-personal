@@ -1915,15 +1915,21 @@ function puntoEnPoligono(lat, lon, coordenadas) {
 }
 
 function buscarComisariaPorCoordenadas(lat, lon) {
+  const coincidencias = [];
   for (const [numDDP, poligonos] of Object.entries(POLIGONOS_DDP)) {
     for (const poligono of poligonos) {
       if (puntoEnPoligono(lat, lon, poligono.c) &&
           !(poligono.h || []).some((hueco) => puntoEnPoligono(lat, lon, hueco))) {
-        return { ddp: parseInt(numDDP), nombre: poligono.n, lat: lat, lon: lon };
+        coincidencias.push({ ddp: parseInt(numDDP), nombre: poligono.n, lat: lat, lon: lon });
       }
     }
   }
-  return null;
+  if (coincidencias.length > 1) {
+    console.warn('Solapamiento de jurisdicciones en ' + lat + ',' + lon + ': ' +
+      coincidencias.map((c) => 'DDP-' + c.ddp + ' ' + c.nombre).join(' | ') +
+      ' (se usa la primera)');
+  }
+  return coincidencias[0] || null;
 }
 
 /* Quita "mza/manzana/lote" del texto: Nominatim no tiene esos datos y
