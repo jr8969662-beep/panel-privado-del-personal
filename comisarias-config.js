@@ -1,20 +1,18 @@
 /*
-  DATOS REALES de dependencias de la Policía de la Provincia de Salta
+  DATOS de dependencias de la Policía de la Provincia de Salta
   (Comisarías, Sub Comisarías, Destacamentos y Puestos Policiales),
-  con sus coordenadas reales, tomados del mapa oficial de la Policía de Salta
-  "DEPENDENCIAS POLICIA PROVINCIA DE SALTA" (zona Capital y alrededores).
+  tomados del mapa oficial "DEPENDENCIAS POLICIA PROVINCIA DE SALTA".
 
-  Cómo funciona la asignación automática:
-  1. La persona escribe su domicilio en el formulario.
-  2. Ese texto se convierte en coordenadas (latitud/longitud) usando un
-     servicio gratuito de geocodificación (Nominatim / OpenStreetMap).
-  3. Se calcula cuál de las dependencias de la lista de abajo está más
-     cerca de esas coordenadas, y esa es la que se asigna al trámite.
+  Este archivo se usa para:
+  1. Normalizar el nombre técnico de cada dependencia (KML -> nombre oficial),
+     ver normalizarNombreDependencia().
+  2. Tener una lista de referencia de dependencias y sus barrios, que alimenta
+     el sufijo de barrio de los nombres oficiales.
+  3. CORRECCIONES_BARRIO: atajo barrio -> comisaría.
 
-  Importante: esto es una APROXIMACIÓN por cercanía geográfica, no la
-  jurisdicción oficial exacta (que depende de límites de barrio definidos
-  por la Policía, no solo de la distancia). Si en algún caso el personal
-  ve que la asignación no es la correcta, puede reasignarla manualmente.
+  La asignación real del domicilio a la comisaría se hace en
+  formularios-tramites.html con los polígonos de DDP-*.json (punto en polígono),
+  no por cercanía a un punto.
 */
 
 const DEPENDENCIAS_POLICIALES = [
@@ -88,73 +86,6 @@ const DEPENDENCIAS_POLICIALES = [
   { nombre: "Puesto Policial Viñaco", lat: -25.1717395, lon: -65.4965437 },
   { nombre: "Puesto Policial El Circulo", lat: -24.836051, lon: -65.4190408 },
 ];
-
-/* Distancia entre dos puntos (fórmula de Haversine), en kilómetros */
-function distanciaKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-/* Dada una latitud/longitud, devuelve la dependencia policial más cercana */
-function dependenciaMasCercana(lat, lon) {
-  let mejor = null;
-  let mejorDistancia = Infinity;
-  for (const dep of DEPENDENCIAS_POLICIALES) {
-    const d = distanciaKm(lat, lon, dep.lat, dep.lon);
-    if (d < mejorDistancia) {
-      mejorDistancia = d;
-      mejor = dep;
-    }
-  }
-  return { dependencia: mejor, distanciaKm: mejorDistancia };
-}
-
-/*
-  Convierte un domicilio escrito en texto a coordenadas, usando el
-  servicio gratuito Nominatim (OpenStreetMap). No requiere API key.
-  Devuelve {lat, lon, direccionEncontrada} o null si no se pudo ubicar.
-*/
-async function geocodificarDireccion(domicilio) {
-  const consulta = `${domicilio}, Salta, Argentina`;
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ar&q=${encodeURIComponent(consulta)}`;
-  try {
-    const resp = await fetch(url, { headers: { 'Accept-Language': 'es' } });
-    const data = await resp.json();
-    if (!data || !data.length) return null;
-    return {
-      lat: parseFloat(data[0].lat),
-      lon: parseFloat(data[0].lon),
-      direccionEncontrada: data[0].display_name,
-    };
-  } catch (err) {
-    console.error('Error geocodificando:', err);
-    return null;
-  }
-}
-
-/*
-  Función principal: recibe el domicilio en texto y devuelve
-  { comisaria, distanciaKm, direccionEncontrada } o null si no se pudo
-  determinar (por ejemplo, dirección no encontrada).
-*/
-async function asignarComisariaPorDireccion(domicilio) {
-  if (!domicilio) return null;
-  const ubicacion = await geocodificarDireccion(domicilio);
-  if (!ubicacion) return null;
-  const { dependencia, distanciaKm: dist } = dependenciaMasCercana(ubicacion.lat, ubicacion.lon);
-  if (!dependencia) return null;
-  return {
-    comisaria: dependencia.nombre,
-    distanciaKm: dist,
-    direccionEncontrada: ubicacion.direccionEncontrada,
-  };
-}
 
 /* ------------------------------------------------------------
    NOMBRES OFICIALES DE DEPENDENCIAS
