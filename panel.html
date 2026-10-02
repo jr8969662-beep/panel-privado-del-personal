@@ -660,12 +660,39 @@ function formatearFecha(fechaISO) {
 }
 
 /* ============================================================
+   SEGURIDAD: ESCAPADO DE HTML
+   Cualquier dato que venga de la tabla `solicitudes` lo puede insertar
+   el público (la clave anon permite crear filas), así que se inserta en
+   el DOM como TEXTO, nunca como HTML. Evita XSS almacenado.
+   ============================================================ */
+function escapeHtml(valor) {
+  return String(valor == null ? '' : valor)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escaparDatos(objeto) {
+  const salida = {};
+  for (const [clave, valor] of Object.entries(objeto || {})) {
+    salida[clave] = typeof valor === 'string' ? escapeHtml(valor) : valor;
+  }
+  return salida;
+}
+
+/* ============================================================
    TOASTS
    ============================================================ */
 function mostrarToast(titulo, mensaje, tipo = 'success', duracion = 5000) {
   const toast = document.createElement('div');
   toast.className = 'toast' + (tipo !== 'success' ? ' ' + tipo : '');
-  toast.innerHTML = `<span class="toast-titulo">${titulo}</span>${mensaje}`;
+  const toastTitulo = document.createElement('span');
+  toastTitulo.className = 'toast-titulo';
+  toastTitulo.textContent = titulo;
+  toast.appendChild(toastTitulo);
+  toast.appendChild(document.createTextNode(mensaje));
   toastContainer.appendChild(toast);
   setTimeout(() => {
     toast.style.opacity = '0';
@@ -910,7 +937,7 @@ async function cargarAuditoria() {
   const { data, error } = await supabaseClient
     .from('logs_accesos').select('*').order('fecha', { ascending: false }).limit(100);
   if (error) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#fca5a5;">Error: ${error.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#fca5a5;">Error: ${escapeHtml(error.message)}</td></tr>`;
     return;
   }
   if (!data || data.length === 0) {
@@ -925,12 +952,12 @@ async function cargarAuditoria() {
                     : log.tipo === 'logout' ? '🚪 Salida'
                     : log.tipo === 'logout_inactividad' ? '⏱ Cerrado por inactividad'
                     : log.tipo;
-    tr.innerHTML = `
-      <td style="font-size:0.82rem;">${fecha}</td>
-      <td style="font-size:0.82rem;">${log.email || '-'}</td>
-      <td style="font-size:0.82rem;">${tipoTexto}</td>
-      <td style="font-size:0.82rem;">${log.dispositivo || '-'}</td>
-    `;
+    [fecha, log.email || '-', tipoTexto, log.dispositivo || '-'].forEach(texto => {
+      const td = document.createElement('td');
+      td.style.fontSize = '0.82rem';
+      td.textContent = texto;
+      tr.appendChild(td);
+    });
     tbody.appendChild(tr);
   });
 }
@@ -1008,7 +1035,11 @@ async function intentarLogin() {
 
   const nombreCorto = email.split('@')[0];
   const banner = document.getElementById('banner-bienvenida');
-  banner.innerHTML = `👮 <strong>Bienvenido/a, ${nombreCorto}</strong> · Último ingreso: ${fechaFormateada}`;
+  banner.textContent = '👮 ';
+  const bannerStrong = document.createElement('strong');
+  bannerStrong.textContent = `Bienvenido/a, ${nombreCorto}`;
+  banner.appendChild(bannerStrong);
+  banner.appendChild(document.createTextNode(` · Último ingreso: ${fechaFormateada}`));
   banner.classList.add('activo');
   setTimeout(() => banner.classList.remove('activo'), 6000);
 
@@ -1384,16 +1415,50 @@ function renderTabla() {
     const estadoTexto = s.estado === 'procesado' ? 'Procesado' :
                         s.estado === 'denegado' ? 'Denegado' : 'Pendiente';
     const esDuplicado = duplicados.has(s.id);
-    const banderaUrgente = s.urgente ? '<span class="bandera-urgente" title="Urgente">🚨</span>' : '';
-    const badgeDuplicado = esDuplicado ? '<span class="badge-duplicado" title="Mismo DNI ya cargó este tipo de trámite">⚠️ DUPLICADO</span>' : '';
-    tr.innerHTML = `
-      <td>${fecha}</td>
-      <td>${banderaUrgente}${s.tramite_titulo || s.tramite || '-'}</td>
-      <td><span class="codigo-tabla">${s.codigo || '-'}</span></td>
-      <td>${nombreSolicitante}${badgeDuplicado}</td>
-      <td>${s.comisaria_asignada || '-'}</td>
-      <td><span class="etiqueta ${s.estado}">${estadoTexto}</span></td>
-    `;
+    const tdFecha = document.createElement('td');
+    tdFecha.textContent = fecha;
+    tr.appendChild(tdFecha);
+
+    const tdTramite = document.createElement('td');
+    if (s.urgente) {
+      const bandera = document.createElement('span');
+      bandera.className = 'bandera-urgente';
+      bandera.title = 'Urgente';
+      bandera.textContent = '🚨';
+      tdTramite.appendChild(bandera);
+    }
+    tdTramite.appendChild(document.createTextNode(s.tramite_titulo || s.tramite || '-'));
+    tr.appendChild(tdTramite);
+
+    const tdCodigo = document.createElement('td');
+    const spanCodigo = document.createElement('span');
+    spanCodigo.className = 'codigo-tabla';
+    spanCodigo.textContent = s.codigo || '-';
+    tdCodigo.appendChild(spanCodigo);
+    tr.appendChild(tdCodigo);
+
+    const tdSolicitante = document.createElement('td');
+    tdSolicitante.appendChild(document.createTextNode(nombreSolicitante));
+    if (esDuplicado) {
+      const badge = document.createElement('span');
+      badge.className = 'badge-duplicado';
+      badge.title = 'Mismo DNI ya cargó este tipo de trámite';
+      badge.textContent = '⚠️ DUPLICADO';
+      tdSolicitante.appendChild(badge);
+    }
+    tr.appendChild(tdSolicitante);
+
+    const tdComisaria = document.createElement('td');
+    tdComisaria.textContent = s.comisaria_asignada || '-';
+    tr.appendChild(tdComisaria);
+
+    const tdEstado = document.createElement('td');
+    const etiquetaEstado = document.createElement('span');
+    const claseEstado = s.estado === 'procesado' ? 'procesado' : s.estado === 'denegado' ? 'denegado' : 'pendiente';
+    etiquetaEstado.className = 'etiqueta ' + claseEstado;
+    etiquetaEstado.textContent = estadoTexto;
+    tdEstado.appendChild(etiquetaEstado);
+    tr.appendChild(tdEstado);
     tr.addEventListener('click', () => mostrarDetalle(s));
     tbody.appendChild(tr);
   });
@@ -1768,7 +1833,7 @@ async function crearSeccion(titulo, campos) {
   seccion.className = 'detalle-seccion';
   const h = document.createElement('h4');
   h.className = 'detalle-seccion-titulo';
-  h.innerHTML = titulo;
+  h.textContent = titulo;
   seccion.appendChild(h);
   const lista = document.createElement('div');
   lista.className = 'detalle-lista';
@@ -1817,7 +1882,11 @@ function crearItemEstado(estado) {
   const dd = document.createElement('dd');
   const estadoTexto = estado === 'procesado' ? 'Procesado' :
                       estado === 'denegado' ? 'Denegado' : 'Pendiente';
-  dd.innerHTML = `<span class="etiqueta ${estado}">${estadoTexto}</span>`;
+  const claseEstado = estado === 'procesado' ? 'procesado' : estado === 'denegado' ? 'denegado' : 'pendiente';
+  const etiqueta = document.createElement('span');
+  etiqueta.className = 'etiqueta ' + claseEstado;
+  etiqueta.textContent = estadoTexto;
+  dd.appendChild(etiqueta);
   item.appendChild(dt);
   item.appendChild(dd);
   return item;
@@ -1826,8 +1895,14 @@ function crearItemEstado(estado) {
 async function mostrarDetalle(s) {
   solicitudAbierta = s;
   const tituloEl = document.getElementById('detalle-titulo');
-  const urgenteIcono = s.urgente ? '<span style="color:#fca5a5;">🚨 URGENTE</span>' : '';
-  tituloEl.innerHTML = (s.tramite_titulo || s.tramite) + ' ' + urgenteIcono;
+  tituloEl.textContent = s.tramite_titulo || s.tramite || '';
+  if (s.urgente) {
+    tituloEl.appendChild(document.createTextNode(' '));
+    const urgenteIcono = document.createElement('span');
+    urgenteIcono.style.color = '#fca5a5';
+    urgenteIcono.textContent = '🚨 URGENTE';
+    tituloEl.appendChild(urgenteIcono);
+  }
   const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
   document.getElementById('detalle-fecha').textContent = 'Solicitud recibida el ' + fecha;
 
@@ -2052,9 +2127,9 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
   if (!solicitudAbierta) return;
   const s = solicitudAbierta;
   const ventana = window.open('', '_blank');
-  const titulo = s.tramite_titulo || s.tramite;
-  const d = s.datos || {};
-  const comisaria = s.comisaria_asignada || 'Comisaría asignada';
+  const titulo = escapeHtml(s.tramite_titulo || s.tramite || '');
+  const d = escaparDatos(s.datos || {});
+  const comisaria = escapeHtml(s.comisaria_asignada || 'Comisaría asignada');
   const tramitesOficiales = ['residencia','convivencia','carencia','autorizacion','extravio','supervivencia'];
 
   const cssBase = `
@@ -2100,7 +2175,7 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
     const bloqueCodigo = s.codigo ? `
       <div class="codigo-impreso">
         <div class="etiqueta-codigo">🔐 Código único del trámite</div>
-        <div class="valor-codigo">${s.codigo}</div>
+        <div class="valor-codigo">${escapeHtml(s.codigo)}</div>
       </div>` : '';
     html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
       <style>${cssBase}</style></head><body>${bloqueCodigo}${certHTML}</body></html>`;
@@ -2112,11 +2187,11 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
       <p class="subt">Solicitud recibida el ${fecha}</p>
       ${s.codigo ? `<div class="codigo-impreso">
         <div class="etiqueta-codigo">🔐 Código único del trámite</div>
-        <div class="valor-codigo">${s.codigo}</div>
+        <div class="valor-codigo">${escapeHtml(s.codigo)}</div>
       </div>` : ''}
       <dl>
-        <div><dt>Comisaría asignada</dt><dd>${s.comisaria_asignada || '-'}</dd></div>
-        <div><dt>Estado</dt><dd>${s.estado || 'pendiente'}</dd></div>
+        <div><dt>Comisaría asignada</dt><dd>${escapeHtml(s.comisaria_asignada || '-')}</dd></div>
+        <div><dt>Estado</dt><dd>${escapeHtml(s.estado || 'pendiente')}</dd></div>
     `;
     for (const [campo, valor] of Object.entries(d)) {
       if (!valor) continue;
@@ -2128,13 +2203,13 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
             .storage.from(BUCKET_FOTOS).createSignedUrl(valor, 600);
           if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
         }
-        listaHTML += `<div style="grid-column:1/-1;"><dt>${label}</dt><dd><img src="${urlPrint}"></dd></div>`;
+        listaHTML += `<div style="grid-column:1/-1;"><dt>${escapeHtml(label)}</dt><dd><img src="${escapeHtml(urlPrint)}"></dd></div>`;
       } else {
-        listaHTML += `<div><dt>${label}</dt><dd>${valor}</dd></div>`;
+        listaHTML += `<div><dt>${escapeHtml(label)}</dt><dd>${valor}</dd></div>`;
       }
     }
     if (s.motivo_denegacion) {
-      listaHTML += `<div style="grid-column:1/-1;"><dt>Motivo de denegación</dt><dd>${s.motivo_denegacion}</dd></div>`;
+      listaHTML += `<div style="grid-column:1/-1;"><dt>Motivo de denegación</dt><dd>${escapeHtml(s.motivo_denegacion)}</dd></div>`;
     }
     listaHTML += `
       </dl>
