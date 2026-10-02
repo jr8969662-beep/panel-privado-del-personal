@@ -313,6 +313,17 @@
   .mapa-confirmacion #mapa-leaflet{width:100%;height:260px;border-radius:6px;border:1px solid rgba(201,169,97,0.4);z-index:1;}
   .mapa-confirmacion .ayuda{font-size:0.78rem;color:rgba(255,255,255,0.75);margin-top:10px;line-height:1.5;}
   .mapa-confirmacion .coords{font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:6px;font-family:monospace;}
+  /* Corrección por parte del ciudadano */
+  .correccion-ciudadano{margin-top:14px;border-top:1px solid rgba(201,169,97,0.35);padding-top:12px;}
+  .correccion-pregunta{font-size:0.82rem;color:rgba(255,255,255,0.8);margin:0 0 8px;}
+  .correccion-botones{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn-correccion{padding:7px 12px;font-size:0.78rem;border-radius:6px;border:1px solid rgba(201,169,97,0.4);background:transparent;color:#e5e7eb;cursor:pointer;}
+  .btn-correccion:hover{background:rgba(255,255,255,0.06);}
+  .btn-correccion.activo{background:var(--azul);color:#fff;border-color:var(--dorado);}
+  .correccion-ubicacion,.correccion-comisaria{margin-top:10px;}
+  .correccion-ubicacion .ayuda{font-size:0.78rem;color:rgba(255,255,255,0.7);margin:0;}
+  .correccion-comisaria label{display:block;font-size:0.8rem;color:rgba(255,255,255,0.8);margin-bottom:6px;}
+  .correccion-comisaria select{width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(201,169,97,0.4);background:var(--azul);color:#fff;font-size:0.85rem;font-family:inherit;}
   .leaflet-container{background:#0a1e3d !important;}
   .leaflet-control-attribution{background:rgba(0,0,0,0.5) !important;color:#fff !important;font-size:0.65rem !important;}
   .leaflet-control-attribution a{color:var(--dorado-claro) !important;}
@@ -2046,8 +2057,96 @@ async function asignarComisariaPorJurisdiccion(domicilio, localidad) {
 let mapaLeafletActivo = null;
 let marcadorLeafletActivo = null;
 
+/* Comisarías y subcomisarías (nombres oficiales únicos) para el select de corrección */
+function opcionesComisarias() {
+  const vistas = new Map();
+  for (const [ddp, poligonos] of Object.entries(POLIGONOS_DDP)) {
+    for (const poligono of poligonos) {
+      const nombre = normalizarNombreDependencia(poligono.n, ddp);
+      const tipo = tipoDependencia(nombre);
+      if (tipo === 'Comisaría' || tipo === 'Subcomisaría') vistas.set(nombre, tipo);
+    }
+  }
+  return [...vistas.keys()].sort((a, b) => a.localeCompare(b, 'es'));
+}
+
+/* Botones de "corrección por parte del ciudadano", dentro del bloque del mapa */
+function crearControlesCorreccion(form, bloqueMapa) {
+  const cont = document.createElement('div');
+  cont.className = 'correccion-ciudadano';
+
+  const pregunta = document.createElement('p');
+  pregunta.className = 'correccion-pregunta';
+  pregunta.textContent = '¿La comisaría y la ubicación son correctas?';
+  cont.appendChild(pregunta);
+
+  const botones = document.createElement('div');
+  botones.className = 'correccion-botones';
+
+  const panelUbicacion = document.createElement('div');
+  panelUbicacion.className = 'correccion-ubicacion';
+  panelUbicacion.hidden = true;
+  const ayudaUbicacion = document.createElement('p');
+  ayudaUbicacion.className = 'ayuda';
+  ayudaUbicacion.textContent = 'Arrastrá el marcador del mapa hasta tu casa (o tocá el punto exacto).';
+  panelUbicacion.appendChild(ayudaUbicacion);
+
+  const panelComisaria = document.createElement('div');
+  panelComisaria.className = 'correccion-comisaria';
+  panelComisaria.hidden = true;
+  const labelComisaria = document.createElement('label');
+  labelComisaria.textContent = 'Elegí la comisaría correcta';
+  const select = document.createElement('select');
+  select.className = 'select-comisaria';
+  const vacio = document.createElement('option');
+  vacio.value = '';
+  vacio.textContent = 'Seleccionar…';
+  select.appendChild(vacio);
+  for (const nombre of opcionesComisarias()) {
+    const opcion = document.createElement('option');
+    opcion.value = nombre;
+    opcion.textContent = nombre;
+    select.appendChild(opcion);
+  }
+  panelComisaria.appendChild(labelComisaria);
+  panelComisaria.appendChild(select);
+
+  const definiciones = [
+    ['ok', '✓ Todo bien'],
+    ['ubicacion', '📍 La ubicación no es correcta'],
+    ['comisaria', '🏢 La comisaría no es correcta'],
+    ['ambas', '✏️ Corregir ambas'],
+  ];
+  const elementos = {};
+  function seleccionar(modo) {
+    form.dataset.correccionTipo = modo === 'ok' ? '' : modo;
+    panelUbicacion.hidden = !(modo === 'ubicacion' || modo === 'ambas');
+    panelComisaria.hidden = !(modo === 'comisaria' || modo === 'ambas');
+    for (const [clave, boton] of Object.entries(elementos)) boton.classList.toggle('activo', clave === modo);
+  }
+  for (const [modo, texto] of definiciones) {
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'btn-correccion';
+    boton.dataset.corr = modo;
+    boton.textContent = texto;
+    boton.addEventListener('click', () => seleccionar(modo));
+    elementos[modo] = boton;
+    botones.appendChild(boton);
+  }
+  select.addEventListener('change', () => { form.dataset.comisariaCorregida = select.value; });
+
+  cont.appendChild(botones);
+  cont.appendChild(panelUbicacion);
+  cont.appendChild(panelComisaria);
+  bloqueMapa.appendChild(cont);
+  seleccionar('ok');
+}
+
 function crearMapaConfirmacion(aviso, form, opciones) {
   const { lat, lng, comisariaFija, esMultiple, texto, nombreEl } = opciones;
+  form.dataset.correccionTipo = '';
+  form.dataset.comisariaCorregida = '';
 
   const bloqueMapa = document.createElement('div');
   bloqueMapa.className = 'mapa-confirmacion';
@@ -2067,6 +2166,7 @@ function crearMapaConfirmacion(aviso, form, opciones) {
     <div class="coords" data-coords>📍 Ubicación actual: ${lat.toFixed(5)}, ${lng.toFixed(5)}</div>
   `;
   aviso.appendChild(bloqueMapa);
+  crearControlesCorreccion(form, bloqueMapa);
 
   setTimeout(async () => {
     const divMapa = bloqueMapa.querySelector('#mapa-leaflet');
