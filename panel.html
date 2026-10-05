@@ -644,7 +644,6 @@
    ZONAS DE COMISARÍAS (inline)
    ============================================================ */
 const ZONAS_COMISARIA = {
-  // Centro
   "Comisaría N°1": "Centro",
   "Comisaría N°2": "Centro",
   "Comisaría N°3": "Centro",
@@ -652,13 +651,11 @@ const ZONAS_COMISARIA = {
   "Comisaría N°24": "Centro",
   "Subcomisaría Villa Asunción": "Centro",
   "Subcomisaría Barrio Policial": "Centro",
-  // Norte
   "Comisaría N°6": "Norte",
   "Comisaría N°11": "Norte",
   "Comisaría N°103": "Norte",
   "Comisaría N°110": "Norte",
   "Subcomisaría El Huaico": "Norte",
-  // Sur
   "Comisaría N°4": "Sur",
   "Comisaría N°10": "Sur",
   "Comisaría N°12": "Sur",
@@ -668,31 +665,25 @@ const ZONAS_COMISARIA = {
   "Comisaría N°106": "Sur",
   "Comisaría N°111": "Sur",
   "Subcomisaría Villa Mitre": "Sur",
-  // Este
   "Comisaría N°14": "Este",
   "Comisaría N°16": "Este",
   "Comisaría N°107": "Este",
   "Subcomisaría Grand Bourg Este": "Este",
   "Subcomisaría Grand Bourg": "Este",
-  // Oeste
   "Comisaría N°13": "Oeste",
   "Comisaría N°19": "Oeste",
   "Subcomisaría Villa Lavalle": "Oeste",
   "Subcomisaría Barrio Docente": "Oeste",
   "Subcomisaría El Aybal": "Oeste",
-  // Noreste
   "Comisaría N°101": "Noreste",
   "Comisaría N°112": "Noreste",
   "Comisaría N°118": "Noreste",
-  // Noroeste
   "Comisaría N°25": "Noroeste",
   "Comisaría N°100": "Noroeste",
   "Comisaría N°108": "Noroeste",
-  // Sudeste
   "Comisaría N°8": "Sudeste",
   "Comisaría N°104": "Sudeste",
   "Subcomisaría El Sol": "Sudeste",
-  // Suroeste
   "Comisaría N°7": "Suroeste",
   "Comisaría N°9": "Suroeste",
   "Comisaría N°15": "Suroeste",
@@ -703,14 +694,12 @@ const ZONAS_COMISARIA = {
 function obtenerZona(nombreComisaria) {
   if (!nombreComisaria) return "";
   const n = String(nombreComisaria);
-  // 1) Match por número de comisaría
   const m = n.match(/comisar[íi]a?\s*n?[°º]?\.?\s*(\d{1,3})/i)
          || n.match(/cr[íi]a\.?\s*(\d{1,3})/i);
   if (m) {
     const clave = "Comisaría N°" + m[1];
     if (ZONAS_COMISARIA[clave]) return ZONAS_COMISARIA[clave];
   }
-  // 2) Match por nombre (Subcomisaría/Destacamento)
   const claves = Object.keys(ZONAS_COMISARIA).sort((a, b) => b.length - a.length);
   for (const clave of claves) {
     if (clave.startsWith("Comisaría N°")) continue;
@@ -2284,7 +2273,7 @@ document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
   document.getElementById('detalle').style.display = 'none';
 });
 
-/* CAMBIAR ESTADO — con envío de correo y fecha de expiración */
+/* CAMBIAR ESTADO */
 async function cambiarEstado(nuevoEstado) {
   if (!solicitudAbierta) return;
   let motivo = null;
