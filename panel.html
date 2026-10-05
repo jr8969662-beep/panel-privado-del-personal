@@ -1462,7 +1462,8 @@ function aplicarFiltros() {
     if (estado && s.estado !== estado) return false;
     if (comisaria && s.comisaria_asignada !== comisaria) return false;
     if (tipoDep && obtenerTipoDependencia(s.comisaria_asignada) !== tipoDep) return false;
-    if (zonaFiltro && obtenerZona(s.comisaria_asignada) !== zonaFiltro) return false;
+    const zonaReal = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
+    if (zonaFiltro && zonaReal !== zonaFiltro) return false;
     if (tramite && s.tramite !== tramite) return false;
     if (s.created_at) {
       const f = new Date(s.created_at);
@@ -1493,7 +1494,10 @@ function ordenarLista(lista) {
     let va, vb;
     if (campo === 'solicitante') { va = obtenerNombreSolicitud(a); vb = obtenerNombreSolicitud(b); }
     else if (campo === 'comisaria_asignada') { va = a.comisaria_asignada || ''; vb = b.comisaria_asignada || ''; }
-    else if (campo === 'zona') { va = obtenerZona(a.comisaria_asignada); vb = obtenerZona(b.comisaria_asignada); }
+    else if (campo === 'zona') {
+      va = (a.datos && a.datos.zona) || obtenerZona(a.comisaria_asignada);
+      vb = (b.datos && b.datos.zona) || obtenerZona(b.comisaria_asignada);
+    }
     else if (campo === 'codigo') { va = a.codigo || ''; vb = b.codigo || ''; }
     else { va = a[campo] || ''; vb = b[campo] || ''; }
     if (campo === 'created_at') { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
@@ -1571,7 +1575,7 @@ function renderTabla() {
     tr.appendChild(tdComisaria);
 
     const tdZona = document.createElement('td');
-    const zona = obtenerZona(s.comisaria_asignada);
+    const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
     if (zona) {
       const spanZona = document.createElement('span');
       spanZona.className = 'etiqueta-zona ' + claseZona(zona);
@@ -2153,7 +2157,7 @@ async function mostrarDetalle(s) {
   const et = etiquetasDetalle;
   const camposSol = [];
   camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
-  const zona = obtenerZona(s.comisaria_asignada);
+  const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
   if (zona) camposSol.push(['Zona', zona]);
   if (s.codigo) camposSol.push(['🔐 Código único del trámite', s.codigo]);
 
@@ -2404,7 +2408,7 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
       <style>${cssBase}</style></head><body>${bloqueCodigo}${certHTML}</body></html>`;
   } else {
     const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
-    const zona = obtenerZona(s.comisaria_asignada);
+    const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
     let listaHTML = `
       <h1>${titulo}</h1>
       <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
@@ -2473,7 +2477,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
       d.email || '-',
       d.domicilio || d.domicilioComun || '-',
       s.comisaria_asignada || '-',
-      obtenerZona(s.comisaria_asignada) || '-',
+      (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada) || '-',
       s.estado || 'pendiente',
       s.urgente ? 'SÍ' : 'NO',
       s.retirado ? 'SÍ' : 'NO',
