@@ -210,6 +210,20 @@
   .badge-correccion{background:rgba(202,138,4,0.35);color:#fde68a;
     border:1px solid rgba(253,230,138,0.6);padding:2px 7px;border-radius:10px;
     font-size:0.68rem;font-weight:700;margin-left:6px;cursor:help;}
+
+  /* Etiquetas de ZONA */
+  .etiqueta-zona{padding:3px 9px;border-radius:10px;font-size:0.7rem;font-weight:700;
+    letter-spacing:0.03em;display:inline-block;text-transform:uppercase;}
+  .zona-centro{background:rgba(44,90,160,0.35);color:#93c5fd;border:1px solid rgba(147,197,253,0.5);}
+  .zona-norte{background:rgba(21,128,61,0.35);color:#86efac;border:1px solid rgba(134,239,172,0.5);}
+  .zona-sur{background:rgba(185,28,28,0.35);color:#fca5a5;border:1px solid rgba(252,165,165,0.5);}
+  .zona-este{background:rgba(202,138,4,0.35);color:#fcd34d;border:1px solid rgba(252,211,77,0.5);}
+  .zona-oeste{background:rgba(120,53,15,0.4);color:#fdba74;border:1px solid rgba(253,186,116,0.5);}
+  .zona-noreste{background:rgba(234,88,12,0.35);color:#fdba74;border:1px solid rgba(253,186,116,0.5);}
+  .zona-noroeste{background:rgba(126,34,206,0.35);color:#d8b4fe;border:1px solid rgba(216,180,254,0.5);}
+  .zona-sudeste{background:rgba(14,116,144,0.35);color:#67e8f9;border:1px solid rgba(103,232,249,0.5);}
+  .zona-suroeste{background:rgba(157,23,77,0.35);color:#f9a8d4;border:1px solid rgba(249,168,212,0.5);}
+
   .aviso-correccion{background:rgba(202,138,4,0.12);border:1px solid rgba(253,230,138,0.55);
     border-left:4px solid #fde68a;border-radius:8px;padding:14px 16px;margin-bottom:16px;}
   .aviso-correccion h4{margin:0 0 8px;font-size:0.9rem;color:#fde68a;}
@@ -497,6 +511,18 @@
         <option value="Puesto">📌 Puestos Policiales</option>
         <option value="Base Operativa">🎯 Bases Operativas</option>
       </select>
+      <select id="filtro-zona" title="Filtrar por zona">
+        <option value="">Todas las zonas</option>
+        <option value="Centro">Centro</option>
+        <option value="Norte">Norte</option>
+        <option value="Sur">Sur</option>
+        <option value="Este">Este</option>
+        <option value="Oeste">Oeste</option>
+        <option value="Noreste">Noreste</option>
+        <option value="Noroeste">Noroeste</option>
+        <option value="Sudeste">Sudeste</option>
+        <option value="Suroeste">Suroeste</option>
+      </select>
       <select id="filtro-comisaria"><option value="">Todas las comisarías</option></select>
       <select id="filtro-tramite">
         <option value="">Todos los trámites</option>
@@ -524,6 +550,7 @@
             <th class="ordenable" data-sort="codigo">Código</th>
             <th class="ordenable" data-sort="solicitante">Solicitante</th>
             <th class="ordenable" data-sort="comisaria_asignada">Comisaría</th>
+            <th class="ordenable" data-sort="zona">Zona</th>
             <th class="ordenable" data-sort="estado">Estado</th>
           </tr>
         </thead>
@@ -614,6 +641,90 @@
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 /* ============================================================
+   ZONAS DE COMISARÍAS (inline)
+   ============================================================ */
+const ZONAS_COMISARIA = {
+  // Centro
+  "Comisaría N°1": "Centro",
+  "Comisaría N°2": "Centro",
+  "Comisaría N°3": "Centro",
+  "Comisaría N°5": "Centro",
+  "Comisaría N°24": "Centro",
+  "Subcomisaría Villa Asunción": "Centro",
+  "Subcomisaría Barrio Policial": "Centro",
+  // Norte
+  "Comisaría N°6": "Norte",
+  "Comisaría N°11": "Norte",
+  "Comisaría N°103": "Norte",
+  "Comisaría N°110": "Norte",
+  "Subcomisaría El Huaico": "Norte",
+  // Sur
+  "Comisaría N°4": "Sur",
+  "Comisaría N°10": "Sur",
+  "Comisaría N°12": "Sur",
+  "Comisaría N°17": "Sur",
+  "Comisaría N°102": "Sur",
+  "Comisaría N°105": "Sur",
+  "Comisaría N°106": "Sur",
+  "Comisaría N°111": "Sur",
+  "Subcomisaría Villa Mitre": "Sur",
+  // Este
+  "Comisaría N°14": "Este",
+  "Comisaría N°16": "Este",
+  "Comisaría N°107": "Este",
+  "Subcomisaría Grand Bourg Este": "Este",
+  "Subcomisaría Grand Bourg": "Este",
+  // Oeste
+  "Comisaría N°13": "Oeste",
+  "Comisaría N°19": "Oeste",
+  "Subcomisaría Villa Lavalle": "Oeste",
+  "Subcomisaría Barrio Docente": "Oeste",
+  "Subcomisaría El Aybal": "Oeste",
+  // Noreste
+  "Comisaría N°101": "Noreste",
+  "Comisaría N°112": "Noreste",
+  "Comisaría N°118": "Noreste",
+  // Noroeste
+  "Comisaría N°25": "Noroeste",
+  "Comisaría N°100": "Noroeste",
+  "Comisaría N°108": "Noroeste",
+  // Sudeste
+  "Comisaría N°8": "Sudeste",
+  "Comisaría N°104": "Sudeste",
+  "Subcomisaría El Sol": "Sudeste",
+  // Suroeste
+  "Comisaría N°7": "Suroeste",
+  "Comisaría N°9": "Suroeste",
+  "Comisaría N°15": "Suroeste",
+  "Comisaría N°20": "Suroeste",
+  "Destacamento Villa Rebeca": "Suroeste",
+};
+
+function obtenerZona(nombreComisaria) {
+  if (!nombreComisaria) return "";
+  const n = String(nombreComisaria);
+  // 1) Match por número de comisaría
+  const m = n.match(/comisar[íi]a?\s*n?[°º]?\.?\s*(\d{1,3})/i)
+         || n.match(/cr[íi]a\.?\s*(\d{1,3})/i);
+  if (m) {
+    const clave = "Comisaría N°" + m[1];
+    if (ZONAS_COMISARIA[clave]) return ZONAS_COMISARIA[clave];
+  }
+  // 2) Match por nombre (Subcomisaría/Destacamento)
+  const claves = Object.keys(ZONAS_COMISARIA).sort((a, b) => b.length - a.length);
+  for (const clave of claves) {
+    if (clave.startsWith("Comisaría N°")) continue;
+    if (n.toLowerCase().includes(clave.toLowerCase())) return ZONAS_COMISARIA[clave];
+  }
+  return "";
+}
+
+function claseZona(zona) {
+  if (!zona) return "";
+  return "zona-" + zona.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+/* ============================================================
    CONFIGURACIÓN DE EMAILJS
    ============================================================ */
 const EMAILJS_PUBLIC_KEY = '64rdi6i-PC71o8Yqh';
@@ -674,9 +785,6 @@ function formatearFecha(fechaISO) {
 
 /* ============================================================
    SEGURIDAD: ESCAPADO DE HTML
-   Cualquier dato que venga de la tabla `solicitudes` lo puede insertar
-   el público (la clave anon permite crear filas), así que se inserta en
-   el DOM como TEXTO, nunca como HTML. Evita XSS almacenado.
    ============================================================ */
 function escapeHtml(valor) {
   return String(valor == null ? '' : valor)
@@ -716,7 +824,7 @@ function mostrarToast(titulo, mensaje, tipo = 'success', duracion = 5000) {
 }
 
 /* ============================================================
-   ENVÍO DE CORREO AL CIUDADANO (EmailJS) — sin QR, con código y fecha límite
+   ENVÍO DE CORREO AL CIUDADANO (EmailJS)
    ============================================================ */
 async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
   try {
@@ -736,7 +844,6 @@ async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
                       : nuevoEstado === 'denegado' ? 'DENEGADO'
                       : 'EN REVISIÓN';
 
-    // Mensaje extra
     let mensajeExtra = '';
     if (nuevoEstado === 'denegado' && motivo) {
       mensajeExtra = `Motivo de la denegación: ${motivo}`;
@@ -749,7 +856,6 @@ async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
       mensajeExtra = 'Tu trámite quedó nuevamente en revisión.';
     }
 
-    // Bloque HTML del código (solo se arma si está aprobado)
     let bloqueCodigo = '';
     if (nuevoEstado === 'procesado' && codigo !== '—') {
       bloqueCodigo = `
@@ -760,7 +866,6 @@ async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
         </div>`;
     }
 
-    // Bloque HTML de la fecha límite
     let bloqueFechaLimite = '';
     if (nuevoEstado === 'procesado') {
       const expira = sumarDiasHabiles(new Date(), DIAS_HABILES_EXPIRACION);
@@ -1190,7 +1295,7 @@ modalPass.addEventListener('click', (e) => {
   if (e.target.id === 'modal-pass') modalPass.classList.remove('activo');
 });
 
-/* FILTRO COMISARÍA (se llena con los nombres oficiales reales que llegan) */
+/* FILTRO COMISARÍA */
 const filtroComisaria = document.getElementById('filtro-comisaria');
 
 function poblarFiltroComisaria() {
@@ -1257,13 +1362,13 @@ const etiquetasDetalle = {
   validado_por: 'Validado por',
   validado_en: 'Fecha de validación',
   notas_internas: 'Notas internas',
+  zona: 'Zona',
 };
 
 /* ============================================================
    CARGA DE SOLICITUDES + LIMPIEZA AUTOMÁTICA DE EXPIRADOS
    ============================================================ */
 async function cargarSolicitudes() {
-  // 🧹 Limpieza: borrar procesados expirados y NO retirados
   try {
     const { error: errLimpieza } = await supabaseClient
       .from('solicitudes')
@@ -1354,6 +1459,7 @@ function detectarDuplicados() {
 function aplicarFiltros() {
   const estado = document.getElementById('filtro-estado').value;
   const tipoDep = document.getElementById('filtro-tipo-dependencia').value;
+  const zonaFiltro = document.getElementById('filtro-zona').value;
   const comisaria = document.getElementById('filtro-comisaria').value;
   const tramite = document.getElementById('filtro-tramite').value;
   const fechaFiltro = document.getElementById('filtro-fecha').value;
@@ -1367,6 +1473,7 @@ function aplicarFiltros() {
     if (estado && s.estado !== estado) return false;
     if (comisaria && s.comisaria_asignada !== comisaria) return false;
     if (tipoDep && obtenerTipoDependencia(s.comisaria_asignada) !== tipoDep) return false;
+    if (zonaFiltro && obtenerZona(s.comisaria_asignada) !== zonaFiltro) return false;
     if (tramite && s.tramite !== tramite) return false;
     if (s.created_at) {
       const f = new Date(s.created_at);
@@ -1397,6 +1504,7 @@ function ordenarLista(lista) {
     let va, vb;
     if (campo === 'solicitante') { va = obtenerNombreSolicitud(a); vb = obtenerNombreSolicitud(b); }
     else if (campo === 'comisaria_asignada') { va = a.comisaria_asignada || ''; vb = b.comisaria_asignada || ''; }
+    else if (campo === 'zona') { va = obtenerZona(a.comisaria_asignada); vb = obtenerZona(b.comisaria_asignada); }
     else if (campo === 'codigo') { va = a.codigo || ''; vb = b.codigo || ''; }
     else { va = a[campo] || ''; vb = b[campo] || ''; }
     if (campo === 'created_at') { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
@@ -1473,6 +1581,18 @@ function renderTabla() {
     tdComisaria.textContent = s.comisaria_asignada || '-';
     tr.appendChild(tdComisaria);
 
+    const tdZona = document.createElement('td');
+    const zona = obtenerZona(s.comisaria_asignada);
+    if (zona) {
+      const spanZona = document.createElement('span');
+      spanZona.className = 'etiqueta-zona ' + claseZona(zona);
+      spanZona.textContent = zona;
+      tdZona.appendChild(spanZona);
+    } else {
+      tdZona.textContent = '-';
+    }
+    tr.appendChild(tdZona);
+
     const tdEstado = document.createElement('td');
     const etiquetaEstado = document.createElement('span');
     const claseEstado = s.estado === 'procesado' ? 'procesado' : s.estado === 'denegado' ? 'denegado' : 'pendiente';
@@ -1516,6 +1636,8 @@ document.getElementById('filtro-tipo-dependencia').addEventListener('change', (e
   resetPaginaYRender();
 });
 
+document.getElementById('filtro-zona').addEventListener('change', resetPaginaYRender);
+
 filtroComisaria.addEventListener('change', resetPaginaYRender);
 
 document.getElementById('btn-limpiar').addEventListener('click', () => {
@@ -1527,6 +1649,7 @@ document.getElementById('btn-limpiar').addEventListener('click', () => {
   document.getElementById('fecha-hasta').value = '';
   document.getElementById('rango-fechas').style.display = 'none';
   document.getElementById('filtro-tipo-dependencia').value = '';
+  document.getElementById('filtro-zona').value = '';
   filtroComisaria.value = '';
   Array.from(filtroComisaria.options).forEach(opt => {
     if (!opt.value) return;
@@ -2021,7 +2144,6 @@ async function mostrarDetalle(s) {
   const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
   document.getElementById('detalle-fecha').textContent = 'Solicitud recibida el ' + fecha;
 
-  // Botón retirado: habilitar solo si está procesado y no retirado
   const btnRetirado = document.getElementById('btn-retirado');
   if (s.estado === 'procesado' && !s.retirado) {
     btnRetirado.disabled = false;
@@ -2042,9 +2164,10 @@ async function mostrarDetalle(s) {
   const et = etiquetasDetalle;
   const camposSol = [];
   camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
+  const zona = obtenerZona(s.comisaria_asignada);
+  if (zona) camposSol.push(['Zona', zona]);
   if (s.codigo) camposSol.push(['🔐 Código único del trámite', s.codigo]);
 
-  // Estado de retiro / expiración
   if (s.estado === 'procesado' && s.fecha_expiracion) {
     if (s.retirado) {
       camposSol.push(['📦 Estado de retiro', `✅ Retirado el ${formatearFecha(s.retirado_en || s.validado_en)}`]);
@@ -2177,7 +2300,6 @@ async function cambiarEstado(nuevoEstado) {
     validado_en: new Date().toISOString(),
   };
 
-  // Si se aprueba, calcular fecha de expiración (5 días hábiles)
   if (nuevoEstado === 'procesado') {
     const expira = sumarDiasHabiles(new Date(), DIAS_HABILES_EXPIRACION);
     expira.setHours(23, 59, 59, 999);
@@ -2193,7 +2315,6 @@ async function cambiarEstado(nuevoEstado) {
   const { error } = await supabaseClient.from('solicitudes').update(update).eq('id', solicitudAbierta.id);
   if (error) { console.error(error); alert('No se pudo actualizar: ' + error.message); return; }
 
-  // Refrescar objeto local para que el correo tenga la fecha de expiración
   solicitudAbierta.estado = nuevoEstado;
   solicitudAbierta.fecha_expiracion = update.fecha_expiracion;
 
@@ -2294,6 +2415,7 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
       <style>${cssBase}</style></head><body>${bloqueCodigo}${certHTML}</body></html>`;
   } else {
     const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
+    const zona = obtenerZona(s.comisaria_asignada);
     let listaHTML = `
       <h1>${titulo}</h1>
       <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
@@ -2304,6 +2426,7 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
       </div>` : ''}
       <dl>
         <div><dt>Comisaría asignada</dt><dd>${escapeHtml(s.comisaria_asignada || '-')}</dd></div>
+        ${zona ? `<div><dt>Zona</dt><dd>${escapeHtml(zona)}</dd></div>` : ''}
         <div><dt>Estado</dt><dd>${escapeHtml(s.estado || 'pendiente')}</dd></div>
     `;
     for (const [campo, valor] of Object.entries(d)) {
@@ -2347,7 +2470,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
   if (!filtradas.length) { alert('No hay solicitudes para exportar con los filtros actuales.'); return; }
   const filas = [[
     'Fecha', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email',
-    'Domicilio', 'Comisaría', 'Estado', 'Urgente', 'Retirado',
+    'Domicilio', 'Comisaría', 'Zona', 'Estado', 'Urgente', 'Retirado',
     'Validado por', 'Fecha validación', 'Fecha expiración', 'Motivo denegación'
   ]];
   filtradas.forEach(s => {
@@ -2361,6 +2484,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
       d.email || '-',
       d.domicilio || d.domicilioComun || '-',
       s.comisaria_asignada || '-',
+      obtenerZona(s.comisaria_asignada) || '-',
       s.estado || 'pendiente',
       s.urgente ? 'SÍ' : 'NO',
       s.retirado ? 'SÍ' : 'NO',
