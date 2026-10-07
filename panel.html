@@ -223,7 +223,6 @@
   .zona-sudeste{background:rgba(14,116,144,0.35);color:#67e8f9;border:1px solid rgba(103,232,249,0.5);}
   .zona-suroeste{background:rgba(157,23,77,0.35);color:#f9a8d4;border:1px solid rgba(249,168,212,0.5);}
 
-  /* Estilo para los datos del DNI electrónico */
   .detalle-item.dni-electronico{border-left-color:#fbbf24;
     background:rgba(251,191,36,0.08);}
   .detalle-item.dni-electronico dt{color:#fbbf24;}
@@ -271,7 +270,7 @@
     word-break:break-word;line-height:1.4;}
   .detalle-item dd img{max-width:100%;max-height:320px;
     border:1px solid rgba(255,255,255,0.3);border-radius:8px;margin-top:6px;
-    display:block;cursor:pointer;transition:transform 0.2s;}
+    display:block;cursor:zoom-in;transition:transform 0.2s, box-shadow 0.2s;}
   .detalle-item dd img:hover{transform:scale(1.02);box-shadow:var(--sombra-media);}
   .detalle-separador{height:1px;
     background:linear-gradient(90deg, transparent, var(--dorado), var(--dorado-claro), var(--dorado), transparent);
@@ -300,14 +299,82 @@
   .vacio{padding:40px 20px;text-align:center;color:rgba(255,255,255,0.7);font-size:0.9rem;}
   .vacio .vacio-icono{font-size:3rem;margin-bottom:12px;opacity:0.5;}
 
-  #modal-foto{display:none;position:fixed;top:0;left:0;right:0;bottom:0;
-    background:rgba(0,0,0,0.95);z-index:9999;padding:20px;
-    align-items:center;justify-content:center;}
+  /* ============================================================
+     VISOR DE FOTOS CON ZOOM
+     ============================================================ */
+  #modal-foto{display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.97);z-index:9999;
+    align-items:center;justify-content:center;
+    touch-action:none;user-select:none;overflow:hidden;}
   #modal-foto.activo{display:flex;}
-  #modal-foto img{max-width:100%;max-height:100%;border-radius:8px;}
-  #modal-foto .cerrar-modal{position:absolute;top:20px;right:20px;
-    background:rgba(255,255,255,0.9);color:#000;border:none;width:44px;height:44px;
-    border-radius:50%;cursor:pointer;font-size:1.4rem;font-weight:700;}
+
+  #modal-foto .visor-contenedor{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    cursor:grab;overflow:hidden;touch-action:none;}
+  #modal-foto .visor-contenedor.arrastrando{cursor:grabbing;}
+
+  #modal-foto img#foto-grande{
+    max-width:96%;max-height:96%;
+    border-radius:6px;
+    transform-origin:center center;
+    transition:transform 0.08s linear;
+    user-select:none;-webkit-user-drag:none;
+    will-change:transform;pointer-events:none;}
+
+  #modal-foto .barra-superior{
+    position:absolute;top:0;left:0;right:0;
+    padding:14px 16px;
+    background:linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+    display:flex;justify-content:space-between;align-items:center;
+    gap:12px;z-index:10;pointer-events:none;}
+  #modal-foto .barra-superior > *{pointer-events:auto;}
+  #modal-foto .visor-titulo{
+    color:#fff;font-size:0.85rem;font-weight:600;
+    text-shadow:0 1px 3px rgba(0,0,0,0.8);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    max-width:50%;}
+
+  #modal-foto .barra-inferior{
+    position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+    background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:50px;
+    display:flex;align-items:center;gap:4px;
+    padding:6px 8px;z-index:10;
+    box-shadow:0 8px 32px rgba(0,0,0,0.6);}
+
+  #modal-foto .barra-inferior button{
+    width:44px;height:44px;border-radius:50%;
+    border:none;background:transparent;color:#fff;
+    font-size:1.15rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background 0.15s;padding:0;font-family:inherit;}
+  #modal-foto .barra-inferior button:hover{background:rgba(255,255,255,0.15);}
+  #modal-foto .barra-inferior button:active{background:rgba(255,255,255,0.25);}
+  #modal-foto .barra-inferior .zoom-indicador{
+    color:#fff;font-size:0.82rem;font-weight:700;
+    min-width:56px;text-align:center;
+    font-variant-numeric:tabular-nums;
+    padding:0 6px;user-select:none;}
+
+  #modal-foto .cerrar-modal{
+    width:44px;height:44px;
+    background:rgba(255,255,255,0.9);color:#000;
+    border:none;border-radius:50%;
+    cursor:pointer;font-size:1.4rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform 0.15s, background 0.15s;
+    padding:0;font-family:inherit;line-height:1;}
+  #modal-foto .cerrar-modal:hover{background:#fff;transform:scale(1.08);}
+
+  @media (max-width: 600px){
+    #modal-foto .barra-inferior{bottom:14px;gap:2px;padding:4px 6px;}
+    #modal-foto .barra-inferior button{width:40px;height:40px;font-size:1.05rem;}
+    #modal-foto .barra-inferior .zoom-indicador{font-size:0.75rem;min-width:48px;}
+    #modal-foto .cerrar-modal{width:40px;height:40px;font-size:1.2rem;}
+    #modal-foto .visor-titulo{font-size:0.78rem;max-width:45%;}
+  }
 
   #toast-container{position:fixed;top:20px;right:20px;z-index:10000;
     display:flex;flex-direction:column;gap:10px;max-width:340px;}
@@ -591,10 +658,23 @@
 
 </main>
 
-<!-- Modal foto -->
+<!-- Modal foto con zoom -->
 <div id="modal-foto">
-  <button class="cerrar-modal" id="cerrar-modal">✕</button>
-  <img id="foto-grande" alt="Foto ampliada">
+  <div class="barra-superior">
+    <div class="visor-titulo" id="visor-titulo">Foto del DNI</div>
+    <button class="cerrar-modal" id="cerrar-modal" title="Cerrar (Esc)">✕</button>
+  </div>
+  <div class="visor-contenedor" id="visor-contenedor">
+    <img id="foto-grande" alt="Foto ampliada" draggable="false">
+  </div>
+  <div class="barra-inferior">
+    <button id="btn-zoom-out" title="Alejar (−)">−</button>
+    <span class="zoom-indicador" id="zoom-indicador">100%</span>
+    <button id="btn-zoom-in" title="Acercar (+)">+</button>
+    <button id="btn-zoom-reset" title="Restablecer (0)">⟲</button>
+    <button id="btn-rotar" title="Rotar 90° (R)">↻</button>
+    <button id="btn-abrir-nueva" title="Abrir en pestaña nueva">↗</button>
+  </div>
 </div>
 
 <!-- Modal cambiar contraseña -->
@@ -645,7 +725,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 /* ============================================================
-   ZONAS DE COMISARÍAS (inline)
+   ZONAS DE COMISARÍAS (inline, con guardia anti-conflicto)
    ============================================================ */
 if (typeof window.ZONAS_COMISARIA === 'undefined') {
   window.ZONAS_COMISARIA = {
@@ -704,12 +784,12 @@ function obtenerZona(nombreComisaria) {
          || n.match(/cr[íi]a\.?\s*(\d{1,3})/i);
   if (m) {
     const clave = "Comisaría N°" + m[1];
-    if (ZONAS_COMISARIA[clave]) return ZONAS_COMISARIA[clave];
+    if (window.ZONAS_COMISARIA[clave]) return window.ZONAS_COMISARIA[clave];
   }
-  const claves = Object.keys(ZONAS_COMISARIA).sort((a, b) => b.length - a.length);
+  const claves = Object.keys(window.ZONAS_COMISARIA).sort((a, b) => b.length - a.length);
   for (const clave of claves) {
     if (clave.startsWith("Comisaría N°")) continue;
-    if (n.toLowerCase().includes(clave.toLowerCase())) return ZONAS_COMISARIA[clave];
+    if (n.toLowerCase().includes(clave.toLowerCase())) return window.ZONAS_COMISARIA[clave];
   }
   return "";
 }
@@ -2003,7 +2083,7 @@ async function crearSeccion(titulo, campos) {
       }
       if (urlFinal) {
         img.src = urlFinal;
-        img.addEventListener('click', () => abrirFotoGrande(urlFinal));
+        img.addEventListener('click', () => abrirFotoGrande(urlFinal, label));
         dd.appendChild(img);
       } else { dd.textContent = 'No se pudo cargar la imagen'; }
     } else { dd.textContent = valor; }
@@ -2170,9 +2250,7 @@ async function mostrarDetalle(s) {
   const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
   if (zona) camposSol.push(['Zona', zona]);
 
-  // ============================================================
   // Datos del DNI electrónico (si fue escaneado con QR)
-  // ============================================================
   if (d.esDNINuevo === 'true' || d.esDNINuevo === true) {
     if (d.nroTramiteDNI) camposSol.push([et.nroTramiteDNI, d.nroTramiteDNI, false, true]);
     if (d.tipoDocumentoDNI) camposSol.push([et.tipoDocumentoDNI, d.tipoDocumentoDNI, false, true]);
@@ -2520,16 +2598,200 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
   mostrarToast('📥 Exportado', `${filtradas.length} trámites exportados`, 'success', 3000);
 });
 
-/* MODAL FOTO */
-function abrirFotoGrande(src) {
-  document.getElementById('foto-grande').src = src;
-  document.getElementById('modal-foto').classList.add('activo');
+/* ============================================================
+   VISOR DE FOTOS CON ZOOM, PANEO, PINCH Y ROTACIÓN
+   ============================================================ */
+const modalFoto = document.getElementById('modal-foto');
+const visorContenedor = document.getElementById('visor-contenedor');
+const fotoGrande = document.getElementById('foto-grande');
+const zoomIndicador = document.getElementById('zoom-indicador');
+const visorTitulo = document.getElementById('visor-titulo');
+
+let visorZoom = 1;
+let visorRotacion = 0;
+let visorPanX = 0;
+let visorPanY = 0;
+let visorArrastrando = false;
+let visorStartX = 0;
+let visorStartY = 0;
+let visorStartPanX = 0;
+let visorStartPanY = 0;
+let visorPinchDist = 0;
+let visorPinchZoomInicial = 1;
+let visorUrlActual = '';
+
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 6;
+const ZOOM_PASO = 0.25;
+
+function visorAplicarTransform() {
+  fotoGrande.style.transform =
+    `translate(${visorPanX}px, ${visorPanY}px) scale(${visorZoom}) rotate(${visorRotacion}deg)`;
+  zoomIndicador.textContent = Math.round(visorZoom * 100) + '%';
 }
-document.getElementById('cerrar-modal').addEventListener('click', () => {
-  document.getElementById('modal-foto').classList.remove('activo');
+
+function visorResetear() {
+  visorZoom = 1;
+  visorRotacion = 0;
+  visorPanX = 0;
+  visorPanY = 0;
+  visorAplicarTransform();
+}
+
+function visorZoomA(factor, centroX, centroY) {
+  const anterior = visorZoom;
+  visorZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorZoom * factor));
+  if (visorZoom === anterior) return;
+  if (centroX != null && centroY != null) {
+    const rect = visorContenedor.getBoundingClientRect();
+    const cx = centroX - rect.left - rect.width / 2;
+    const cy = centroY - rect.top - rect.height / 2;
+    const ratio = visorZoom / anterior;
+    visorPanX = cx - (cx - visorPanX) * ratio;
+    visorPanY = cy - (cy - visorPanY) * ratio;
+  }
+  visorAplicarTransform();
+}
+
+function visorZoomBoton(delta) {
+  visorZoomA(delta, null, null);
+}
+
+function abrirFotoGrande(src, titulo) {
+  visorUrlActual = src;
+  fotoGrande.src = src;
+  fotoGrande.style.transition = 'none';
+  visorResetear();
+  setTimeout(() => { fotoGrande.style.transition = 'transform 0.08s linear'; }, 50);
+  visorTitulo.textContent = titulo || 'Foto del DNI';
+  modalFoto.classList.add('activo');
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarFotoGrande() {
+  modalFoto.classList.remove('activo');
+  document.body.style.overflow = '';
+  fotoGrande.src = '';
+  visorUrlActual = '';
+  visorResetear();
+}
+
+document.getElementById('cerrar-modal').addEventListener('click', cerrarFotoGrande);
+document.getElementById('btn-zoom-in').addEventListener('click', () => visorZoomBoton(1 + ZOOM_PASO));
+document.getElementById('btn-zoom-out').addEventListener('click', () => visorZoomBoton(1 / (1 + ZOOM_PASO)));
+document.getElementById('btn-zoom-reset').addEventListener('click', visorResetear);
+document.getElementById('btn-rotar').addEventListener('click', () => {
+  visorRotacion = (visorRotacion + 90) % 360;
+  visorAplicarTransform();
 });
-document.getElementById('modal-foto').addEventListener('click', (e) => {
-  if (e.target.id === 'modal-foto') document.getElementById('modal-foto').classList.remove('activo');
+document.getElementById('btn-abrir-nueva').addEventListener('click', () => {
+  if (visorUrlActual) window.open(visorUrlActual, '_blank', 'noopener');
+});
+
+visorContenedor.addEventListener('click', (e) => {
+  if (e.target === visorContenedor && visorZoom <= 1.01) cerrarFotoGrande();
+});
+
+visorContenedor.addEventListener('wheel', (e) => {
+  if (!modalFoto.classList.contains('activo')) return;
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+  visorZoomA(factor, e.clientX, e.clientY);
+}, { passive: false });
+
+visorContenedor.addEventListener('dblclick', (e) => {
+  if (visorZoom > 1.1) { visorResetear(); }
+  else { visorZoom = 2.5; visorZoomA(1, e.clientX, e.clientY); }
+});
+
+visorContenedor.addEventListener('mousedown', (e) => {
+  if (visorZoom <= 1) return;
+  visorArrastrando = true;
+  visorStartX = e.clientX;
+  visorStartY = e.clientY;
+  visorStartPanX = visorPanX;
+  visorStartPanY = visorPanY;
+  visorContenedor.classList.add('arrastrando');
+  e.preventDefault();
+});
+window.addEventListener('mousemove', (e) => {
+  if (!visorArrastrando) return;
+  visorPanX = visorStartPanX + (e.clientX - visorStartX);
+  visorPanY = visorStartPanY + (e.clientY - visorStartY);
+  visorAplicarTransform();
+});
+window.addEventListener('mouseup', () => {
+  visorArrastrando = false;
+  visorContenedor.classList.remove('arrastrando');
+});
+
+visorContenedor.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    visorPinchDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    visorPinchZoomInicial = visorZoom;
+  } else if (e.touches.length === 1 && visorZoom > 1) {
+    visorArrastrando = true;
+    visorStartX = e.touches[0].clientX;
+    visorStartY = e.touches[0].clientY;
+    visorStartPanX = visorPanX;
+    visorStartPanY = visorPanY;
+  }
+}, { passive: true });
+
+visorContenedor.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2 && visorPinchDist > 0) {
+    e.preventDefault();
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    const factor = dist / visorPinchDist;
+    const nuevoZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorPinchZoomInicial * factor));
+    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    visorZoomA(nuevoZoom / visorZoom, cx, cy);
+  } else if (e.touches.length === 1 && visorArrastrando) {
+    e.preventDefault();
+    visorPanX = visorStartPanX + (e.touches[0].clientX - visorStartX);
+    visorPanY = visorStartPanY + (e.touches[0].clientY - visorStartY);
+    visorAplicarTransform();
+  }
+}, { passive: false });
+
+visorContenedor.addEventListener('touchend', (e) => {
+  if (e.touches.length === 0) {
+    visorArrastrando = false;
+    visorPinchDist = 0;
+  } else if (e.touches.length === 1) {
+    visorPinchDist = 0;
+    if (visorZoom > 1) {
+      visorArrastrando = true;
+      visorStartX = e.touches[0].clientX;
+      visorStartY = e.touches[0].clientY;
+      visorStartPanX = visorPanX;
+      visorStartPanY = visorPanY;
+    }
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (!modalFoto.classList.contains('activo')) return;
+  if (e.key === 'Escape') { cerrarFotoGrande(); e.preventDefault(); }
+  else if (e.key === '+' || e.key === '=') { visorZoomBoton(1 + ZOOM_PASO); e.preventDefault(); }
+  else if (e.key === '-' || e.key === '_') { visorZoomBoton(1 / (1 + ZOOM_PASO)); e.preventDefault(); }
+  else if (e.key === '0') { visorResetear(); e.preventDefault(); }
+  else if (e.key === 'r' || e.key === 'R') {
+    visorRotacion = (visorRotacion + 90) % 360;
+    visorAplicarTransform();
+    e.preventDefault();
+  }
+  else if (e.key === 'ArrowLeft')  { visorPanX -= 40; visorAplicarTransform(); e.preventDefault(); }
+  else if (e.key === 'ArrowRight') { visorPanX += 40; visorAplicarTransform(); e.preventDefault(); }
+  else if (e.key === 'ArrowUp')    { visorPanY -= 40; visorAplicarTransform(); e.preventDefault(); }
+  else if (e.key === 'ArrowDown')  { visorPanY += 40; visorAplicarTransform(); e.preventDefault(); }
 });
 </script>
 
