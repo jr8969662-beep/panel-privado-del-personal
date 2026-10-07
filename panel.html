@@ -211,7 +211,6 @@
     border:1px solid rgba(253,230,138,0.6);padding:2px 7px;border-radius:10px;
     font-size:0.68rem;font-weight:700;margin-left:6px;cursor:help;}
 
-  /* Etiquetas de ZONA */
   .etiqueta-zona{padding:3px 9px;border-radius:10px;font-size:0.7rem;font-weight:700;
     letter-spacing:0.03em;display:inline-block;text-transform:uppercase;}
   .zona-centro{background:rgba(44,90,160,0.35);color:#93c5fd;border:1px solid rgba(147,197,253,0.5);}
@@ -224,9 +223,7 @@
   .zona-sudeste{background:rgba(14,116,144,0.35);color:#67e8f9;border:1px solid rgba(103,232,249,0.5);}
   .zona-suroeste{background:rgba(157,23,77,0.35);color:#f9a8d4;border:1px solid rgba(249,168,212,0.5);}
 
-  /* ============================================================
-     NUEVO: Estilo para los datos del DNI electrónico
-     ============================================================ */
+  /* Estilo para los datos del DNI electrónico */
   .detalle-item.dni-electronico{border-left-color:#fbbf24;
     background:rgba(251,191,36,0.08);}
   .detalle-item.dni-electronico dt{color:#fbbf24;}
@@ -1359,7 +1356,6 @@ const etiquetasDetalle = {
   validado_en: 'Fecha de validación',
   notas_internas: 'Notas internas',
   zona: 'Zona',
-  // 👇 NUEVO: etiquetas para datos del DNI electrónico
   nroTramiteDNI: 'Nro. de Trámite del DNI',
   tipoDocumentoDNI: 'Tipo de documento',
   fechaEmisionDNI: 'Fecha de emisión del DNI',
@@ -2173,7 +2169,7 @@ async function mostrarDetalle(s) {
   if (zona) camposSol.push(['Zona', zona]);
 
   // ============================================================
-  // NUEVO: Datos del DNI electrónico (si fue escaneado con QR)
+  // Datos del DNI electrónico (si fue escaneado con QR)
   // ============================================================
   if (d.esDNINuevo === 'true' || d.esDNINuevo === true) {
     if (d.nroTramiteDNI) camposSol.push([et.nroTramiteDNI, d.nroTramiteDNI, false, true]);
