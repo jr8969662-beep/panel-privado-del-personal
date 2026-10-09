@@ -2495,304 +2495,303 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
 
   let html;
 
-  if (tramitesOficiales.includes(s.tramite)) {
-    const certHTML = generarCertificadoOficial(s.tramite, d, comisaria);
-    const bloqueCodigo = s.codigo ? `
-      <div class="codigo-impreso">
-        <div class="etiqueta-codigo">🔐 Código único del trámite</div>
-        <div class="valor-codigo">${escapeHtml(s.codigo)}</div>
-      </div>` : '';
-    html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
-      <style>${cssBase}</style></head><body>${bloqueCodigo}${certHTML}</body></html>`;
-  } else {
-    const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
-    const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
-    let listaHTML = `
-      <h1>${titulo}</h1>
-      <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
-      <p class="subt">Solicitud recibida el ${fecha}</p>
-      ${s.codigo ? `<div class="codigo-impreso">
-        <div class="etiqueta-codigo">🔐 Código único del trámite</div>
-        <div class="valor-codigo">${escapeHtml(s.codigo)}</div>
-      </div>` : ''}
-      <dl>
-        <div><dt>Comisaría asignada</dt><dd>${escapeHtml(s.comisaria_asignada || '-')}</dd></div>
-        ${zona ? `<div><dt>Zona</dt><dd>${escapeHtml(zona)}</dd></div>` : ''}
-        <div><dt>Estado</dt><dd>${escapeHtml(s.estado || 'pendiente')}</dd></div>
-    `;
-    for (const [campo, valor] of Object.entries(d)) {
-      if (campo.startsWith('_')) continue;
-      if (!valor) continue;
-      const label = etiquetasDetalle[campo] || campo;
-      if (campo.startsWith('foto_')) {
-        let urlPrint = valor;
-        if (!valor.startsWith('http')) {
-          const { data: signedData } = await supabaseClient
-            .storage.from(BUCKET_FOTOS).createSignedUrl(valor, 600);
-          if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
+      if (tramitesOficiales.includes(s.tramite)) {
+      const certHTML = generarCertificadoOficial(s.tramite, d, comisaria);
+      html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
+        <style>${cssBase}</style></head><body>${certHTML}</body></html>`;
+    } else {
+      const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
+      const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
+      let listaHTML = `
+        <h1>${titulo}</h1>
+        <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
+        <p class="subt">Solicitud recibida el ${fecha}</p>
+        ${s.codigo ? `<div class="codigo-impreso">
+          <div class="etiqueta-codigo">🔐 Código único del trámite</div>
+          <div class="valor-codigo">${escapeHtml(s.codigo)}</div>
+        </div>` : ''}
+        <dl>
+          <div><dt>Comisaría asignada</dt><dd>${escapeHtml(s.comisaria_asignada || '-')}</dd></div>
+          ${zona ? `<div><dt>Zona</dt><dd>${escapeHtml(zona)}</dd></div>` : ''}
+          <div><dt>Estado</dt><dd>${escapeHtml(s.estado || 'pendiente')}</dd></div>
+      `;
+      for (const [campo, valor] of Object.entries(d)) {
+        if (campo.startsWith('_')) continue;
+        if (!valor) continue;
+        const label = etiquetasDetalle[campo] || campo;
+        if (campo.startsWith('foto_')) {
+          let urlPrint = valor;
+          if (!valor.startsWith('http')) {
+            const { data: signedData } = await supabaseClient
+              .storage.from(BUCKET_FOTOS).createSignedUrl(valor, 600);
+            if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
+          }
+          listaHTML += `<div style="grid-column:1/-1;"><dt>${escapeHtml(label)}</dt><dd><img src="${escapeHtml(urlPrint)}"></dd></div>`;
+        } else {
+          listaHTML += `<div><dt>${escapeHtml(label)}</dt><dd>${valor}</dd></div>`;
         }
-        listaHTML += `<div style="grid-column:1/-1;"><dt>${escapeHtml(label)}</dt><dd><img src="${escapeHtml(urlPrint)}"></dd></div>`;
-      } else {
-        listaHTML += `<div><dt>${escapeHtml(label)}</dt><dd>${valor}</dd></div>`;
       }
+      if (s.motivo_denegacion) {
+        listaHTML += `<div style="grid-column:1/-1;"><dt>Motivo de denegación</dt><dd>${escapeHtml(s.motivo_denegacion)}</dd></div>`;
+      }
+      listaHTML += `
+        </dl>
+        <div class="firma">
+          <div>Firma del solicitante</div>
+          <div>Firma y sello - Autoridad policial</div>
+        </div>
+      `;
+      html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
+        <style>${cssBase}</style></head><body>${listaHTML}</body></html>`;
     }
-    if (s.motivo_denegacion) {
-      listaHTML += `<div style="grid-column:1/-1;"><dt>Motivo de denegación</dt><dd>${escapeHtml(s.motivo_denegacion)}</dd></div>`;
-    }
-    listaHTML += `
-      </dl>
-      <div class="firma">
-        <div>Firma del solicitante</div>
-        <div>Firma y sello - Autoridad policial</div>
-      </div>
-    `;
-    html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
-      <style>${cssBase}</style></head><body>${listaHTML}</body></html>`;
-  }
 
-  ventana.document.write(html);
-  ventana.document.close();
-  setTimeout(() => ventana.print(), 500);
-});
-
-/* EXPORTAR CSV */
-document.getElementById('btn-exportar').addEventListener('click', () => {
-  const filtradas = ordenarLista(aplicarFiltros());
-  if (!filtradas.length) { alert('No hay solicitudes para exportar con los filtros actuales.'); return; }
-  const filas = [[
-    'Fecha', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email',
-    'Domicilio', 'Comisaría', 'Zona', 'Estado', 'Urgente', 'Retirado',
-    'Validado por', 'Fecha validación', 'Fecha expiración', 'Motivo denegación'
-  ]];
-  filtradas.forEach(s => {
-    const d = s.datos || {};
-    filas.push([
-      s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-',
-      s.codigo || '-',
-      s.tramite_titulo || s.tramite || '-',
-      obtenerNombreSolicitud(s) || '-',
-      obtenerDniSolicitud(s) || '-',
-      d.email || '-',
-      d.domicilio || d.domicilioComun || '-',
-      s.comisaria_asignada || '-',
-      (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada) || '-',
-      s.estado || 'pendiente',
-      s.urgente ? 'SÍ' : 'NO',
-      s.retirado ? 'SÍ' : 'NO',
-      s.validado_por || '-',
-      s.validado_en ? new Date(s.validado_en).toLocaleString('es-AR') : '-',
-      s.fecha_expiracion ? new Date(s.fecha_expiracion).toLocaleString('es-AR') : '-',
-      s.motivo_denegacion || '-'
-    ]);
+    ventana.document.write(html);
+    ventana.document.close();
+    setTimeout(() => ventana.print(), 500);
   });
-  const csv = filas.map(fila =>
-    fila.map(celda => `"${String(celda).replace(/"/g, '""')}"`).join(';')
-  ).join('\r\n');
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `solicitudes_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  mostrarToast('📥 Exportado', `${filtradas.length} trámites exportados`, 'success', 3000);
-});
 
-/* ============================================================
-   VISOR DE FOTOS CON ZOOM, PANEO, PINCH Y ROTACIÓN
-   ============================================================ */
-const modalFoto = document.getElementById('modal-foto');
-const visorContenedor = document.getElementById('visor-contenedor');
-const fotoGrande = document.getElementById('foto-grande');
-const zoomIndicador = document.getElementById('zoom-indicador');
-const visorTitulo = document.getElementById('visor-titulo');
+  /* EXPORTAR CSV */
+  document.getElementById('btn-exportar').addEventListener('click', () => {
+    const filtradas = ordenarLista(aplicarFiltros());
+    if (!filtradas.length) { alert('No hay solicitudes para exportar con los filtros actuales.'); return; }
+    const filas = [[
+      'Fecha', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email',
+      'Domicilio', 'Comisaría', 'Zona', 'Estado', 'Urgente', 'Retirado',
+      'Validado por', 'Fecha validación', 'Fecha expiración', 'Motivo denegación',
+      'Ubicación GPS'
+    ]];
+    filtradas.forEach(s => {
+      const d = s.datos || {};
+      const gps = (d._ubicacion_lat != null && d._ubicacion_lon != null)
+        ? `${d._ubicacion_lat}, ${d._ubicacion_lon}` : '-';
+      filas.push([
+        s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-',
+        s.codigo || '-',
+        s.tramite_titulo || s.tramite || '-',
+        obtenerNombreSolicitud(s) || '-',
+        obtenerDniSolicitud(s) || '-',
+        d.email || '-',
+        d.domicilio || d.domicilioComun || '-',
+        s.comisaria_asignada || '-',
+        (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada) || '-',
+        s.estado || 'pendiente',
+        s.urgente ? 'SÍ' : 'NO',
+        s.retirado ? 'SÍ' : 'NO',
+        s.validado_por || '-',
+        s.validado_en ? new Date(s.validado_en).toLocaleString('es-AR') : '-',
+        s.fecha_expiracion ? new Date(s.fecha_expiracion).toLocaleString('es-AR') : '-',
+        s.motivo_denegacion || '-',
+        gps
+      ]);
+    });
+    const csv = filas.map(fila =>
+      fila.map(celda => `"${String(celda).replace(/"/g, '""')}"`).join(';')
+    ).join('\r\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `solicitudes_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    mostrarToast('📥 Exportado', `${filtradas.length} trámites exportados`, 'success', 3000);
+  });
 
-let visorZoom = 1;
-let visorRotacion = 0;
-let visorPanX = 0;
-let visorPanY = 0;
-let visorArrastrando = false;
-let visorStartX = 0;
-let visorStartY = 0;
-let visorStartPanX = 0;
-let visorStartPanY = 0;
-let visorPinchDist = 0;
-let visorPinchZoomInicial = 1;
-let visorUrlActual = '';
+  /* ============================================================
+     VISOR DE FOTOS CON ZOOM, PANEO, PINCH Y ROTACIÓN
+     ============================================================ */
+  const modalFoto = document.getElementById('modal-foto');
+  const visorContenedor = document.getElementById('visor-contenedor');
+  const fotoGrande = document.getElementById('foto-grande');
+  const zoomIndicador = document.getElementById('zoom-indicador');
+  const visorTitulo = document.getElementById('visor-titulo');
 
-const ZOOM_MIN = 0.5;
-const ZOOM_MAX = 6;
-const ZOOM_PASO = 0.25;
+  let visorZoom = 1;
+  let visorRotacion = 0;
+  let visorPanX = 0;
+  let visorPanY = 0;
+  let visorArrastrando = false;
+  let visorStartX = 0;
+  let visorStartY = 0;
+  let visorStartPanX = 0;
+  let visorStartPanY = 0;
+  let visorPinchDist = 0;
+  let visorPinchZoomInicial = 1;
+  let visorUrlActual = '';
 
-function visorAplicarTransform() {
-  fotoGrande.style.transform =
-    `translate(${visorPanX}px, ${visorPanY}px) scale(${visorZoom}) rotate(${visorRotacion}deg)`;
-  zoomIndicador.textContent = Math.round(visorZoom * 100) + '%';
-}
+  const ZOOM_MIN = 0.5;
+  const ZOOM_MAX = 6;
+  const ZOOM_PASO = 0.25;
 
-function visorResetear() {
-  visorZoom = 1;
-  visorRotacion = 0;
-  visorPanX = 0;
-  visorPanY = 0;
-  visorAplicarTransform();
-}
-
-function visorZoomA(factor, centroX, centroY) {
-  const anterior = visorZoom;
-  visorZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorZoom * factor));
-  if (visorZoom === anterior) return;
-  if (centroX != null && centroY != null) {
-    const rect = visorContenedor.getBoundingClientRect();
-    const cx = centroX - rect.left - rect.width / 2;
-    const cy = centroY - rect.top - rect.height / 2;
-    const ratio = visorZoom / anterior;
-    visorPanX = cx - (cx - visorPanX) * ratio;
-    visorPanY = cy - (cy - visorPanY) * ratio;
+  function visorAplicarTransform() {
+    fotoGrande.style.transform =
+      `translate(${visorPanX}px, ${visorPanY}px) scale(${visorZoom}) rotate(${visorRotacion}deg)`;
+    zoomIndicador.textContent = Math.round(visorZoom * 100) + '%';
   }
-  visorAplicarTransform();
-}
 
-function visorZoomBoton(delta) {
-  visorZoomA(delta, null, null);
-}
-
-function abrirFotoGrande(src, titulo) {
-  visorUrlActual = src;
-  fotoGrande.src = src;
-  fotoGrande.style.transition = 'none';
-  visorResetear();
-  setTimeout(() => { fotoGrande.style.transition = 'transform 0.08s linear'; }, 50);
-  visorTitulo.textContent = titulo || 'Foto del DNI';
-  modalFoto.classList.add('activo');
-  document.body.style.overflow = 'hidden';
-}
-
-function cerrarFotoGrande() {
-  modalFoto.classList.remove('activo');
-  document.body.style.overflow = '';
-  fotoGrande.src = '';
-  visorUrlActual = '';
-  visorResetear();
-}
-
-document.getElementById('cerrar-modal').addEventListener('click', cerrarFotoGrande);
-document.getElementById('btn-zoom-in').addEventListener('click', () => visorZoomBoton(1 + ZOOM_PASO));
-document.getElementById('btn-zoom-out').addEventListener('click', () => visorZoomBoton(1 / (1 + ZOOM_PASO)));
-document.getElementById('btn-zoom-reset').addEventListener('click', visorResetear);
-document.getElementById('btn-rotar').addEventListener('click', () => {
-  visorRotacion = (visorRotacion + 90) % 360;
-  visorAplicarTransform();
-});
-document.getElementById('btn-abrir-nueva').addEventListener('click', () => {
-  if (visorUrlActual) window.open(visorUrlActual, '_blank', 'noopener');
-});
-
-visorContenedor.addEventListener('click', (e) => {
-  if (e.target === visorContenedor && visorZoom <= 1.01) cerrarFotoGrande();
-});
-
-visorContenedor.addEventListener('wheel', (e) => {
-  if (!modalFoto.classList.contains('activo')) return;
-  e.preventDefault();
-  const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-  visorZoomA(factor, e.clientX, e.clientY);
-}, { passive: false });
-
-visorContenedor.addEventListener('dblclick', (e) => {
-  if (visorZoom > 1.1) { visorResetear(); }
-  else { visorZoom = 2.5; visorZoomA(1, e.clientX, e.clientY); }
-});
-
-visorContenedor.addEventListener('mousedown', (e) => {
-  if (visorZoom <= 1) return;
-  visorArrastrando = true;
-  visorStartX = e.clientX;
-  visorStartY = e.clientY;
-  visorStartPanX = visorPanX;
-  visorStartPanY = visorPanY;
-  visorContenedor.classList.add('arrastrando');
-  e.preventDefault();
-});
-window.addEventListener('mousemove', (e) => {
-  if (!visorArrastrando) return;
-  visorPanX = visorStartPanX + (e.clientX - visorStartX);
-  visorPanY = visorStartPanY + (e.clientY - visorStartY);
-  visorAplicarTransform();
-});
-window.addEventListener('mouseup', () => {
-  visorArrastrando = false;
-  visorContenedor.classList.remove('arrastrando');
-});
-
-visorContenedor.addEventListener('touchstart', (e) => {
-  if (e.touches.length === 2) {
-    visorPinchDist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-    visorPinchZoomInicial = visorZoom;
-  } else if (e.touches.length === 1 && visorZoom > 1) {
-    visorArrastrando = true;
-    visorStartX = e.touches[0].clientX;
-    visorStartY = e.touches[0].clientY;
-    visorStartPanX = visorPanX;
-    visorStartPanY = visorPanY;
-  }
-}, { passive: true });
-
-visorContenedor.addEventListener('touchmove', (e) => {
-  if (e.touches.length === 2 && visorPinchDist > 0) {
-    e.preventDefault();
-    const dist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-    const factor = dist / visorPinchDist;
-    const nuevoZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorPinchZoomInicial * factor));
-    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    visorZoomA(nuevoZoom / visorZoom, cx, cy);
-  } else if (e.touches.length === 1 && visorArrastrando) {
-    e.preventDefault();
-    visorPanX = visorStartPanX + (e.touches[0].clientX - visorStartX);
-    visorPanY = visorStartPanY + (e.touches[0].clientY - visorStartY);
+  function visorResetear() {
+    visorZoom = 1;
+    visorRotacion = 0;
+    visorPanX = 0;
+    visorPanY = 0;
     visorAplicarTransform();
   }
-}, { passive: false });
 
-visorContenedor.addEventListener('touchend', (e) => {
-  if (e.touches.length === 0) {
+  function visorZoomA(factor, centroX, centroY) {
+    const anterior = visorZoom;
+    visorZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorZoom * factor));
+    if (visorZoom === anterior) return;
+    if (centroX != null && centroY != null) {
+      const rect = visorContenedor.getBoundingClientRect();
+      const cx = centroX - rect.left - rect.width / 2;
+      const cy = centroY - rect.top - rect.height / 2;
+      const ratio = visorZoom / anterior;
+      visorPanX = cx - (cx - visorPanX) * ratio;
+      visorPanY = cy - (cy - visorPanY) * ratio;
+    }
+    visorAplicarTransform();
+  }
+
+  function visorZoomBoton(delta) {
+    visorZoomA(delta, null, null);
+  }
+
+  function abrirFotoGrande(src, titulo) {
+    visorUrlActual = src;
+    fotoGrande.src = src;
+    fotoGrande.style.transition = 'none';
+    visorResetear();
+    setTimeout(() => { fotoGrande.style.transition = 'transform 0.08s linear'; }, 50);
+    visorTitulo.textContent = titulo || 'Foto del DNI';
+    modalFoto.classList.add('activo');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarFotoGrande() {
+    modalFoto.classList.remove('activo');
+    document.body.style.overflow = '';
+    fotoGrande.src = '';
+    visorUrlActual = '';
+    visorResetear();
+  }
+
+  document.getElementById('cerrar-modal').addEventListener('click', cerrarFotoGrande);
+  document.getElementById('btn-zoom-in').addEventListener('click', () => visorZoomBoton(1 + ZOOM_PASO));
+  document.getElementById('btn-zoom-out').addEventListener('click', () => visorZoomBoton(1 / (1 + ZOOM_PASO)));
+  document.getElementById('btn-zoom-reset').addEventListener('click', visorResetear);
+  document.getElementById('btn-rotar').addEventListener('click', () => {
+    visorRotacion = (visorRotacion + 90) % 360;
+    visorAplicarTransform();
+  });
+  document.getElementById('btn-abrir-nueva').addEventListener('click', () => {
+    if (visorUrlActual) window.open(visorUrlActual, '_blank', 'noopener');
+  });
+
+  visorContenedor.addEventListener('click', (e) => {
+    if (e.target === visorContenedor && visorZoom <= 1.01) cerrarFotoGrande();
+  });
+
+  visorContenedor.addEventListener('wheel', (e) => {
+    if (!modalFoto.classList.contains('activo')) return;
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    visorZoomA(factor, e.clientX, e.clientY);
+  }, { passive: false });
+
+  visorContenedor.addEventListener('dblclick', (e) => {
+    if (visorZoom > 1.1) { visorResetear(); }
+    else { visorZoom = 2.5; visorZoomA(1, e.clientX, e.clientY); }
+  });
+
+  visorContenedor.addEventListener('mousedown', (e) => {
+    if (visorZoom <= 1) return;
+    visorArrastrando = true;
+    visorStartX = e.clientX;
+    visorStartY = e.clientY;
+    visorStartPanX = visorPanX;
+    visorStartPanY = visorPanY;
+    visorContenedor.classList.add('arrastrando');
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!visorArrastrando) return;
+    visorPanX = visorStartPanX + (e.clientX - visorStartX);
+    visorPanY = visorStartPanY + (e.clientY - visorStartY);
+    visorAplicarTransform();
+  });
+  window.addEventListener('mouseup', () => {
     visorArrastrando = false;
-    visorPinchDist = 0;
-  } else if (e.touches.length === 1) {
-    visorPinchDist = 0;
-    if (visorZoom > 1) {
+    visorContenedor.classList.remove('arrastrando');
+  });
+
+  visorContenedor.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      visorPinchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      visorPinchZoomInicial = visorZoom;
+    } else if (e.touches.length === 1 && visorZoom > 1) {
       visorArrastrando = true;
       visorStartX = e.touches[0].clientX;
       visorStartY = e.touches[0].clientY;
       visorStartPanX = visorPanX;
       visorStartPanY = visorPanY;
     }
-  }
-});
+  }, { passive: true });
 
-document.addEventListener('keydown', (e) => {
-  if (!modalFoto.classList.contains('activo')) return;
-  if (e.key === 'Escape') { cerrarFotoGrande(); e.preventDefault(); }
-  else if (e.key === '+' || e.key === '=') { visorZoomBoton(1 + ZOOM_PASO); e.preventDefault(); }
-  else if (e.key === '-' || e.key === '_') { visorZoomBoton(1 / (1 + ZOOM_PASO)); e.preventDefault(); }
-  else if (e.key === '0') { visorResetear(); e.preventDefault(); }
-  else if (e.key === 'r' || e.key === 'R') {
-    visorRotacion = (visorRotacion + 90) % 360;
-    visorAplicarTransform();
-    e.preventDefault();
-  }
-  else if (e.key === 'ArrowLeft')  { visorPanX -= 40; visorAplicarTransform(); e.preventDefault(); }
-  else if (e.key === 'ArrowRight') { visorPanX += 40; visorAplicarTransform(); e.preventDefault(); }
-  else if (e.key === 'ArrowUp')    { visorPanY -= 40; visorAplicarTransform(); e.preventDefault(); }
-  else if (e.key === 'ArrowDown')  { visorPanY += 40; visorAplicarTransform(); e.preventDefault(); }
-});
+  visorContenedor.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2 && visorPinchDist > 0) {
+      e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = dist / visorPinchDist;
+      const nuevoZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorPinchZoomInicial * factor));
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      visorZoomA(nuevoZoom / visorZoom, cx, cy);
+    } else if (e.touches.length === 1 && visorArrastrando) {
+      e.preventDefault();
+      visorPanX = visorStartPanX + (e.touches[0].clientX - visorStartX);
+      visorPanY = visorStartPanY + (e.touches[0].clientY - visorStartY);
+      visorAplicarTransform();
+    }
+  }, { passive: false });
+
+  visorContenedor.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) {
+      visorArrastrando = false;
+      visorPinchDist = 0;
+    } else if (e.touches.length === 1) {
+      visorPinchDist = 0;
+      if (visorZoom > 1) {
+        visorArrastrando = true;
+        visorStartX = e.touches[0].clientX;
+        visorStartY = e.touches[0].clientY;
+        visorStartPanX = visorPanX;
+        visorStartPanY = visorPanY;
+      }
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!modalFoto.classList.contains('activo')) return;
+    if (e.key === 'Escape') { cerrarFotoGrande(); e.preventDefault(); }
+    else if (e.key === '+' || e.key === '=') { visorZoomBoton(1 + ZOOM_PASO); e.preventDefault(); }
+    else if (e.key === '-' || e.key === '_') { visorZoomBoton(1 / (1 + ZOOM_PASO)); e.preventDefault(); }
+    else if (e.key === '0') { visorResetear(); e.preventDefault(); }
+    else if (e.key === 'r' || e.key === 'R') {
+      visorRotacion = (visorRotacion + 90) % 360;
+      visorAplicarTransform();
+      e.preventDefault();
+    }
+    else if (e.key === 'ArrowLeft')  { visorPanX -= 40; visorAplicarTransform(); e.preventDefault(); }
+    else if (e.key === 'ArrowRight') { visorPanX += 40; visorAplicarTransform(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp')    { visorPanY -= 40; visorAplicarTransform(); e.preventDefault(); }
+    else if (e.key === 'ArrowDown')  { visorPanY += 40; visorAplicarTransform(); e.preventDefault(); }
+  });
 </script>
 
 </body>
