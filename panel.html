@@ -295,6 +295,9 @@
   #btn-retirado{background:#0d9488;color:#fff;border:1px solid rgba(94,234,212,0.4);}
   #btn-retirado:hover{background:#0f766e;}
   #btn-retirado:disabled{opacity:0.5;cursor:not-allowed;}
+  #btn-invalidar-ubicacion{background:rgba(185,28,28,0.5);color:#fff;
+    border:1px solid rgba(252,165,165,0.5);}
+  #btn-invalidar-ubicacion:hover{background:rgba(185,28,28,0.75);}
 
   .vacio{padding:40px 20px;text-align:center;color:rgba(255,255,255,0.7);font-size:0.9rem;}
   .vacio .vacio-icono{font-size:3rem;margin-bottom:12px;opacity:0.5;}
@@ -650,6 +653,7 @@
         <button id="btn-pendiente">⏱ Marcar pendiente</button>
         <button id="btn-urgente">🚨 Marcar urgente</button>
         <button id="btn-retirado">📦 Marcar como retirado</button>
+        <button id="btn-invalidar-ubicacion">🚫 Invalidar ubicación del DNI</button>
         <button id="btn-imprimir">🖨 Imprimir</button>
         <button id="btn-cerrar-detalle">Cerrar</button>
       </div>
@@ -1775,6 +1779,55 @@ document.getElementById('btn-pag-next').addEventListener('click', () => {
 });
 
 /* ============================================================
+   INVALIDAR / MARCAR SOSPECHOSA LA UBICACIÓN DE UN CIUDADANO
+   ============================================================ */
+async function invalidarUbicacionCiudadano(dni, motivo) {
+  if (!dni) return false;
+  try {
+    const { error } = await supabaseClient
+      .from('ubicaciones_ciudadanos')
+      .update({
+        estado: 'invalidada',
+        motivo_rechazo: motivo || 'Denegado por el personal policial',
+        invalidada_en: new Date().toISOString(),
+        rechazos: 999,
+      })
+      .eq('dni', String(dni));
+    if (error) { console.warn('Error invalidando ubicación:', error); return false; }
+    console.log('⛔ Ubicación invalidada para DNI', dni);
+    return true;
+  } catch (e) { console.warn('Excepción invalidando:', e); return false; }
+}
+
+async function marcarUbicacionSospechosa(dni, motivo) {
+  if (!dni) return false;
+  try {
+    const { data: actual } = await supabaseClient
+      .from('ubicaciones_ciudadanos')
+      .select('rechazos')
+      .eq('dni', String(dni))
+      .maybeSingle();
+
+    const nuevosRechazos = (actual?.rechazos || 0) + 1;
+    const nuevoEstado = nuevosRechazos >= 3 ? 'invalidada' : 'sospechosa';
+
+    const { error } = await supabaseClient
+      .from('ubicaciones_ciudadanos')
+      .update({
+        estado: nuevoEstado,
+        rechazos: nuevosRechazos,
+        motivo_rechazo: motivo || 'Denegado por el personal policial',
+        invalidada_en: nuevoEstado === 'invalidada' ? new Date().toISOString() : null,
+      })
+      .eq('dni', String(dni));
+
+    if (error) { console.warn('Error marcando sospechosa:', error); return false; }
+    console.log('⚠️ Ubicación marcada como', nuevoEstado, 'para DNI', dni, '(rechazos:', nuevosRechazos, ')');
+    return { estado: nuevoEstado, rechazos: nuevosRechazos };
+  } catch (e) { console.warn('Excepción marcando:', e); return false; }
+}
+
+/* ============================================================
    GENERADORES DE CERTIFICADOS OFICIALES (para imprimir)
    ============================================================ */
 function formatearDni(dni) {
@@ -2409,6 +2462,39 @@ async function cambiarEstado(nuevoEstado) {
   solicitudAbierta.estado = nuevoEstado;
   solicitudAbierta.fecha_expiracion = update.fecha_expiracion;
 
+  // Si se deniega y el motivo menciona el domicilio → marcar ubicación del ciudadano
+  if (nuevoEstado === 'denegado' && motivo) {
+    const motivoNorm = motivo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const palabrasClave = [
+      'domicilio', 'direccion', 'ubicacion', 'no reside', 'no vive',
+      'falso', 'falsa', 'mentira', 'incorrecto', 'erroneo', 'erronea',
+      'no corresponde', 'ajeno', 'no es su casa'
+    ];
+    const mencionaDomicilio = palabrasClave.some(p => motivoNorm.includes(p));
+
+    if (mencionaDomicilio) {
+      const dniSol = obtenerDniSolicitud(solicitudAbierta);
+      if (dniSol) {
+        const resultado = await marcarUbicacionSospechosa(dniSol, motivo);
+        if (resultado && resultado.estado === 'invalidada') {
+          mostrarToast(
+            '⛔ Ubicación invalidada',
+            `Se marcó como fraudulenta la ubicación del DNI ${dniSol}. Rechazos: ${resultado.rechazos}`,
+            'warning',
+            6000
+          );
+        } else if (resultado) {
+          mostrarToast(
+            '⚠️ Ubicación marcada como sospechosa',
+            `Rechazos acumulados del DNI ${dniSol}: ${resultado.rechazos}. Al 3er rechazo se invalida.`,
+            'warning',
+            6000
+          );
+        }
+      }
+    }
+  }
+
   enviarCorreoEstado(solicitudAbierta, nuevoEstado, motivo);
 
   document.getElementById('detalle').style.display = 'none';
@@ -2445,6 +2531,21 @@ document.getElementById('btn-retirado').addEventListener('click', async () => {
   document.getElementById('detalle').style.display = 'none';
   await cargarSolicitudes();
   mostrarToast('📦 Certificado retirado', 'Ya no se va a eliminar automáticamente', 'success', 3500);
+});
+
+/* INVALIDAR UBICACIÓN MANUALMENTE */
+document.getElementById('btn-invalidar-ubicacion').addEventListener('click', async () => {
+  if (!solicitudAbierta) return;
+  const dni = obtenerDniSolicitud(solicitudAbierta);
+  if (!dni) { alert('Esta solicitud no tiene DNI asociado.'); return; }
+  if (!confirm(`¿Invalidar la ubicación guardada del DNI ${dni}?\n\nEl ciudadano tendrá que marcar de nuevo en el mapa la próxima vez.`)) return;
+  const motivo = prompt('Motivo de la invalidación (opcional):', '') || 'Invalidada manualmente por el personal';
+  const ok = await invalidarUbicacionCiudadano(dni, motivo);
+  if (ok) {
+    mostrarToast('⛔ Ubicación invalidada', `DNI ${dni} tendrá que marcar de nuevo`, 'warning', 4000);
+  } else {
+    mostrarToast('❌ Error', 'No se pudo invalidar la ubicación. ¿Existe la tabla en Supabase?', 'error', 5000);
+  }
 });
 
 /* IMPRIMIR */
@@ -2495,303 +2596,303 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
 
   let html;
 
-      if (tramitesOficiales.includes(s.tramite)) {
-      const certHTML = generarCertificadoOficial(s.tramite, d, comisaria);
-      html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
-        <style>${cssBase}</style></head><body>${certHTML}</body></html>`;
-    } else {
-      const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
-      const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
-      let listaHTML = `
-        <h1>${titulo}</h1>
-        <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
-        <p class="subt">Solicitud recibida el ${fecha}</p>
-        ${s.codigo ? `<div class="codigo-impreso">
-          <div class="etiqueta-codigo">🔐 Código único del trámite</div>
-          <div class="valor-codigo">${escapeHtml(s.codigo)}</div>
-        </div>` : ''}
-        <dl>
-          <div><dt>Comisaría asignada</dt><dd>${escapeHtml(s.comisaria_asignada || '-')}</dd></div>
-          ${zona ? `<div><dt>Zona</dt><dd>${escapeHtml(zona)}</dd></div>` : ''}
-          <div><dt>Estado</dt><dd>${escapeHtml(s.estado || 'pendiente')}</dd></div>
-      `;
-      for (const [campo, valor] of Object.entries(d)) {
-        if (campo.startsWith('_')) continue;
-        if (!valor) continue;
-        const label = etiquetasDetalle[campo] || campo;
-        if (campo.startsWith('foto_')) {
-          let urlPrint = valor;
-          if (!valor.startsWith('http')) {
-            const { data: signedData } = await supabaseClient
-              .storage.from(BUCKET_FOTOS).createSignedUrl(valor, 600);
-            if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
-          }
-          listaHTML += `<div style="grid-column:1/-1;"><dt>${escapeHtml(label)}</dt><dd><img src="${escapeHtml(urlPrint)}"></dd></div>`;
-        } else {
-          listaHTML += `<div><dt>${escapeHtml(label)}</dt><dd>${valor}</dd></div>`;
+  if (tramitesOficiales.includes(s.tramite)) {
+    const certHTML = generarCertificadoOficial(s.tramite, d, comisaria);
+    html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
+      <style>${cssBase}</style></head><body>${certHTML}</body></html>`;
+  } else {
+    const fecha = s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-';
+    const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
+    let listaHTML = `
+      <h1>${titulo}</h1>
+      <p class="subt">Policía de Salta · Dirección de Modernización e Innovación Tecnológica (JP)</p>
+      <p class="subt">Solicitud recibida el ${fecha}</p>
+      ${s.codigo ? `<div class="codigo-impreso">
+        <div class="etiqueta-codigo">🔐 Código único del trámite</div>
+        <div class="valor-codigo">${escapeHtml(s.codigo)}</div>
+      </div>` : ''}
+      <dl>
+        <div><dt>Comisaría asignada</dt><dd>${escapeHtml(s.comisaria_asignada || '-')}</dd></div>
+        ${zona ? `<div><dt>Zona</dt><dd>${escapeHtml(zona)}</dd></div>` : ''}
+        <div><dt>Estado</dt><dd>${escapeHtml(s.estado || 'pendiente')}</dd></div>
+    `;
+    for (const [campo, valor] of Object.entries(d)) {
+      if (campo.startsWith('_')) continue;
+      if (!valor) continue;
+      const label = etiquetasDetalle[campo] || campo;
+      if (campo.startsWith('foto_')) {
+        let urlPrint = valor;
+        if (!valor.startsWith('http')) {
+          const { data: signedData } = await supabaseClient
+            .storage.from(BUCKET_FOTOS).createSignedUrl(valor, 600);
+          if (signedData && signedData.signedUrl) urlPrint = signedData.signedUrl;
         }
+        listaHTML += `<div style="grid-column:1/-1;"><dt>${escapeHtml(label)}</dt><dd><img src="${escapeHtml(urlPrint)}"></dd></div>`;
+      } else {
+        listaHTML += `<div><dt>${escapeHtml(label)}</dt><dd>${valor}</dd></div>`;
       }
-      if (s.motivo_denegacion) {
-        listaHTML += `<div style="grid-column:1/-1;"><dt>Motivo de denegación</dt><dd>${escapeHtml(s.motivo_denegacion)}</dd></div>`;
-      }
-      listaHTML += `
-        </dl>
-        <div class="firma">
-          <div>Firma del solicitante</div>
-          <div>Firma y sello - Autoridad policial</div>
-        </div>
-      `;
-      html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
-        <style>${cssBase}</style></head><body>${listaHTML}</body></html>`;
     }
-
-    ventana.document.write(html);
-    ventana.document.close();
-    setTimeout(() => ventana.print(), 500);
-  });
-
-  /* EXPORTAR CSV */
-  document.getElementById('btn-exportar').addEventListener('click', () => {
-    const filtradas = ordenarLista(aplicarFiltros());
-    if (!filtradas.length) { alert('No hay solicitudes para exportar con los filtros actuales.'); return; }
-    const filas = [[
-      'Fecha', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email',
-      'Domicilio', 'Comisaría', 'Zona', 'Estado', 'Urgente', 'Retirado',
-      'Validado por', 'Fecha validación', 'Fecha expiración', 'Motivo denegación',
-      'Ubicación GPS'
-    ]];
-    filtradas.forEach(s => {
-      const d = s.datos || {};
-      const gps = (d._ubicacion_lat != null && d._ubicacion_lon != null)
-        ? `${d._ubicacion_lat}, ${d._ubicacion_lon}` : '-';
-      filas.push([
-        s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-',
-        s.codigo || '-',
-        s.tramite_titulo || s.tramite || '-',
-        obtenerNombreSolicitud(s) || '-',
-        obtenerDniSolicitud(s) || '-',
-        d.email || '-',
-        d.domicilio || d.domicilioComun || '-',
-        s.comisaria_asignada || '-',
-        (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada) || '-',
-        s.estado || 'pendiente',
-        s.urgente ? 'SÍ' : 'NO',
-        s.retirado ? 'SÍ' : 'NO',
-        s.validado_por || '-',
-        s.validado_en ? new Date(s.validado_en).toLocaleString('es-AR') : '-',
-        s.fecha_expiracion ? new Date(s.fecha_expiracion).toLocaleString('es-AR') : '-',
-        s.motivo_denegacion || '-',
-        gps
-      ]);
-    });
-    const csv = filas.map(fila =>
-      fila.map(celda => `"${String(celda).replace(/"/g, '""')}"`).join(';')
-    ).join('\r\n');
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `solicitudes_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    mostrarToast('📥 Exportado', `${filtradas.length} trámites exportados`, 'success', 3000);
-  });
-
-  /* ============================================================
-     VISOR DE FOTOS CON ZOOM, PANEO, PINCH Y ROTACIÓN
-     ============================================================ */
-  const modalFoto = document.getElementById('modal-foto');
-  const visorContenedor = document.getElementById('visor-contenedor');
-  const fotoGrande = document.getElementById('foto-grande');
-  const zoomIndicador = document.getElementById('zoom-indicador');
-  const visorTitulo = document.getElementById('visor-titulo');
-
-  let visorZoom = 1;
-  let visorRotacion = 0;
-  let visorPanX = 0;
-  let visorPanY = 0;
-  let visorArrastrando = false;
-  let visorStartX = 0;
-  let visorStartY = 0;
-  let visorStartPanX = 0;
-  let visorStartPanY = 0;
-  let visorPinchDist = 0;
-  let visorPinchZoomInicial = 1;
-  let visorUrlActual = '';
-
-  const ZOOM_MIN = 0.5;
-  const ZOOM_MAX = 6;
-  const ZOOM_PASO = 0.25;
-
-  function visorAplicarTransform() {
-    fotoGrande.style.transform =
-      `translate(${visorPanX}px, ${visorPanY}px) scale(${visorZoom}) rotate(${visorRotacion}deg)`;
-    zoomIndicador.textContent = Math.round(visorZoom * 100) + '%';
-  }
-
-  function visorResetear() {
-    visorZoom = 1;
-    visorRotacion = 0;
-    visorPanX = 0;
-    visorPanY = 0;
-    visorAplicarTransform();
-  }
-
-  function visorZoomA(factor, centroX, centroY) {
-    const anterior = visorZoom;
-    visorZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorZoom * factor));
-    if (visorZoom === anterior) return;
-    if (centroX != null && centroY != null) {
-      const rect = visorContenedor.getBoundingClientRect();
-      const cx = centroX - rect.left - rect.width / 2;
-      const cy = centroY - rect.top - rect.height / 2;
-      const ratio = visorZoom / anterior;
-      visorPanX = cx - (cx - visorPanX) * ratio;
-      visorPanY = cy - (cy - visorPanY) * ratio;
+    if (s.motivo_denegacion) {
+      listaHTML += `<div style="grid-column:1/-1;"><dt>Motivo de denegación</dt><dd>${escapeHtml(s.motivo_denegacion)}</dd></div>`;
     }
-    visorAplicarTransform();
+    listaHTML += `
+      </dl>
+      <div class="firma">
+        <div>Firma del solicitante</div>
+        <div>Firma y sello - Autoridad policial</div>
+      </div>
+    `;
+    html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title>
+      <style>${cssBase}</style></head><body>${listaHTML}</body></html>`;
   }
 
-  function visorZoomBoton(delta) {
-    visorZoomA(delta, null, null);
+  ventana.document.write(html);
+  ventana.document.close();
+  setTimeout(() => ventana.print(), 500);
+});
+
+/* EXPORTAR CSV */
+document.getElementById('btn-exportar').addEventListener('click', () => {
+  const filtradas = ordenarLista(aplicarFiltros());
+  if (!filtradas.length) { alert('No hay solicitudes para exportar con los filtros actuales.'); return; }
+  const filas = [[
+    'Fecha', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email',
+    'Domicilio', 'Comisaría', 'Zona', 'Estado', 'Urgente', 'Retirado',
+    'Validado por', 'Fecha validación', 'Fecha expiración', 'Motivo denegación',
+    'Ubicación GPS'
+  ]];
+  filtradas.forEach(s => {
+    const d = s.datos || {};
+    const gps = (d._ubicacion_lat != null && d._ubicacion_lon != null)
+      ? `${d._ubicacion_lat}, ${d._ubicacion_lon}` : '-';
+    filas.push([
+      s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-',
+      s.codigo || '-',
+      s.tramite_titulo || s.tramite || '-',
+      obtenerNombreSolicitud(s) || '-',
+      obtenerDniSolicitud(s) || '-',
+      d.email || '-',
+      d.domicilio || d.domicilioComun || '-',
+      s.comisaria_asignada || '-',
+      (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada) || '-',
+      s.estado || 'pendiente',
+      s.urgente ? 'SÍ' : 'NO',
+      s.retirado ? 'SÍ' : 'NO',
+      s.validado_por || '-',
+      s.validado_en ? new Date(s.validado_en).toLocaleString('es-AR') : '-',
+      s.fecha_expiracion ? new Date(s.fecha_expiracion).toLocaleString('es-AR') : '-',
+      s.motivo_denegacion || '-',
+      gps
+    ]);
+  });
+  const csv = filas.map(fila =>
+    fila.map(celda => `"${String(celda).replace(/"/g, '""')}"`).join(';')
+  ).join('\r\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `solicitudes_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  mostrarToast('📥 Exportado', `${filtradas.length} trámites exportados`, 'success', 3000);
+});
+
+/* ============================================================
+   VISOR DE FOTOS CON ZOOM, PANEO, PINCH Y ROTACIÓN
+   ============================================================ */
+const modalFoto = document.getElementById('modal-foto');
+const visorContenedor = document.getElementById('visor-contenedor');
+const fotoGrande = document.getElementById('foto-grande');
+const zoomIndicador = document.getElementById('zoom-indicador');
+const visorTitulo = document.getElementById('visor-titulo');
+
+let visorZoom = 1;
+let visorRotacion = 0;
+let visorPanX = 0;
+let visorPanY = 0;
+let visorArrastrando = false;
+let visorStartX = 0;
+let visorStartY = 0;
+let visorStartPanX = 0;
+let visorStartPanY = 0;
+let visorPinchDist = 0;
+let visorPinchZoomInicial = 1;
+let visorUrlActual = '';
+
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 6;
+const ZOOM_PASO = 0.25;
+
+function visorAplicarTransform() {
+  fotoGrande.style.transform =
+    `translate(${visorPanX}px, ${visorPanY}px) scale(${visorZoom}) rotate(${visorRotacion}deg)`;
+  zoomIndicador.textContent = Math.round(visorZoom * 100) + '%';
+}
+
+function visorResetear() {
+  visorZoom = 1;
+  visorRotacion = 0;
+  visorPanX = 0;
+  visorPanY = 0;
+  visorAplicarTransform();
+}
+
+function visorZoomA(factor, centroX, centroY) {
+  const anterior = visorZoom;
+  visorZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorZoom * factor));
+  if (visorZoom === anterior) return;
+  if (centroX != null && centroY != null) {
+    const rect = visorContenedor.getBoundingClientRect();
+    const cx = centroX - rect.left - rect.width / 2;
+    const cy = centroY - rect.top - rect.height / 2;
+    const ratio = visorZoom / anterior;
+    visorPanX = cx - (cx - visorPanX) * ratio;
+    visorPanY = cy - (cy - visorPanY) * ratio;
   }
+  visorAplicarTransform();
+}
 
-  function abrirFotoGrande(src, titulo) {
-    visorUrlActual = src;
-    fotoGrande.src = src;
-    fotoGrande.style.transition = 'none';
-    visorResetear();
-    setTimeout(() => { fotoGrande.style.transition = 'transform 0.08s linear'; }, 50);
-    visorTitulo.textContent = titulo || 'Foto del DNI';
-    modalFoto.classList.add('activo');
-    document.body.style.overflow = 'hidden';
-  }
+function visorZoomBoton(delta) {
+  visorZoomA(delta, null, null);
+}
 
-  function cerrarFotoGrande() {
-    modalFoto.classList.remove('activo');
-    document.body.style.overflow = '';
-    fotoGrande.src = '';
-    visorUrlActual = '';
-    visorResetear();
-  }
+function abrirFotoGrande(src, titulo) {
+  visorUrlActual = src;
+  fotoGrande.src = src;
+  fotoGrande.style.transition = 'none';
+  visorResetear();
+  setTimeout(() => { fotoGrande.style.transition = 'transform 0.08s linear'; }, 50);
+  visorTitulo.textContent = titulo || 'Foto del DNI';
+  modalFoto.classList.add('activo');
+  document.body.style.overflow = 'hidden';
+}
 
-  document.getElementById('cerrar-modal').addEventListener('click', cerrarFotoGrande);
-  document.getElementById('btn-zoom-in').addEventListener('click', () => visorZoomBoton(1 + ZOOM_PASO));
-  document.getElementById('btn-zoom-out').addEventListener('click', () => visorZoomBoton(1 / (1 + ZOOM_PASO)));
-  document.getElementById('btn-zoom-reset').addEventListener('click', visorResetear);
-  document.getElementById('btn-rotar').addEventListener('click', () => {
-    visorRotacion = (visorRotacion + 90) % 360;
-    visorAplicarTransform();
-  });
-  document.getElementById('btn-abrir-nueva').addEventListener('click', () => {
-    if (visorUrlActual) window.open(visorUrlActual, '_blank', 'noopener');
-  });
+function cerrarFotoGrande() {
+  modalFoto.classList.remove('activo');
+  document.body.style.overflow = '';
+  fotoGrande.src = '';
+  visorUrlActual = '';
+  visorResetear();
+}
 
-  visorContenedor.addEventListener('click', (e) => {
-    if (e.target === visorContenedor && visorZoom <= 1.01) cerrarFotoGrande();
-  });
+document.getElementById('cerrar-modal').addEventListener('click', cerrarFotoGrande);
+document.getElementById('btn-zoom-in').addEventListener('click', () => visorZoomBoton(1 + ZOOM_PASO));
+document.getElementById('btn-zoom-out').addEventListener('click', () => visorZoomBoton(1 / (1 + ZOOM_PASO)));
+document.getElementById('btn-zoom-reset').addEventListener('click', visorResetear);
+document.getElementById('btn-rotar').addEventListener('click', () => {
+  visorRotacion = (visorRotacion + 90) % 360;
+  visorAplicarTransform();
+});
+document.getElementById('btn-abrir-nueva').addEventListener('click', () => {
+  if (visorUrlActual) window.open(visorUrlActual, '_blank', 'noopener');
+});
 
-  visorContenedor.addEventListener('wheel', (e) => {
-    if (!modalFoto.classList.contains('activo')) return;
-    e.preventDefault();
-    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-    visorZoomA(factor, e.clientX, e.clientY);
-  }, { passive: false });
+visorContenedor.addEventListener('click', (e) => {
+  if (e.target === visorContenedor && visorZoom <= 1.01) cerrarFotoGrande();
+});
 
-  visorContenedor.addEventListener('dblclick', (e) => {
-    if (visorZoom > 1.1) { visorResetear(); }
-    else { visorZoom = 2.5; visorZoomA(1, e.clientX, e.clientY); }
-  });
+visorContenedor.addEventListener('wheel', (e) => {
+  if (!modalFoto.classList.contains('activo')) return;
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+  visorZoomA(factor, e.clientX, e.clientY);
+}, { passive: false });
 
-  visorContenedor.addEventListener('mousedown', (e) => {
-    if (visorZoom <= 1) return;
+visorContenedor.addEventListener('dblclick', (e) => {
+  if (visorZoom > 1.1) { visorResetear(); }
+  else { visorZoom = 2.5; visorZoomA(1, e.clientX, e.clientY); }
+});
+
+visorContenedor.addEventListener('mousedown', (e) => {
+  if (visorZoom <= 1) return;
+  visorArrastrando = true;
+  visorStartX = e.clientX;
+  visorStartY = e.clientY;
+  visorStartPanX = visorPanX;
+  visorStartPanY = visorPanY;
+  visorContenedor.classList.add('arrastrando');
+  e.preventDefault();
+});
+window.addEventListener('mousemove', (e) => {
+  if (!visorArrastrando) return;
+  visorPanX = visorStartPanX + (e.clientX - visorStartX);
+  visorPanY = visorStartPanY + (e.clientY - visorStartY);
+  visorAplicarTransform();
+});
+window.addEventListener('mouseup', () => {
+  visorArrastrando = false;
+  visorContenedor.classList.remove('arrastrando');
+});
+
+visorContenedor.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    visorPinchDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    visorPinchZoomInicial = visorZoom;
+  } else if (e.touches.length === 1 && visorZoom > 1) {
     visorArrastrando = true;
-    visorStartX = e.clientX;
-    visorStartY = e.clientY;
+    visorStartX = e.touches[0].clientX;
+    visorStartY = e.touches[0].clientY;
     visorStartPanX = visorPanX;
     visorStartPanY = visorPanY;
-    visorContenedor.classList.add('arrastrando');
-    e.preventDefault();
-  });
-  window.addEventListener('mousemove', (e) => {
-    if (!visorArrastrando) return;
-    visorPanX = visorStartPanX + (e.clientX - visorStartX);
-    visorPanY = visorStartPanY + (e.clientY - visorStartY);
-    visorAplicarTransform();
-  });
-  window.addEventListener('mouseup', () => {
-    visorArrastrando = false;
-    visorContenedor.classList.remove('arrastrando');
-  });
+  }
+}, { passive: true });
 
-  visorContenedor.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-      visorPinchDist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      visorPinchZoomInicial = visorZoom;
-    } else if (e.touches.length === 1 && visorZoom > 1) {
+visorContenedor.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2 && visorPinchDist > 0) {
+    e.preventDefault();
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    const factor = dist / visorPinchDist;
+    const nuevoZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorPinchZoomInicial * factor));
+    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    visorZoomA(nuevoZoom / visorZoom, cx, cy);
+  } else if (e.touches.length === 1 && visorArrastrando) {
+    e.preventDefault();
+    visorPanX = visorStartPanX + (e.touches[0].clientX - visorStartX);
+    visorPanY = visorStartPanY + (e.touches[0].clientY - visorStartY);
+    visorAplicarTransform();
+  }
+}, { passive: false });
+
+visorContenedor.addEventListener('touchend', (e) => {
+  if (e.touches.length === 0) {
+    visorArrastrando = false;
+    visorPinchDist = 0;
+  } else if (e.touches.length === 1) {
+    visorPinchDist = 0;
+    if (visorZoom > 1) {
       visorArrastrando = true;
       visorStartX = e.touches[0].clientX;
       visorStartY = e.touches[0].clientY;
       visorStartPanX = visorPanX;
       visorStartPanY = visorPanY;
     }
-  }, { passive: true });
+  }
+});
 
-  visorContenedor.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 2 && visorPinchDist > 0) {
-      e.preventDefault();
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      const factor = dist / visorPinchDist;
-      const nuevoZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, visorPinchZoomInicial * factor));
-      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      visorZoomA(nuevoZoom / visorZoom, cx, cy);
-    } else if (e.touches.length === 1 && visorArrastrando) {
-      e.preventDefault();
-      visorPanX = visorStartPanX + (e.touches[0].clientX - visorStartX);
-      visorPanY = visorStartPanY + (e.touches[0].clientY - visorStartY);
-      visorAplicarTransform();
-    }
-  }, { passive: false });
-
-  visorContenedor.addEventListener('touchend', (e) => {
-    if (e.touches.length === 0) {
-      visorArrastrando = false;
-      visorPinchDist = 0;
-    } else if (e.touches.length === 1) {
-      visorPinchDist = 0;
-      if (visorZoom > 1) {
-        visorArrastrando = true;
-        visorStartX = e.touches[0].clientX;
-        visorStartY = e.touches[0].clientY;
-        visorStartPanX = visorPanX;
-        visorStartPanY = visorPanY;
-      }
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (!modalFoto.classList.contains('activo')) return;
-    if (e.key === 'Escape') { cerrarFotoGrande(); e.preventDefault(); }
-    else if (e.key === '+' || e.key === '=') { visorZoomBoton(1 + ZOOM_PASO); e.preventDefault(); }
-    else if (e.key === '-' || e.key === '_') { visorZoomBoton(1 / (1 + ZOOM_PASO)); e.preventDefault(); }
-    else if (e.key === '0') { visorResetear(); e.preventDefault(); }
-    else if (e.key === 'r' || e.key === 'R') {
-      visorRotacion = (visorRotacion + 90) % 360;
-      visorAplicarTransform();
-      e.preventDefault();
-    }
-    else if (e.key === 'ArrowLeft')  { visorPanX -= 40; visorAplicarTransform(); e.preventDefault(); }
-    else if (e.key === 'ArrowRight') { visorPanX += 40; visorAplicarTransform(); e.preventDefault(); }
-    else if (e.key === 'ArrowUp')    { visorPanY -= 40; visorAplicarTransform(); e.preventDefault(); }
-    else if (e.key === 'ArrowDown')  { visorPanY += 40; visorAplicarTransform(); e.preventDefault(); }
-  });
+document.addEventListener('keydown', (e) => {
+  if (!modalFoto.classList.contains('activo')) return;
+  if (e.key === 'Escape') { cerrarFotoGrande(); e.preventDefault(); }
+  else if (e.key === '+' || e.key === '=') { visorZoomBoton(1 + ZOOM_PASO); e.preventDefault(); }
+  else if (e.key === '-' || e.key === '_') { visorZoomBoton(1 / (1 + ZOOM_PASO)); e.preventDefault(); }
+  else if (e.key === '0') { visorResetear(); e.preventDefault(); }
+  else if (e.key === 'r' || e.key === 'R') {
+    visorRotacion = (visorRotacion + 90) % 360;
+    visorAplicarTransform();
+    e.preventDefault();
+  }
+  else if (e.key === 'ArrowLeft')  { visorPanX -= 40; visorAplicarTransform(); e.preventDefault(); }
+  else if (e.key === 'ArrowRight') { visorPanX += 40; visorAplicarTransform(); e.preventDefault(); }
+  else if (e.key === 'ArrowUp')    { visorPanY -= 40; visorAplicarTransform(); e.preventDefault(); }
+  else if (e.key === 'ArrowDown')  { visorPanY += 40; visorAplicarTransform(); e.preventDefault(); }
+});
 </script>
 
 </body>
