@@ -464,7 +464,19 @@
     #toast-container{top:10px;right:10px;left:10px;max-width:none;}
     #aviso-inactividad{left:10px;right:10px;transform:none;font-size:0.82rem;}
   }
+
+  #perfil-personal{font-size:0.78rem;line-height:1.3;text-align:right;color:rgba(255,255,255,0.85);margin-right:12px;max-width:260px;}
+  #perfil-personal strong{color:var(--dorado-brilloso,#ffd24d);display:block;}
+  .aviso-sin-comisaria{display:none;margin:0 0 16px;padding:14px 18px;border-radius:8px;background:rgba(185,28,28,0.25);border:1px solid rgba(252,165,165,0.5);color:#fecaca;font-weight:600;}
+  .aviso-sin-comisaria.activo{display:block;}
+  #detalle-mapa-caja{margin:14px 0;padding:12px;border-radius:8px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.12);}
+  #detalle-mapa-caja h4{margin:0 0 8px;font-size:0.9rem;color:var(--dorado-claro,#f5d98a);}
+  #detalle-mapa{height:260px;border-radius:6px;}
+  #detalle-mapa-caja a{display:inline-block;margin-top:8px;color:#9cc2ff;font-size:0.85rem;}
+  #btn-derivar{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);}
+  #derivar-select{width:100%;padding:10px;border-radius:6px;margin-top:6px;}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 
@@ -476,6 +488,7 @@
       <p>Policía de Salta · DMI (JP)</p>
     </div>
   </div>
+  <div id="perfil-personal"></div>
   <div class="header-acciones">
     <button id="btn-auditoria" title="Ver historial de accesos">📋 Auditoría</button>
     <button id="btn-cambiar-pass" title="Cambiar contraseña">🔑 Cambiar contraseña</button>
@@ -484,6 +497,7 @@
 </header>
 
 <main>
+  <div class="aviso-sin-comisaria" id="aviso-sin-comisaria">⚠️ Tu usuario todavía no tiene una comisaría asignada, por eso no ves trámites. Pedile al administrador que te asigne tu comisaría.</div>
 
   <!-- LOGIN -->
   <div id="vista-login">
@@ -648,6 +662,7 @@
       <h3 id="detalle-titulo"></h3>
       <p class="detalle-fecha" id="detalle-fecha"></p>
       <div id="detalle-contenido"></div>
+      <div id="detalle-mapa-caja" style="display:none;"><h4>📍 Ubicación del domicilio</h4><div id="detalle-mapa"></div><a id="detalle-mapa-link" target="_blank" rel="noopener">Abrir en Google Maps ↗</a></div>
       <div class="btns">
         <button id="btn-validar">✓ Validar</button>
         <button id="btn-denegar">✕ Denegar</button>
@@ -655,6 +670,7 @@
         <button id="btn-urgente">🚨 Marcar urgente</button>
         <button id="btn-retirado">📦 Marcar como retirado</button>
         <button id="btn-invalidar-ubicacion">🚫 Invalidar ubicación del DNI</button>
+        <button id="btn-derivar" style="display:none;">↪ Derivar a otra comisaría</button>
         <button id="btn-imprimir">🖨 Imprimir</button>
         <button id="btn-cerrar-detalle">Cerrar</button>
       </div>
@@ -683,6 +699,19 @@
 </div>
 
 <!-- Modal cambiar contraseña -->
+<div class="modal-overlay" id="modal-derivar">
+  <div class="modal-caja">
+    <h3>↪ Derivar a otra comisaría</h3>
+    <p style="font-size:0.85rem;opacity:0.85;margin:0 0 6px;">Usalo si el domicilio corresponde a otra jurisdicción. El trámite pasará a esa comisaría y dejarás de verlo.</p>
+    <label>Comisaría de destino</label>
+    <select id="derivar-select"></select>
+    <div class="modal-btns">
+      <button type="button" id="btn-cancelar-derivar" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);">Cancelar</button>
+      <button type="button" id="btn-confirmar-derivar" style="background:linear-gradient(135deg, var(--dorado), var(--dorado-brilloso));color:var(--azul-oscuro);">Derivar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-pass">
   <div class="modal-caja">
     <h3>🔑 Cambiar contraseña</h3>
@@ -725,6 +754,7 @@
 <div id="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="supabase-config.js"></script>
 <script src="comisarias-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -917,7 +947,7 @@ async function enviarCorreoEstado(solicitud, nuevoEstado, motivo) {
 
     const nombre = d.nombre || d.nombreSolicitante || d.nombreConviviente || d.nombreMenor || 'ciudadano/a';
     const tramite = solicitud.tramite_titulo || solicitud.tramite || 'Trámite';
-    const comisaria = solicitud.comisaria_asignada || 'la dependencia asignada';
+    const comisaria = nombreComisaria(solicitud.comisaria_asignada) || 'la dependencia asignada';
     const codigo = solicitud.codigo || '—';
 
     const estadoTexto = nuevoEstado === 'procesado' ? 'APROBADO'
@@ -1310,11 +1340,116 @@ btnSalir.addEventListener('click', async () => {
   await supabaseClient.auth.signOut();
 });
 
+/* ============================================================
+   PERFIL DEL PERSONAL + NOMBRES LEGIBLES + DERIVACIÓN
+   ============================================================ */
+const LISTA_COMISARIAS = ["DUR1-S1-Cría 10° (Ex Cria 102)", "DUR1-S1-Dsto. Atocha", "DUR1-S10-Cria. 2°", "DUR1-S2-Cria. 13° (Ex Sub-Cria. Asunción)", "DUR1-S2-Cría 12° (Ex-Cria. 104)", "DUR1-S2-Subcria Grand Bourg", "DUR1-S3-Cria 6°", "DUR1-S3-Cría 11° (Ex-cria 103)", "DUR1-S3-Subcria. Castañares", "DUR1-S4-Cría 9° (Ex-Cria. 100)", "DUR1-S4-Subcria Las Costas", "DUR1-S5-Subcria La Caldera", "DUR1-S5-Subcria. Vaqueros", "DUR1-S6- Cria. 1°", "DUR1-S6-Cria. 3°", "DUR1-S7- Subcria. Autodromo", "DUR1-S7-Cria. 4°", "DUR1-S8-Cría 8° (Ex-Cria. 9na)", "DUR1-S8-Subcria Villa El Sol", "DUR1-S9-Cria. 5°", "DUR1-S9-Cría 7° (Ex-Cria. 8)", "DUR1-S9-Sub-cria. Lola Mora", "DUR10-S1-Cría 4° (Ex-Cria. 15)", "DUR10-S1-Cría 6° (Ex-Cria. 106)", "DUR10-S1-Dsto. Palacios", "DUR10-S2-Cría 1° (Ex-Cria. 7)", "DUR10-S2-Cría 3° (Ex-Cria. 12)", "DUR10-S2-Dsto. Docente", "DUR10-S2-Dsto. San Carlos", "DUR10-S3-Cría 2° (Ex-Cria. 10)", "DUR10-S3-Dsto. San Ignacio", "DUR10-S3-Sub Cria. Lavalle", "DUR10-S4-Cría 5° (Ex-Cria. 17)", "DUR10-S5-Cría 7° (Ex-Cria. 108 Quijano)", "DUR10-S5-Cría. 9° (Ex-Subcria. San Luis)", "DUR10-S5-Dsto. La Silleta", "DUR10-S5-Subcria. San Antonio", "DUR11-S1-Cria.7° Pinares", "DUR11-S1-Cría 1° (Ex-Cria. 13 Cerrillos)", "DUR11-S1-Cría 5° (Ex-Cria. 105 La Merced)", "DUR11-S1-Dsto La Isla", "DUR11-S1-Dsto. San Agustin", "DUR11-S1-Subcría. Los Alamos", "DUR11-S2-Cría 2° (Ex-Cria. 14 Rosario de Lerma)", "DUR11-S3-Cría 3° (Ex-Cria. 18 Chicoana)", "DUR11-S3-Cría 4° (Ex-Cria. 19 El Carril)", "DUR11-S4-Cria. 6° (Ex-Subcria. Moldes)", "DUR11-S4-Subcria. Guachipas", "DUR11-S4-Subcria. La Viña", "DUR12-S1-Cria. 1° Cachi (EX Cria. 61°)", "DUR12-S1-Dsto. La Poma", "DUR12-S1-Dsto. Palermo Oeste", "DUR12-S1-Dsto. Payogasta", "DUR12-S2-Cria. 2° Molinos (Ex Cria. 62°)", "DUR12-S2-Dsto. Luracatao", "DUR12-S2-Dsto. Seclantas", "DUR13-S1-Cría. 1° Rosario de la Frontera (Ex Cria. 31°)", "DUR13-S1-Dsto. Antillas", "DUR13-S1-Dsto. Potreros", "DUR13-S1-Subcría. El Mirador", "DUR13-S2-Dsto. El Jardin", "DUR13-S2-Dsto. La Candelaria", "DUR13-S2-Subcría. El Tala", "DUR14-S1- Cría 1° - ex Cria. 43 Embarcación", "DUR14-S1-Dsto Padre Lozano", "DUR14-S1-Dsto. Gral. Ballivian", "DUR14-S2-Cría 2° Coronel Juan Solá", "DUR14-S2-Dsto Dragones", "DUR14-S2-Dsto Hickman", "DUR14-S2-Dsto. Los Blancos", "DUR14-S2-Puesto Pluma de Pato", "DUR2-S1-Cría. 1° Oran (Ex Cria. 20°)", "DUR2-S1-Pto. Pol. Estacion", "DUR2-S2-Cría. 2° Hipolito Irigoyen (Ex. Cría. 22°)", "DUR2-S2-Dsto. Tabacal", "DUR2-S3-Cría.3° Docente (Ex Cría. 24°)", "DUR2-S3-Dsto. Balut", "DUR2-S4-Cría. 4° Aeroparque (Ex Cría. 25°)", "DUR2-S4-Subcría.9 de Julio", "DUR2-S5-Cría. 5° Aguas Blancas (Ex Cría. 26°)", "DUR2-S5-Subcría. Los Toldos", "DUR2-S6-Dsto. Isla de Cañas", "DUR2-S6-Dsto. Los Naranjos", "DUR3-S1-Cría. 1° Metán (Ex Cria. 30°)", "DUR3-S2-Cría. 2° El Galpon", "DUR3-S2-Dsto. Lumbreras", "DUR3-S2-Dsto. Rio Piedras", "DUR3-S2-Pto. Pol. El Tunal", "DUR3-S3-Dsto. El Naranjo", "DUR3-S3-Dsto. San Felipe", "DUR4-S1-Cría. 1° Salvador Mazza (Ex Cría. 40°)", "DUR4-S1-Cría. 5° Aguaray (Ex Cría. 46°)", "DUR4-S1-Dsto. Acambuco", "DUR4-S1-Dsto. Alto Verde", "DUR4-S2-Cría. 2° Mosconi (Ex Cria.41°)", "DUR4-S2-Dsto. Coronel Cornejo", "DUR4-S2-Pto. Pol. Aeroparque Mosconi", "DUR4-S2-Subcría.Vespucio", "DUR4-S3-Cría. 3° Tartagal-Centro (Ex Cría. 42°)", "DUR4-S4-Cría. 4° El Portico (Ex Cría. 45°)", "DUR4-S4-Dsto. Villa Guemes", "DUR4-S5-Dsto. Alto La Sierra", "DUR4-S5-Subcría. Santa Victoria Este", "DUR5-S1-Cría.1° Joaquin V. Gonzalez (Ex Cría. 50°)", "DUR5-S1-Dsto. 25 de Junio", "DUR5-S1-Dsto. Gaona", "DUR5-S2-Dsto. Los Rosales", "DUR5-S2-Dsto. San Jose de Orquera", "DUR5-S2-Dsto. Talavera", "DUR5-S2-Subcría. El Quebrachal", "DUR5-S3-Dsto. Tolloche", "DUR6-S1-Cria. 60 Cafayate", "DUR6-S2-Dsto. Angastaco", "DUR6-S2-Dsto. Animana", "DUR6-S2-Sub Cria. San Carlos", "DUR7-S1-Comisaría 1° - ex Cría.11° Gral. Güemes", "DUR7-S1-Comisaría 3° - ex Cría.101° La Banda", "DUR7-S1-Pto.Pol.Parque Industrial", "DUR7-S2-Comisaría 2° - ex Cría. 16° Campo Santo", "DUR7-S2-Dsto. Betania", "DUR7-S2-Dsto. Cobos", "DUR7-S2-Subcría. El Bordo", "DUR8-S1- Comisaría.1° Pichanal (Ex Cría. 21°)", "DUR8-S2-Comisaría 2° - ex Cria. 23 Colonia Santa Rosa", "DUR8-S2-Dsto. Urundel", "DUR8-S2-Sub Cria. Las Palmeras", "DUR8-S3-Dsto. La Unión", "DUR8-S3-Dsto. Rivadavia Banda Sur", "DUR9-S1-Cría.1° Las Lajitas (Ex Cría. 51°)", "DUR9-S1-Dsto. Piquete Cabado", "DUR9-S1-Dsto. Rio del Valle", "DUR9-S2-Dsto. Gral. Pizarro", "DUR9-S2-Dsto. Luis Burela", "DUR9-S2-Dsto. Mollinedo", "DUR9-S2-Subcría.El Dorado", "Dest. Iruya", "Dest. Nazareno", "Sub Cria. San Jorge", "Sub-Cría Santa Victoria Oeste"];
+
+// "DUR1-S3-Cría 11° (Ex-cria 103)"  ->  "Comisaría 11° (Ex-cria 103) — DUR 1"
+// Los nombres viejos (ej. "Comisaría N°11 - 17 de Octubre (DDP 1)") se muestran igual.
+function nombreComisaria(nombre) {
+  if (!nombre) return '';
+  const m = String(nombre).match(/^DUR\s*(\d+)\s*-\s*S\s*\d+\s*-\s*(.*)$/i);
+  if (!m) return String(nombre);
+  const resto = m[2]
+    .replace(/^\s*Cr[íi]a\.?\s*/i, 'Comisaría ')
+    .replace(/^\s*Comisar[íi]a\.?\s*/i, 'Comisaría ')
+    .replace(/^\s*Sub[-\s]?cr[íi]a\.?\s*/i, 'Subcomisaría ')
+    .replace(/^\s*Dsto\.?\s*/i, 'Destacamento ')
+    .replace(/^\s*Dest\.(?!acamento)\s*/i, 'Destacamento ')
+    .replace(/^\s*Pto\.?\s*Pol\.?\s*/i, 'Puesto Policial ')
+    .replace(/\s+/g, ' ').trim();
+  return `${resto} — DUR ${m[1]}`;
+}
+
+let perfilActual = null;   // null = todavía no configurado en Supabase (modo anterior: se ve todo)
+
+async function cargarPerfil() {
+  perfilActual = null;
+  const caja = document.getElementById('perfil-personal');
+  const aviso = document.getElementById('aviso-sin-comisaria');
+  const btnAud = document.getElementById('btn-auditoria');
+  aviso.classList.remove('activo');
+  btnAud.style.display = '';
+  caja.innerHTML = '';
+  try {
+    const { data: ses } = await supabaseClient.auth.getSession();
+    const uid = ses && ses.session && ses.session.user && ses.session.user.id;
+    if (!uid) return;
+    const { data, error } = await supabaseClient.from('personal').select('*').eq('user_id', uid).maybeSingle();
+    if (error) { console.warn('Perfil no disponible (¿todavía no se ejecutó el SQL de seguridad?):', error.message); return; }
+    if (!data || data.activo === false) {
+      perfilActual = { sinAsignar: true };
+      aviso.classList.add('activo');
+      caja.innerHTML = `<strong>${escapeHtml(usuarioActual || '')}</strong>Sin comisaría asignada`;
+      btnAud.style.display = 'none';
+      return;
+    }
+    perfilActual = data;
+    const esAdmin = data.rol === 'admin';
+    const comis = esAdmin ? 'Administrador · todas las comisarías' : (data.comisarias || []).map(nombreComisaria).join(' · ') || 'Sin comisaría';
+    caja.innerHTML = `<strong>${escapeHtml(data.nombre || data.email || usuarioActual || '')}</strong>${escapeHtml(comis)}`;
+    btnAud.style.display = esAdmin ? '' : 'none';
+  } catch (e) { console.warn('Error cargando perfil', e); }
+}
+
+// Si hay una sola comisaría en pantalla, los filtros de comisaría/zona/tipo no aportan nada.
+function ajustarFiltrosSegunAlcance() {
+  const distintas = new Set(solicitudesCache.map(x => x.comisaria_asignada).filter(Boolean));
+  const unica = perfilActual && !perfilActual.sinAsignar && perfilActual.rol !== 'admin' && distintas.size <= 1;
+  ['filtro-comisaria', 'filtro-zona', 'filtro-tipo-dependencia'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = unica ? 'none' : '';
+  });
+}
+
+/* ---- Mapa del domicilio en el detalle ---- */
+let mapaDetalle = null;
+function mostrarMapaDetalle(d) {
+  const caja = document.getElementById('detalle-mapa-caja');
+  if (mapaDetalle) { mapaDetalle.remove(); mapaDetalle = null; }
+  const lat = parseFloat(d && d._ubicacion_lat), lon = parseFloat(d && d._ubicacion_lon);
+  if (!isFinite(lat) || !isFinite(lon) || typeof L === 'undefined') { caja.style.display = 'none'; return; }
+  caja.style.display = 'block';
+  document.getElementById('detalle-mapa-link').href = `https://www.google.com/maps?q=${lat},${lon}`;
+  mapaDetalle = L.map('detalle-mapa', { center: [lat, lon], zoom: 17 });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaDetalle);
+  L.marker([lat, lon]).addTo(mapaDetalle);
+  setTimeout(() => mapaDetalle && mapaDetalle.invalidateSize(), 250);
+}
+
+/* ---- Derivar a otra comisaría ---- */
+(function () {
+  const modal = document.getElementById('modal-derivar');
+  const sel = document.getElementById('derivar-select');
+  LISTA_COMISARIAS.slice().sort((a, b) => nombreComisaria(a).localeCompare(nombreComisaria(b), 'es')).forEach(n => {
+    const o = document.createElement('option'); o.value = n; o.textContent = nombreComisaria(n); sel.appendChild(o);
+  });
+  document.getElementById('btn-derivar').addEventListener('click', () => {
+    if (!solicitudAbierta) return;
+    sel.value = LISTA_COMISARIAS.includes(solicitudAbierta.comisaria_asignada) ? solicitudAbierta.comisaria_asignada : sel.options[0].value;
+    modal.classList.add('activo');
+  });
+  document.getElementById('btn-cancelar-derivar').addEventListener('click', () => modal.classList.remove('activo'));
+  document.getElementById('btn-confirmar-derivar').addEventListener('click', async () => {
+    if (!solicitudAbierta) return;
+    const destino = sel.value;
+    if (destino === solicitudAbierta.comisaria_asignada) { alert('Elegí una comisaría distinta a la actual.'); return; }
+    if (!confirm(`¿Derivar este trámite a:\n${nombreComisaria(destino)}?\n\nDejarás de verlo.`)) return;
+    const { error } = await supabaseClient.rpc('derivar_solicitud', { p_id: solicitudAbierta.id, p_comisaria: destino });
+    if (error) { console.error(error); alert('No se pudo derivar el trámite: ' + error.message); return; }
+    modal.classList.remove('activo');
+    document.getElementById('detalle').style.display = 'none';
+    await cargarSolicitudes();
+    mostrarToast('↪ Trámite derivado', 'Pasó a ' + nombreComisaria(destino), 'success', 4000);
+  });
+})();
+
 function mostrarSesion(sesionActiva) {
   if (sesionActiva) {
     vistaLogin.style.display = 'none';
     vistaPanel.style.display = 'block';
-    cargarSolicitudes();
+    cargarPerfil().finally(cargarSolicitudes);
     iniciarTimerInactividad();
   } else {
     vistaLogin.style.display = 'block';
@@ -1325,6 +1460,9 @@ function mostrarSesion(sesionActiva) {
     usuarioActual = null;
     idsConocidos.clear();
     primeraCarga = true;
+    perfilActual = null;
+    document.getElementById('perfil-personal').innerHTML = '';
+    document.getElementById('aviso-sin-comisaria').classList.remove('activo');
     detenerTimerInactividad();
     mostrarUltimoAcceso();
     actualizarUIBloqueo();
@@ -1386,14 +1524,14 @@ function poblarFiltroComisaria() {
   valores.forEach(valor => {
     const opt = document.createElement('option');
     opt.value = valor;
-    opt.textContent = valor;
+    opt.textContent = nombreComisaria(valor);
     filtroComisaria.appendChild(opt);
   });
   filtroComisaria.value = valores.includes(seleccion) ? seleccion : '';
 }
 
 function obtenerTipoDependencia(nombre) {
-  return tipoDependencia(nombre);
+  return tipoDependencia(nombreComisaria(nombre));
 }
 
 /* ETIQUETAS */
@@ -1482,6 +1620,7 @@ async function cargarSolicitudes() {
   }
   solicitudesCache = nuevas;
   poblarFiltroComisaria();
+  ajustarFiltrosSegunAlcance();
   actualizarContadores();
   renderTabla();
 }
@@ -1666,7 +1805,7 @@ function renderTabla() {
     tr.appendChild(tdSolicitante);
 
     const tdComisaria = document.createElement('td');
-    tdComisaria.textContent = s.comisaria_asignada || '-';
+    tdComisaria.textContent = nombreComisaria(s.comisaria_asignada) || '-';
     tr.appendChild(tdComisaria);
 
     const tdZona = document.createElement('td');
@@ -2312,7 +2451,7 @@ async function mostrarDetalle(s) {
   if (d._correccion) cont.appendChild(crearAvisoCorreccion(s));
   const et = etiquetasDetalle;
   const camposSol = [];
-  camposSol.push(['Comisaría asignada', s.comisaria_asignada || '-']);
+  camposSol.push(['Comisaría asignada', nombreComisaria(s.comisaria_asignada) || '-']);
   const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
   if (zona) camposSol.push(['Zona', zona]);
 
@@ -2434,6 +2573,8 @@ async function mostrarDetalle(s) {
   }
 
   document.getElementById('detalle').style.display = 'block';
+  mostrarMapaDetalle(d);
+  document.getElementById('btn-derivar').style.display = (perfilActual && !perfilActual.sinAsignar) ? '' : 'none';
   document.getElementById('detalle').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -2568,7 +2709,7 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
   const ventana = window.open('', '_blank');
   const titulo = escapeHtml(s.tramite_titulo || s.tramite || '');
   const d = escaparDatos(s.datos || {});
-  const comisaria = escapeHtml(s.comisaria_asignada || 'Comisaría asignada');
+  const comisaria = escapeHtml(nombreComisaria(s.comisaria_asignada) || 'Comisaría asignada');
   const tramitesOficiales = ['residencia','convivencia','carencia','autorizacion','extravio','supervivencia'];
 
   const cssBase = `
@@ -2625,7 +2766,7 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
         <div class="valor-codigo">${escapeHtml(s.codigo)}</div>
       </div>` : ''}
       <dl>
-        <div><dt>Comisaría asignada</dt><dd>${escapeHtml(s.comisaria_asignada || '-')}</dd></div>
+        <div><dt>Comisaría asignada</dt><dd>${escapeHtml(nombreComisaria(s.comisaria_asignada) || '-')}</dd></div>
         ${zona ? `<div><dt>Zona</dt><dd>${escapeHtml(zona)}</dd></div>` : ''}
         <div><dt>Estado</dt><dd>${escapeHtml(s.estado || 'pendiente')}</dd></div>
     `;
@@ -2686,7 +2827,7 @@ document.getElementById('btn-exportar').addEventListener('click', () => {
       obtenerDniSolicitud(s) || '-',
       d.email || '-',
       d.domicilio || d.domicilioComun || '-',
-      s.comisaria_asignada || '-',
+      nombreComisaria(s.comisaria_asignada) || '-',
       (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada) || '-',
       s.estado || 'pendiente',
       s.urgente ? 'SÍ' : 'NO',
