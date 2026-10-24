@@ -1,0 +1,141 @@
+# Nombres EXACTOS que guarda el sistema en solicitudes.comisaria_asignada (uno por línea).
+# Copiá y pegá el nombre tal cual en personal.comisarias.
+DUR1-S1-Cría 10° (Ex Cria 102)
+DUR1-S1-Dsto. Atocha
+DUR1-S10-Cria. 2°
+DUR1-S2-Cria. 13° (Ex Sub-Cria. Asunción)
+DUR1-S2-Cría 12° (Ex-Cria. 104)
+DUR1-S2-Subcria Grand Bourg
+DUR1-S3-Cria 6°
+DUR1-S3-Cría 11° (Ex-cria 103)
+DUR1-S3-Subcria. Castañares
+DUR1-S4-Cría 9° (Ex-Cria. 100)
+DUR1-S4-Subcria Las Costas
+DUR1-S5-Subcria La Caldera
+DUR1-S5-Subcria. Vaqueros
+DUR1-S6- Cria. 1°
+DUR1-S6-Cria. 3°
+DUR1-S7- Subcria. Autodromo
+DUR1-S7-Cria. 4°
+DUR1-S8-Cría 8° (Ex-Cria. 9na)
+DUR1-S8-Subcria Villa El Sol
+DUR1-S9-Cria. 5°
+DUR1-S9-Cría 7° (Ex-Cria. 8)
+DUR1-S9-Sub-cria. Lola Mora
+DUR10-S1-Cría 4° (Ex-Cria. 15)
+DUR10-S1-Cría 6° (Ex-Cria. 106)
+DUR10-S1-Dsto. Palacios
+DUR10-S2-Cría 1° (Ex-Cria. 7)
+DUR10-S2-Cría 3° (Ex-Cria. 12)
+DUR10-S2-Dsto. Docente
+DUR10-S2-Dsto. San Carlos
+DUR10-S3-Cría 2° (Ex-Cria. 10)
+DUR10-S3-Dsto. San Ignacio
+DUR10-S3-Sub Cria. Lavalle
+DUR10-S4-Cría 5° (Ex-Cria. 17)
+DUR10-S5-Cría 7° (Ex-Cria. 108 Quijano)
+DUR10-S5-Cría. 9° (Ex-Subcria. San Luis)
+DUR10-S5-Dsto. La Silleta
+DUR10-S5-Subcria. San Antonio
+DUR11-S1-Cria.7° Pinares
+DUR11-S1-Cría 1° (Ex-Cria. 13 Cerrillos)
+DUR11-S1-Cría 5° (Ex-Cria. 105 La Merced)
+DUR11-S1-Dsto La Isla
+DUR11-S1-Dsto. San Agustin
+DUR11-S1-Subcría. Los Alamos
+DUR11-S2-Cría 2° (Ex-Cria. 14 Rosario de Lerma)
+DUR11-S3-Cría 3° (Ex-Cria. 18 Chicoana)
+DUR11-S3-Cría 4° (Ex-Cria. 19 El Carril)
+DUR11-S4-Cria. 6° (Ex-Subcria. Moldes)
+DUR11-S4-Subcria. Guachipas
+DUR11-S4-Subcria. La Viña
+DUR12-S1-Cria. 1° Cachi (EX Cria. 61°)
+DUR12-S1-Dsto. La Poma
+DUR12-S1-Dsto. Palermo Oeste
+DUR12-S1-Dsto. Payogasta
+DUR12-S2-Cria. 2° Molinos (Ex Cria. 62°)
+DUR12-S2-Dsto. Luracatao
+DUR12-S2-Dsto. Seclantas
+DUR13-S1-Cría. 1° Rosario de la Frontera (Ex Cria. 31°)
+DUR13-S1-Dsto. Antillas
+DUR13-S1-Dsto. Potreros
+DUR13-S1-Subcría. El Mirador
+DUR13-S2-Dsto. El Jardin
+DUR13-S2-Dsto. La Candelaria
+DUR13-S2-Subcría. El Tala
+DUR14-S1- Cría 1° - ex Cria. 43 Embarcación
+DUR14-S1-Dsto Padre Lozano
+DUR14-S1-Dsto. Gral. Ballivian
+DUR14-S2-Cría 2° Coronel Juan Solá
+DUR14-S2-Dsto Dragones
+DUR14-S2-Dsto Hickman
+DUR14-S2-Dsto. Los Blancos
+DUR14-S2-Puesto Pluma de Pato
+DUR2-S1-Cría. 1° Oran (Ex Cria. 20°)
+DUR2-S1-Pto. Pol. Estacion
+DUR2-S2-Cría. 2° Hipolito Irigoyen (Ex. Cría. 22°)
+DUR2-S2-Dsto. Tabacal
+DUR2-S3-Cría.3° Docente (Ex Cría. 24°)
+DUR2-S3-Dsto. Balut
+DUR2-S4-Cría. 4° Aeroparque (Ex Cría. 25°)
+DUR2-S4-Subcría.9 de Julio
+DUR2-S5-Cría. 5° Aguas Blancas (Ex Cría. 26°)
+DUR2-S5-Subcría. Los Toldos
+DUR2-S6-Dsto. Isla de Cañas
+DUR2-S6-Dsto. Los Naranjos
+DUR3-S1-Cría. 1° Metán (Ex Cria. 30°)
+DUR3-S2-Cría. 2° El Galpon
+DUR3-S2-Dsto. Lumbreras
+DUR3-S2-Dsto. Rio Piedras
+DUR3-S2-Pto. Pol. El Tunal
+DUR3-S3-Dsto. El Naranjo
+DUR3-S3-Dsto. San Felipe
+DUR4-S1-Cría. 1° Salvador Mazza (Ex Cría. 40°)
+DUR4-S1-Cría. 5° Aguaray (Ex Cría. 46°)
+DUR4-S1-Dsto. Acambuco
+DUR4-S1-Dsto. Alto Verde
+DUR4-S2-Cría. 2° Mosconi (Ex Cria.41°)
+DUR4-S2-Dsto. Coronel Cornejo
+DUR4-S2-Pto. Pol. Aeroparque Mosconi
+DUR4-S2-Subcría.Vespucio
+DUR4-S3-Cría. 3° Tartagal-Centro (Ex Cría. 42°)
+DUR4-S4-Cría. 4° El Portico (Ex Cría. 45°)
+DUR4-S4-Dsto. Villa Guemes
+DUR4-S5-Dsto. Alto La Sierra
+DUR4-S5-Subcría. Santa Victoria Este
+DUR5-S1-Cría.1° Joaquin V. Gonzalez (Ex Cría. 50°)
+DUR5-S1-Dsto. 25 de Junio
+DUR5-S1-Dsto. Gaona
+DUR5-S2-Dsto. Los Rosales
+DUR5-S2-Dsto. San Jose de Orquera
+DUR5-S2-Dsto. Talavera
+DUR5-S2-Subcría. El Quebrachal
+DUR5-S3-Dsto. Tolloche
+DUR6-S1-Cria. 60 Cafayate
+DUR6-S2-Dsto. Angastaco
+DUR6-S2-Dsto. Animana
+DUR6-S2-Sub Cria. San Carlos
+DUR7-S1-Comisaría 1° - ex Cría.11° Gral. Güemes
+DUR7-S1-Comisaría 3° - ex Cría.101° La Banda
+DUR7-S1-Pto.Pol.Parque Industrial
+DUR7-S2-Comisaría 2° - ex Cría. 16° Campo Santo
+DUR7-S2-Dsto. Betania
+DUR7-S2-Dsto. Cobos
+DUR7-S2-Subcría. El Bordo
+DUR8-S1- Comisaría.1° Pichanal (Ex Cría. 21°)
+DUR8-S2-Comisaría 2° - ex Cria. 23 Colonia Santa Rosa
+DUR8-S2-Dsto. Urundel
+DUR8-S2-Sub Cria. Las Palmeras
+DUR8-S3-Dsto. La Unión
+DUR8-S3-Dsto. Rivadavia Banda Sur
+DUR9-S1-Cría.1° Las Lajitas (Ex Cría. 51°)
+DUR9-S1-Dsto. Piquete Cabado
+DUR9-S1-Dsto. Rio del Valle
+DUR9-S2-Dsto. Gral. Pizarro
+DUR9-S2-Dsto. Luis Burela
+DUR9-S2-Dsto. Mollinedo
+DUR9-S2-Subcría.El Dorado
+Dest. Iruya
+Dest. Nazareno
+Sub Cria. San Jorge
+Sub-Cría Santa Victoria Oeste

@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Base del Personal Policial</title>
 <style>
@@ -2245,8 +2246,9 @@ async function resolverCorreccion(aceptar) {
     },
   };
   const cambios = { datos: datosNuevos };
+  let comisariaNueva = null;
   if (aceptar) {
-    cambios.comisaria_asignada = corr.comisaria_corregida || solicitudAbierta.comisaria_asignada;
+    comisariaNueva = corr.comisaria_corregida || null;
     cambios.validado_por = usuarioActual || null;
     cambios.validado_en = ahora;
   }
@@ -2255,6 +2257,17 @@ async function resolverCorreccion(aceptar) {
     console.error(error);
     alert('No se pudo guardar la decisión. Revisá tu conexión e intentá de nuevo.');
     return;
+  }
+  // La derivación a otra comisaría va al final y por una función segura:
+  // al cambiar de comisaría el trámite deja de ser visible para esta.
+  if (comisariaNueva && comisariaNueva !== solicitudAbierta.comisaria_asignada) {
+    const { error: errDeriv } = await supabaseClient.rpc('derivar_solicitud', {
+      p_id: solicitudAbierta.id, p_comisaria: comisariaNueva,
+    });
+    if (errDeriv) {
+      console.error(errDeriv);
+      alert('Se guardó la decisión, pero no se pudo derivar el trámite a la otra comisaría. Avisá al administrador.');
+    }
   }
   document.getElementById('detalle').style.display = 'none';
   await cargarSolicitudes();
@@ -2570,7 +2583,7 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
     .firma div{border-top:1px solid #333; padding-top:6px; width:40%; text-align:center; font-size:0.8rem;}
     .certificado-oficial{background:#fff;color:#1f2937;padding:20px 30px;font-family:'Times New Roman', Georgia, serif;line-height:1.8;text-align:justify;max-width:850px;margin:0 auto;}
     .cert-header{text-align:center;margin-bottom:26px;border-bottom:2px solid #0d2a4d;padding-bottom:14px;}
-    .cert-escudo{display:inline-block;width:70px;height:70px;background-image:url('${window.location.origin}/MI-COMISARIA/logo-policia.png.jpeg');background-size:contain;background-repeat:no-repeat;background-position:center;margin-bottom:6px;}
+    .cert-escudo{display:inline-block;width:70px;height:70px;background-image:url('${window.location.origin}${window.location.pathname.replace(/[^/]*$/, '')}logo-policia.png.jpeg');background-size:contain;background-repeat:no-repeat;background-position:center;margin-bottom:6px;}
     .cert-titulo{font-family:'Segoe UI', Arial, sans-serif;font-weight:bold;color:#0d2a4d;}
     .cert-titulo .cert-linea1{font-size:0.88rem;letter-spacing:0.15em;}
     .cert-titulo .cert-linea2{font-size:1.1rem;letter-spacing:0.3em;color:#c9a961;margin:4px 0;font-family:'Times New Roman', serif;}
