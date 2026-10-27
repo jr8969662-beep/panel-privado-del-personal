@@ -1630,7 +1630,15 @@ const etiquetasDetalle = {
   tipoDocumentoDNI: 'Tipo de documento',
   fechaEmisionDNI: 'Fecha de emisión del DNI',
   esDNINuevo: 'Escaneado con DNI electrónico (QR)',
+  foto_acompanante: 'Foto del DNI - Acompañante',
+  foto_conviviente: 'Foto del DNI - Conviviente 1',
 };
+for (let n = 2; n <= 9; n++) {
+  etiquetasDetalle['nombreConviviente' + n] = 'Nombre del conviviente ' + n;
+  etiquetasDetalle['dniConviviente' + n] = 'DNI del conviviente ' + n;
+  etiquetasDetalle['parentesco' + n] = 'Parentesco del conviviente ' + n;
+  etiquetasDetalle['foto_conviviente' + n] = 'Foto del DNI - Conviviente ' + n;
+}
 
 /* ============================================================
    CARGA DE SOLICITUDES + LIMPIEZA AUTOMÁTICA DE EXPIRADOS
@@ -2117,6 +2125,7 @@ function generarCertificadoConvivencia(r, comisaria) {
       <ul class="cert-lista-convivientes">
         <li>${sol} DNI Nº ${formatearDni(r.dniSolicitante)} <span class="parentesco">(Solicitante)</span></li>
         <li>${conv} DNI Nº ${formatearDni(r.dniConviviente)} <span class="parentesco">(${r.parentesco || '—'})</span></li>
+        ${[2,3,4,5,6,7,8,9].filter(n => r['nombreConviviente' + n]).map(n => `<li>${String(r['nombreConviviente' + n]).toUpperCase()} DNI Nº ${formatearDni(r['dniConviviente' + n])} <span class="parentesco">(${r['parentesco' + n] || '—'})</span></li>`).join('')}
       </ul>
       <p class="cert-texto">
         <strong>____:</strong> Se expide el presente Certificado a solicitud de la parte interesada
@@ -2556,6 +2565,7 @@ async function mostrarDetalle(s) {
     if (d.localidad) camposSol.push([et.localidad, d.localidad]);
     if (d.foto_menor) camposSol.push([et.foto_menor, d.foto_menor, true]);
     if (d.foto_progenitor) camposSol.push([et.foto_progenitor, d.foto_progenitor, true]);
+    if (d.foto_acompanante) camposSol.push([et.foto_acompanante, d.foto_acompanante, true]);
   } else if (s.tramite === 'extravio') {
     if (d.nombre) camposSol.push([et.nombre, d.nombre]);
     if (d.dni) camposSol.push([et.dni, d.dni]);
@@ -2580,6 +2590,13 @@ async function mostrarDetalle(s) {
     if (d.nombreConviviente) camposSol.push([et.nombreConviviente, d.nombreConviviente]);
     if (d.dniConviviente) camposSol.push([et.dniConviviente, d.dniConviviente]);
     if (d.parentesco) camposSol.push([et.parentesco, d.parentesco]);
+    if (d.foto_conviviente) camposSol.push([et.foto_conviviente, d.foto_conviviente, true]);
+    for (let n = 2; n <= 9; n++) {
+      if (d['nombreConviviente' + n]) camposSol.push([et['nombreConviviente' + n], d['nombreConviviente' + n]]);
+      if (d['dniConviviente' + n]) camposSol.push([et['dniConviviente' + n], d['dniConviviente' + n]]);
+      if (d['parentesco' + n]) camposSol.push([et['parentesco' + n], d['parentesco' + n]]);
+      if (d['foto_conviviente' + n]) camposSol.push([et['foto_conviviente' + n], d['foto_conviviente' + n], true]);
+    }
     if (d.domicilio) camposSol.push([et.domicilio, d.domicilio]);
     if (d.domicilioComun) camposSol.push([et.domicilioComun, d.domicilioComun]);
     if (d.localidad) camposSol.push([et.localidad, d.localidad]);

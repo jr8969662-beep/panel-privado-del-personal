@@ -28,7 +28,7 @@ create policy "Subir fotos con formato valido"
 on storage.objects for insert to anon
 with check (
   bucket_id = 'fotos-tramites'
-  and name ~ '^(residencia|convivencia|carencia|autorizacion|antecedentes|domicilio|extravio|supervivencia|estadia)/[0-9]{13}-[a-z0-9]{0,8}-foto_(solicitante|testigo1|testigo2|menor|progenitor)\.jpg$'
+  and name ~ '^(residencia|convivencia|carencia|autorizacion|antecedentes|domicilio|extravio|supervivencia|estadia)/[0-9]{13}-[a-z0-9]{0,8}-foto_(solicitante|testigo1|testigo2|menor|progenitor|acompanante|conviviente[0-9]?)\.jpg$'
 );
 
 -- Lectura: solo fotos de trámites que el usuario puede ver
@@ -43,8 +43,10 @@ using (
     or exists (
       select 1 from public.solicitudes s
       where public.puede_ver_comisaria(s.comisaria_asignada)
-        and name in (s.datos->>'foto_solicitante', s.datos->>'foto_testigo1', s.datos->>'foto_testigo2',
-                     s.datos->>'foto_menor', s.datos->>'foto_progenitor')
+        and exists (
+          select 1 from jsonb_each_text(s.datos) e
+          where e.key like 'foto\_%' and e.value = name
+        )
     )
   )
 );
