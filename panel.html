@@ -2941,10 +2941,29 @@ function exportarCSV(lista) {
   descargarBlob(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }), nombreArchivoExport('csv'));
 }
 
+// Ancho de cada columna = el texto más largo (títulos incluidos) para que todo se vea entero
+function anchosAutomaticos(filas, margen, maximo) {
+  margen = margen || 4; maximo = maximo || 60;
+  const n = Math.max(...filas.map(f => f.length));
+  const anchos = [];
+  for (let c = 0; c < n; c++) {
+    let w = 8;
+    filas.forEach((f, i) => {
+      const v = f[c];
+      if (v === null || v === undefined || v === '') return;
+      const largo = (v instanceof Date) ? 18 : String(v).length;
+      // los títulos (fila 1) nunca se recortan; el resto tiene un tope
+      w = Math.max(w, i === 0 ? largo : Math.min(largo, maximo));
+    });
+    anchos.push({ wch: w + margen });
+  }
+  return anchos;
+}
+
 function exportarExcel(lista) {
   const wb = XLSX.utils.book_new();
   const hoja = XLSX.utils.aoa_to_sheet([ENCABEZADOS_EXPORT, ...lista.map(filaExport)], { cellDates: true });
-  hoja['!cols'] = [18, 11, 30, 28, 12, 26, 34, 40, 18, 8, 12, 12, 9, 10, 24, 18, 18, 30, 24].map(w => ({ wch: w }));
+  hoja['!cols'] = anchosAutomaticos([ENCABEZADOS_EXPORT, ...lista.map(filaExport)]);
   const fechasFmt = [0, 15, 16];
   const rango = XLSX.utils.decode_range(hoja['!ref']);
   for (let r = 1; r <= rango.e.r; r++) fechasFmt.forEach(c => {
@@ -2954,7 +2973,7 @@ function exportarExcel(lista) {
   hoja['!autofilter'] = { ref: hoja['!ref'] };
   XLSX.utils.book_append_sheet(wb, hoja, 'Historial');
   const resumen = XLSX.utils.aoa_to_sheet(filasResumen(lista, quienExporta()), { cellDates: true });
-  resumen['!cols'] = [{ wch: 34 }, { wch: 40 }];
+  resumen['!cols'] = anchosAutomaticos(filasResumen(lista, quienExporta()), 4, 70);
   XLSX.utils.book_append_sheet(wb, resumen, 'Resumen');
   const datos = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   descargarBlob(new Blob([datos], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), nombreArchivoExport('xlsx'));
