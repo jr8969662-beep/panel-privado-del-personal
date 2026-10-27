@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Administración · Mi Comisaría</title>
+<style>
+  :root{--az:#0b1f3a;--az2:#12305a;--or:#c9a961;--bg:#f2f4f8;--tx:#1b2430;--ok:#1f8a4c;--mal:#b3261e;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tx)}
+  header{background:var(--az);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+  header h1{font-size:1.1rem;margin:0}
+  header small{color:var(--or)}
+  nav{background:var(--az2);display:flex;flex-wrap:wrap}
+  nav button{background:none;border:0;color:#cfd8e6;padding:12px 18px;cursor:pointer;font-size:.95rem;border-bottom:3px solid transparent}
+  nav button.on{color:#fff;border-bottom-color:var(--or)}
+  nav .n{background:var(--mal);color:#fff;border-radius:10px;padding:1px 7px;font-size:.75rem;margin-left:6px}
+  main{padding:20px;max-width:1300px;margin:0 auto}
+  .card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:16px}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #e3e7ee;vertical-align:top}
+  th{background:#eef1f6;position:sticky;top:0}
+  button.b,a.b{background:var(--az);color:#fff;border:0;border-radius:6px;padding:7px 12px;cursor:pointer;font-size:.85rem;text-decoration:none;display:inline-block}
+  button.b.ok{background:var(--ok)} button.b.mal{background:var(--mal)} button.b.gris{background:#6b7686}
+  input,select{padding:8px;border:1px solid #bcc5d3;border-radius:6px;font-size:.9rem;max-width:100%}
+  .fila{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+  .tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.75rem;background:#e3e7ee}
+  .tag.pendiente{background:#fff0c2}.tag.enviado,.tag.validado{background:#d3f0de}.tag.rechazado,.tag.denegado{background:#f7d4d1}
+  #login{max-width:360px;margin:80px auto}
+  #login input{width:100%;margin-bottom:10px}
+  .msg{color:var(--mal);font-size:.88rem;min-height:1.2em}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .kpi{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .kpi b{font-size:1.8rem;display:block}
+  .barra{background:#e3e7ee;border-radius:4px;height:12px;margin:2px 0 8px}
+  .barra i{display:block;height:12px;background:var(--az2);border-radius:4px}
+  .oculto{display:none !important}
+  .fotos img{max-width:220px;border:1px solid #ccc;border-radius:6px;margin:4px;cursor:pointer}
+  pre{white-space:pre-wrap;word-break:break-word;font-size:.82rem;background:#f6f8fb;padding:10px;border-radius:6px}
+  .scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<header><h1>🛡️ Administración · Mi Comisaría</h1><span><small id="quien"></small> <button class="b gris oculto" id="salir">Salir</button></span></header>
+
+<div id="login" class="card">
+  <h2>Acceso de administrador</h2>
+  <input type="email" id="l-email" placeholder="Correo" autocomplete="username">
+  <input type="password" id="l-pass" placeholder="Contraseña" autocomplete="current-password">
+  <button class="b" id="l-entrar">Ingresar</button>
+  <p class="msg" id="l-msg"></p>
+</div>
+
+<div id="app" class="oculto">
+  <nav id="tabs">
+    <button data-t="pedidos" class="on">🔑 Pedidos de contraseña<span class="n oculto" id="n-ped"></span></button>
+    <button data-t="tramites">📄 Trámites</button>
+    <button data-t="personal">👮 Personal</button>
+    <button data-t="accesos">📋 Accesos</button>
+    <button data-t="stats">📊 Estadísticas</button>
+  </nav>
+  <main>
+    <section id="t-pedidos"></section>
+    <section id="t-tramites" class="oculto"></section>
+    <section id="t-personal" class="oculto"></section>
+    <section id="t-accesos" class="oculto"></section>
+    <section id="t-stats" class="oculto"></section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const sb = supabaseClient;
+const BUCKET = 'fotos-tramites';
+const PANEL_URL = location.origin + location.pathname.replace(/[^\/]*$/, '') + 'panel.html';
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = (d) => d ? new Date(d).toLocaleString('es-AR') : '—';
+let yo = null;
+
+async function iniciar() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await verificarAdmin(session.user);
+}
+async function verificarAdmin(user) {
+  const { data, error } = await sb.from('personal').select('rol,activo').eq('user_id', user.id).maybeSingle();
+  if (error || !data || data.rol !== 'admin' || !data.activo) {
+    await sb.auth.signOut();
+    $('l-msg').textContent = 'Esta cuenta no es de administrador.';
+    return;
+  }
+  yo = user;
+  $('login').classList.add('oculto');
+  $('app').classList.remove('oculto');
+  $('salir').classList.remove('oculto');
+  $('quien').textContent = user.email;
+  cargarPedidos();
+}
+$('l-entrar').onclick = async () => {
+  $('l-msg').textContent = '';
+  const { data, error } = await sb.auth.signInWithPassword({ email: $('l-email').value.trim(), password: $('l-pass').value });
+  if (error) { $('l-msg').textContent = 'Correo o contraseña incorrectos.'; return; }
+  await verificarAdmin(data.user);
+};
+$('l-pass').addEventListener('keydown', e => { if (e.key === 'Enter') $('l-entrar').click(); });
+$('salir').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+
+$('tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+  ['pedidos','tramites','personal','accesos','stats'].forEach(t => $('t-' + t).classList.toggle('oculto', t !== b.dataset.t));
+  ({ pedidos: cargarPedidos, tramites: cargarTramites, personal: cargarPersonal, accesos: cargarAccesos, stats: cargarStats })[b.dataset.t]();
+});
+
+/* ---------- Pedidos de contraseña ---------- */
+async function cargarPedidos() {
+  const box = $('t-pedidos');
+  box.innerHTML = '<p>Cargando…</p>';
+  const { data, error } = await sb.from('pedidos_clave').select('*').order('created_at', { ascending: false }).limit(200);
+  if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + ' (¿ejecutaste administrador.sql?)</p>'; return; }
+  const pend = data.filter(p => p.estado === 'pendiente').length;
+  $('n-ped').textContent = pend; $('n-ped').classList.toggle('oculto', !pend);
+  let h = '<div class="card"><p>Verificá la identidad de la persona (llamala o confirmá con su jefe) <b>antes</b> de enviar el enlace. El enlace llega a su correo y ella elige su nueva contraseña; vos nunca la ves.</p><div class="scroll"><table><tr><th>Fecha</th><th>Correo</th><th>Nombre / comisaría</th><th>Contacto</th><th>Estado</th><th>Acciones</th></tr>';
+  data.forEach(p => {
+    h += '<tr><td>' + fmt(p.created_at) + '</td><td>' + esc(p.email) + '</td><td>' + esc(p.nombre) + '</td><td>' + esc(p.comentario) +
+      '</td><td><span class="tag ' + p.estado + '">' + p.estado + '</span>' + (p.atendido_por ? '<br><small>' + esc(p.atendido_por) + '<br>' + fmt(p.atendido_en) + '</small>' : '') + '</td><td>';
+    if (p.estado === 'pendiente') {
+      h += '<button class="b ok" data-env="' + p.id + '" data-mail="' + esc(p.email) + '">Enviar enlace</button> <button class="b mal" data-rech="' + p.id + '">Rechazar</button>';
+    }
+    h += '</td></tr>';
+  });
+  if (!data.length) h += '<tr><td colspan="6">No hay pedidos.</td></tr>';
+  box.innerHTML = h + '</table></div></div>';
+}
+$('t-pedidos').addEventListener('click', async (e) => {
+  const env = e.target.dataset.env, rech = e.target.dataset.rech;
+  if (env) {
+    const mail = e.target.dataset.mail;
+    if (!confirm('¿Verificaste la identidad? Se enviará el enlace de nueva contraseña a:\n' + mail)) return;
+    e.target.disabled = true; e.target.textContent = 'Enviando…';
+    const { error } = await sb.auth.resetPasswordForEmail(mail, { redirectTo: PANEL_URL });
+    if (error) { alert('No se pudo enviar: ' + error.message); e.target.disabled = false; e.target.textContent = 'Enviar enlace'; return; }
+    const r = await sb.rpc('admin_atender_pedido', { p_id: env, p_estado: 'enviado' });
+    if (r.error) alert(r.error.message);
+    alert('Enlace enviado a ' + mail);
+    cargarPedidos();
+  } else if (rech) {
+    const nota = prompt('Motivo (opcional):') ; if (nota === null) return;
+    const r = await sb.rpc('admin_atender_pedido', { p_id: rech, p_estado: 'rechazado', p_nota: nota });
+    if (r.error) alert(r.error.message);
+    cargarPedidos();
+  }
+});
+
+/* ---------- Trámites ---------- */
+let tramitesCache = [];
+async function cargarTramites() {
+  const box = $('t-tramites');
+  if (!box.dataset.listo) {
+    box.dataset.listo = '1';
+    box.innerHTML = '<div class="card"><div class="fila"><input id="f-q" placeholder="Buscar nombre, DNI, correo…" size="30"><select id="f-est"><option value="">Todos los estados</option></select><select id="f-tra"><option value="">Todos los trámites</option></select><select id="f-com"><option value="">Todas las comisarías</option></select><button class="b" id="f-rec">Actualizar</button></div><div id="tr-lista" class="scroll"></div></div><div id="tr-det" class="card oculto"></div>';
+    $('f-rec').onclick = cargarTramites;
+    ['f-q','f-est','f-tra','f-com'].forEach(i => $(i).addEventListener('input', pintarTramites));
+  }
+  $('tr-lista').textContent = 'Cargando…';
+  const { data, error } = await sb.from('solicitudes').select('*').order('created_at', { ascending: false }).limit(2000);
+  if (error) { $('tr-lista').textContent = error.message; return; }
+  tramitesCache = data;
+  const opts = (id, key, f) => { const v = $(id).value; const u = [...new Set(data.map(f || (s => s[key])).filter(Boolean))].sort();
+    $(id).innerHTML = $(id).options[0].outerHTML + u.map(x => '<option>' + esc(x) + '</option>').join(''); $(id).value = v; };
+  opts('f-est', 'estado'); opts('f-tra', 'tramite', s => s.tramite_titulo || s.tramite); opts('f-com', 'comisaria_asignada');
+  pintarTramites();
+}
+function pintarTramites() {
+  const q = $('f-q').value.toLowerCase(), est = $('f-est').value, tra = $('f-tra').value, com = $('f-com').value;
+  const lista = tramitesCache.filter(s =>
+    (!est || s.estado === est) && (!tra || (s.tramite_titulo || s.tramite) === tra) && (!com || s.comisaria_asignada === com) &&
+    (!q || JSON.stringify(s.datos || {}).toLowerCase().includes(q) || String(s.codigo || s.id).toLowerCase().includes(q)));
+  let h = '<table><tr><th>Fecha</th><th>Trámite</th><th>Solicitante</th><th>Comisaría</th><th>Estado</th><th></th></tr>';
+  lista.slice(0, 300).forEach(s => {
+    const d = s.datos || {};
+    const nom = d.nombre_completo || [d.apellido, d.nombre].filter(Boolean).join(' ') || d.nombre || '';
+    h += '<tr><td>' + fmt(s.created_at) + '</td><td>' + esc(s.tramite_titulo || s.tramite) + '</td><td>' + esc(nom) + '<br><small>' + esc(d.dni || '') + '</small></td><td>' + esc(s.comisaria_asignada) +
+      '</td><td><span class="tag ' + esc(s.estado) + '">' + esc(s.estado) + '</span></td><td><button class="b" data-ver="' + s.id + '">Ver</button></td></tr>';
+  });
+  $('tr-lista').innerHTML = h + '</table>' + (lista.length > 300 ? '<p>Mostrando 300 de ' + lista.length + '. Usá los filtros.</p>' : '');
+}
+$('t-tramites').addEventListener('click', async (e) => {
+  const id = e.target.dataset.ver; if (!id) return;
+  const s = tramitesCache.find(x => String(x.id) === String(id)); if (!s) return;
+  const det = $('tr-det'); det.classList.remove('oculto');
+  let h = '<h3>' + esc(s.tramite_titulo || s.tramite) + ' · ' + esc(s.comisaria_asignada) + '</h3><p>Estado: <b>' + esc(s.estado) + '</b> · ' + fmt(s.created_at) + '</p><table>';
+  const fotos = [];
+  Object.entries(s.datos || {}).forEach(([k, v]) => {
+    if (v == null || v === '' || typeof v === 'object') return;
+    if (/^foto_/.test(k)) fotos.push([k, v]); else h += '<tr><th>' + esc(k) + '</th><td>' + esc(v) + '</td></tr>';
+  });
+  h += '</table><div class="fotos" id="det-fotos"></div>';
+  det.innerHTML = h; det.scrollIntoView({ behavior: 'smooth' });
+  for (const [k, v] of fotos) {
+    let url = v;
+    if (!String(v).startsWith('http')) {
+      const r = await sb.storage.from(BUCKET).createSignedUrl(v, 600);
+      url = r.data && r.data.signedUrl;
+    }
+    if (url) $('det-fotos').insertAdjacentHTML('beforeend', '<figure style="display:inline-block;margin:0"><img src="' + esc(url) + '" onclick="window.open(this.src)"><figcaption><small>' + esc(k) + '</small></figcaption></figure>');
+  }
+});
+
+/* ---------- Personal ---------- */
+async function cargarPersonal() {
+  const box = $('t-personal');
+  box.innerHTML = '<p>Cargando…</p>';
+  const { data, error } = await sb.rpc('admin_listar_personal');
+  if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + '</p>'; return; }
+  let h = '<div class="card"><h3>Dar de alta</h3><p><small>Primero creá el usuario en Supabase → Authentication → Users → Add user (con "Auto Confirm User"), después cargalo acá.</small></p><div class="fila"><input id="a-mail" type="email" placeholder="correo" size="26"><input id="a-nom" placeholder="Nombre" size="20"><input id="a-com" placeholder="Comisarías (separadas por ;)" size="36"><button class="b ok" id="a-alta">Dar de alta</button></div></div>' +
+    '<div class="card scroll"><table><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Comisarías</th><th>Último ingreso</th><th>Activo</th><th></th></tr>';
+  data.forEach(p => {
+    h += '<tr data-u="' + p.user_id + '"><td><input class="p-nom" value="' + esc(p.nombre) + '"></td><td>' + esc(p.email) + '</td><td>' + esc(p.rol) +
+      '</td><td><input class="p-com" size="30" value="' + esc((p.comisarias || []).join('; ')) + '"></td><td>' + fmt(p.ultimo_ingreso) +
+      '</td><td><input type="checkbox" class="p-act"' + (p.activo ? ' checked' : '') + '></td><td><button class="b" data-gp="1">Guardar</button></td></tr>';
+  });
+  box.innerHTML = h + '</table></div>';
+}
+const listaCom = (t) => t.split(';').map(x => x.trim()).filter(Boolean);
+$('t-personal').addEventListener('click', async (e) => {
+  if (e.target.id === 'a-alta') {
+    const r = await sb.rpc('admin_alta_personal', { p_email: $('a-mail').value, p_nombre: $('a-nom').value, p_comisarias: listaCom($('a-com').value) });
+    if (r.error) alert(r.error.message); else cargarPersonal();
+  } else if (e.target.dataset.gp) {
+    const tr = e.target.closest('tr');
+    const r = await sb.rpc('admin_actualizar_personal', { p_user_id: tr.dataset.u, p_nombre: tr.querySelector('.p-nom').value,
+      p_comisarias: listaCom(tr.querySelector('.p-com').value), p_activo: tr.querySelector('.p-act').checked });
+    if (r.error) alert(r.error.message); else { e.target.textContent = '✔ Guardado'; setTimeout(() => e.target.textContent = 'Guardar', 1500); }
+  }
+});
+
+/* ---------- Accesos ---------- */
+async function cargarAccesos() {
+  const box = $('t-accesos');
+  const { data, error } = await sb.from('logs_accesos').select('*').order('fecha', { ascending: false }).limit(300);
+  if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + '</p>'; return; }
+  let h = '<div class="card scroll"><table><tr><th>Fecha</th><th>Usuario</th><th>Detalle</th></tr>';
+  data.forEach(l => { const { id, fecha, email, usuario, ...resto } = l;
+    h += '<tr><td>' + fmt(fecha) + '</td><td>' + esc(email || usuario || '') + '</td><td><small>' + esc(JSON.stringify(resto)) + '</small></td></tr>'; });
+  box.innerHTML = h + '</table></div>';
+}
+
+/* ---------- Estadísticas ---------- */
+async function cargarStats() {
+  const box = $('t-stats');
+  const { data, error } = await sb.rpc('admin_estadisticas');
+  if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + '</p>'; return; }
+  const barras = (t, arr) => { const mx = Math.max(1, ...arr.map(x => x.n));
+    return '<div class="card"><h3>' + t + '</h3>' + arr.map(x => '<div>' + esc(x.clave) + ' <b>' + x.n + '</b><div class="barra"><i style="width:' + (100 * x.n / mx) + '%"></i></div></div>').join('') + '</div>'; };
+  box.innerHTML = '<div class="grid"><div class="kpi"><b>' + data.total + '</b>Trámites totales</div><div class="kpi"><b>' + data.pendientes + '</b>Pendientes</div><div class="kpi"><b>' + data.personal_activo + '</b>Personal activo</div><div class="kpi"><b>' + data.pedidos_pendientes + '</b>Pedidos de contraseña</div></div><br>' +
+    '<div class="grid">' + barras('Por trámite', data.por_tramite) + barras('Por estado', data.por_estado) + barras('Por comisaría', data.por_comisaria) + barras('Últimos 30 días', data.por_dia) + '</div>';
+}
+iniciar();
+</script>
+</body>
+</html>

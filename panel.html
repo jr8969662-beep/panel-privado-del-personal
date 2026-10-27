@@ -744,6 +744,23 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-recuperar">
+  <div class="modal-caja">
+    <h3>🔐 Olvidé mi contraseña</h3>
+    <p style="font-size:0.85rem;color:rgba(255,255,255,0.8);margin:0 0 12px;">Dejá tu correo y tu nombre. El administrador verificará tu identidad y te enviará a ese correo un enlace para elegir una contraseña nueva.</p>
+    <label>Tu correo (el que usás para ingresar)</label>
+    <input type="email" id="rec-email" placeholder="tu@email.com" autocomplete="username">
+    <label>Tu nombre y comisaría</label>
+    <input type="text" id="rec-nombre" maxlength="120" placeholder="Ej.: Of. Pérez, Comisaría 1ra">
+    <label>Teléfono o dato para contactarte (opcional)</label>
+    <input type="text" id="rec-comentario" maxlength="300" placeholder="Para que el administrador pueda verificarte">
+    <div class="modal-btns">
+      <button type="button" id="btn-cancelar-rec" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);">Cancelar</button>
+      <button type="button" id="btn-enviar-rec" style="background:linear-gradient(135deg, var(--dorado), var(--dorado-brilloso));color:var(--azul-oscuro);">Enviar pedido</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Auditoría -->
 <div class="modal-overlay" id="modal-auditoria">
   <div class="modal-caja" style="max-width:780px;">
@@ -1304,7 +1321,27 @@ setTimeout(() => {
 
 linkRecuperar.addEventListener('click', (e) => {
   e.preventDefault();
-  alert('Para recuperar tu contraseña, contactá al administrador del sistema:\n\nadmin@salta.gob.ar');
+  const m = document.getElementById('modal-recuperar');
+  document.getElementById('rec-email').value = document.getElementById('login-email').value || '';
+  m.classList.add('activo');
+});
+document.getElementById('btn-cancelar-rec').addEventListener('click', () => {
+  document.getElementById('modal-recuperar').classList.remove('activo');
+});
+document.getElementById('btn-enviar-rec').addEventListener('click', async () => {
+  const email = document.getElementById('rec-email').value.trim();
+  const nombre = document.getElementById('rec-nombre').value.trim();
+  const coment = document.getElementById('rec-comentario').value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Escribí un correo válido.'); return; }
+  if (!nombre) { alert('Escribí tu nombre y comisaría.'); return; }
+  const btn = document.getElementById('btn-enviar-rec');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    await supabaseClient.rpc('pedir_restablecer_clave', { p_email: email, p_nombre: nombre, p_comentario: coment });
+  } catch (err) { /* misma respuesta siempre */ }
+  btn.disabled = false; btn.textContent = 'Enviar pedido';
+  document.getElementById('modal-recuperar').classList.remove('activo');
+  alert('Pedido enviado.\n\nSi tu correo está registrado, el administrador lo revisará, verificará tu identidad y te enviará un enlace a tu correo para elegir una nueva contraseña.');
 });
 
 /* AUTO-LOGOUT POR INACTIVIDAD */
@@ -1518,10 +1555,24 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
   if (session && session.user) usuarioActual = session.user.email;
   mostrarSesion(!!session);
 });
+let enRecuperacion = /type=recovery/.test(location.hash || '');
 supabaseClient.auth.onAuthStateChange((_event, session) => {
   if (session && session.user) usuarioActual = session.user.email;
   mostrarSesion(!!session);
+  if (_event === 'PASSWORD_RECOVERY' || (enRecuperacion && session)) {
+    enRecuperacion = false;
+    abrirNuevaClave();
+  }
 });
+function abrirNuevaClave() {
+  const t = document.querySelector('#modal-pass h3');
+  if (t) t.textContent = '🔑 Elegí tu nueva contraseña';
+  document.getElementById('btn-cancelar-pass').style.display = 'none';
+  modalPass.dataset.obligatorio = '1';
+  passNueva.value = ''; passRepetir.value = '';
+  modalPass.classList.add('activo');
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+}
 
 /* CAMBIAR CONTRASEÑA */
 const modalPass = document.getElementById('modal-pass');
@@ -1551,11 +1602,13 @@ document.getElementById('btn-guardar-pass').addEventListener('click', async () =
   btn.textContent = 'Guardar';
   if (error) { alert('No se pudo cambiar la contraseña: ' + error.message); return; }
   modalPass.classList.remove('activo');
+  delete modalPass.dataset.obligatorio;
+  document.getElementById('btn-cancelar-pass').style.display = '';
   mostrarToast('🔑 Contraseña actualizada', 'Tu nueva contraseña ya está activa', 'success', 4000);
 });
 
 modalPass.addEventListener('click', (e) => {
-  if (e.target.id === 'modal-pass') modalPass.classList.remove('activo');
+  if (e.target.id === 'modal-pass' && !modalPass.dataset.obligatorio) modalPass.classList.remove('activo');
 });
 
 /* FILTRO COMISARÍA */
