@@ -1347,8 +1347,34 @@ const LISTA_COMISARIAS = ["DUR1-S1-Cría 10° (Ex Cria 102)", "DUR1-S1-Dsto. Ato
 
 // "DUR1-S3-Cría 11° (Ex-cria 103)"  ->  "Comisaría 11° (Ex-cria 103) — DUR 1"
 // Los nombres viejos (ej. "Comisaría N°11 - 17 de Octubre (DDP 1)") se muestran igual.
+// Datos oficiales (SIGETec 26/10/2026): nombre, distrito y sector de cada dependencia
+let DEP_OFICIAL = {};
+async function cargarDepOficial() {
+  try {
+    const r = await fetch('dependencias.json?v=1');
+    if (!r.ok) return;
+    (await r.json()).forEach(d => { DEP_OFICIAL[d.clave] = d; });
+  } catch (e) { console.warn('No se pudo cargar dependencias.json', e); }
+}
+
+// Teléfonos de la dependencia: viven en Supabase y solo los lee el personal logueado
+const _cacheContactos = new Map();
+async function obtenerContactoDependencia(clave) {
+  if (!clave) return null;
+  if (_cacheContactos.has(clave)) return _cacheContactos.get(clave);
+  let tel = null;
+  try {
+    const { data, error } = await supabaseClient.from('dependencias_contacto').select('telefonos').eq('clave', clave).maybeSingle();
+    if (!error && data && Array.isArray(data.telefonos)) tel = data.telefonos;
+  } catch (e) {}
+  _cacheContactos.set(clave, tel);
+  return tel;
+}
+
 function nombreComisaria(nombre) {
   if (!nombre) return '';
+  const of = DEP_OFICIAL[nombre];
+  if (of && of.oficial) return `${of.nombre} (D${of.distrito}·S${of.sector})`;
   const m = String(nombre).match(/^DUR\s*(\d+)\s*-\s*S\s*\d+\s*-\s*(.*)$/i);
   if (!m) return String(nombre);
   const resto = m[2]
@@ -1449,7 +1475,7 @@ function mostrarSesion(sesionActiva) {
   if (sesionActiva) {
     vistaLogin.style.display = 'none';
     vistaPanel.style.display = 'block';
-    cargarPerfil().finally(cargarSolicitudes);
+    cargarDepOficial().then(cargarPerfil).finally(cargarSolicitudes);
     iniciarTimerInactividad();
   } else {
     vistaLogin.style.display = 'block';
@@ -2452,6 +2478,13 @@ async function mostrarDetalle(s) {
   const et = etiquetasDetalle;
   const camposSol = [];
   camposSol.push(['Comisaría asignada', nombreComisaria(s.comisaria_asignada) || '-']);
+  try {
+    const tel = await obtenerContactoDependencia(s.comisaria_asignada);
+    if (tel && tel.length) {
+      camposSol.push(['📞 Teléfonos de la dependencia',
+        tel.map(t => `${t.etiqueta}: ${t.numero}${t.medio === 'Red WIN' ? ' (Red WIN)' : ''}`).join(' · ')]);
+    }
+  } catch (e) {}
   const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
   if (zona) camposSol.push(['Zona', zona]);
 

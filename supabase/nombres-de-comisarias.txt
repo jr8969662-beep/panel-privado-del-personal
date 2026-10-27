@@ -1,141 +1,177 @@
-# Nombres EXACTOS que guarda el sistema en solicitudes.comisaria_asignada (uno por línea).
-# Copiá y pegá el nombre tal cual en personal.comisarias.
-DUR1-S1-Cría 10° (Ex Cria 102)
-DUR1-S1-Dsto. Atocha
-DUR1-S10-Cria. 2°
-DUR1-S2-Cria. 13° (Ex Sub-Cria. Asunción)
-DUR1-S2-Cría 12° (Ex-Cria. 104)
-DUR1-S2-Subcria Grand Bourg
-DUR1-S3-Cria 6°
-DUR1-S3-Cría 11° (Ex-cria 103)
-DUR1-S3-Subcria. Castañares
-DUR1-S4-Cría 9° (Ex-Cria. 100)
-DUR1-S4-Subcria Las Costas
-DUR1-S5-Subcria La Caldera
-DUR1-S5-Subcria. Vaqueros
-DUR1-S6- Cria. 1°
-DUR1-S6-Cria. 3°
-DUR1-S7- Subcria. Autodromo
-DUR1-S7-Cria. 4°
-DUR1-S8-Cría 8° (Ex-Cria. 9na)
-DUR1-S8-Subcria Villa El Sol
-DUR1-S9-Cria. 5°
-DUR1-S9-Cría 7° (Ex-Cria. 8)
-DUR1-S9-Sub-cria. Lola Mora
-DUR10-S1-Cría 4° (Ex-Cria. 15)
-DUR10-S1-Cría 6° (Ex-Cria. 106)
-DUR10-S1-Dsto. Palacios
-DUR10-S2-Cría 1° (Ex-Cria. 7)
-DUR10-S2-Cría 3° (Ex-Cria. 12)
-DUR10-S2-Dsto. Docente
-DUR10-S2-Dsto. San Carlos
-DUR10-S3-Cría 2° (Ex-Cria. 10)
-DUR10-S3-Dsto. San Ignacio
-DUR10-S3-Sub Cria. Lavalle
-DUR10-S4-Cría 5° (Ex-Cria. 17)
-DUR10-S5-Cría 7° (Ex-Cria. 108 Quijano)
-DUR10-S5-Cría. 9° (Ex-Subcria. San Luis)
-DUR10-S5-Dsto. La Silleta
-DUR10-S5-Subcria. San Antonio
-DUR11-S1-Cria.7° Pinares
-DUR11-S1-Cría 1° (Ex-Cria. 13 Cerrillos)
-DUR11-S1-Cría 5° (Ex-Cria. 105 La Merced)
-DUR11-S1-Dsto La Isla
-DUR11-S1-Dsto. San Agustin
-DUR11-S1-Subcría. Los Alamos
-DUR11-S2-Cría 2° (Ex-Cria. 14 Rosario de Lerma)
-DUR11-S3-Cría 3° (Ex-Cria. 18 Chicoana)
-DUR11-S3-Cría 4° (Ex-Cria. 19 El Carril)
-DUR11-S4-Cria. 6° (Ex-Subcria. Moldes)
-DUR11-S4-Subcria. Guachipas
-DUR11-S4-Subcria. La Viña
-DUR12-S1-Cria. 1° Cachi (EX Cria. 61°)
-DUR12-S1-Dsto. La Poma
-DUR12-S1-Dsto. Palermo Oeste
-DUR12-S1-Dsto. Payogasta
-DUR12-S2-Cria. 2° Molinos (Ex Cria. 62°)
-DUR12-S2-Dsto. Luracatao
-DUR12-S2-Dsto. Seclantas
-DUR13-S1-Cría. 1° Rosario de la Frontera (Ex Cria. 31°)
-DUR13-S1-Dsto. Antillas
-DUR13-S1-Dsto. Potreros
-DUR13-S1-Subcría. El Mirador
-DUR13-S2-Dsto. El Jardin
-DUR13-S2-Dsto. La Candelaria
-DUR13-S2-Subcría. El Tala
-DUR14-S1- Cría 1° - ex Cria. 43 Embarcación
-DUR14-S1-Dsto Padre Lozano
-DUR14-S1-Dsto. Gral. Ballivian
-DUR14-S2-Cría 2° Coronel Juan Solá
-DUR14-S2-Dsto Dragones
-DUR14-S2-Dsto Hickman
-DUR14-S2-Dsto. Los Blancos
-DUR14-S2-Puesto Pluma de Pato
-DUR2-S1-Cría. 1° Oran (Ex Cria. 20°)
-DUR2-S1-Pto. Pol. Estacion
-DUR2-S2-Cría. 2° Hipolito Irigoyen (Ex. Cría. 22°)
-DUR2-S2-Dsto. Tabacal
-DUR2-S3-Cría.3° Docente (Ex Cría. 24°)
-DUR2-S3-Dsto. Balut
-DUR2-S4-Cría. 4° Aeroparque (Ex Cría. 25°)
-DUR2-S4-Subcría.9 de Julio
-DUR2-S5-Cría. 5° Aguas Blancas (Ex Cría. 26°)
-DUR2-S5-Subcría. Los Toldos
-DUR2-S6-Dsto. Isla de Cañas
-DUR2-S6-Dsto. Los Naranjos
-DUR3-S1-Cría. 1° Metán (Ex Cria. 30°)
-DUR3-S2-Cría. 2° El Galpon
-DUR3-S2-Dsto. Lumbreras
-DUR3-S2-Dsto. Rio Piedras
-DUR3-S2-Pto. Pol. El Tunal
-DUR3-S3-Dsto. El Naranjo
-DUR3-S3-Dsto. San Felipe
-DUR4-S1-Cría. 1° Salvador Mazza (Ex Cría. 40°)
-DUR4-S1-Cría. 5° Aguaray (Ex Cría. 46°)
-DUR4-S1-Dsto. Acambuco
-DUR4-S1-Dsto. Alto Verde
-DUR4-S2-Cría. 2° Mosconi (Ex Cria.41°)
-DUR4-S2-Dsto. Coronel Cornejo
-DUR4-S2-Pto. Pol. Aeroparque Mosconi
-DUR4-S2-Subcría.Vespucio
-DUR4-S3-Cría. 3° Tartagal-Centro (Ex Cría. 42°)
-DUR4-S4-Cría. 4° El Portico (Ex Cría. 45°)
-DUR4-S4-Dsto. Villa Guemes
-DUR4-S5-Dsto. Alto La Sierra
-DUR4-S5-Subcría. Santa Victoria Este
-DUR5-S1-Cría.1° Joaquin V. Gonzalez (Ex Cría. 50°)
-DUR5-S1-Dsto. 25 de Junio
-DUR5-S1-Dsto. Gaona
-DUR5-S2-Dsto. Los Rosales
-DUR5-S2-Dsto. San Jose de Orquera
-DUR5-S2-Dsto. Talavera
-DUR5-S2-Subcría. El Quebrachal
-DUR5-S3-Dsto. Tolloche
-DUR6-S1-Cria. 60 Cafayate
-DUR6-S2-Dsto. Angastaco
-DUR6-S2-Dsto. Animana
-DUR6-S2-Sub Cria. San Carlos
-DUR7-S1-Comisaría 1° - ex Cría.11° Gral. Güemes
-DUR7-S1-Comisaría 3° - ex Cría.101° La Banda
-DUR7-S1-Pto.Pol.Parque Industrial
-DUR7-S2-Comisaría 2° - ex Cría. 16° Campo Santo
-DUR7-S2-Dsto. Betania
-DUR7-S2-Dsto. Cobos
-DUR7-S2-Subcría. El Bordo
-DUR8-S1- Comisaría.1° Pichanal (Ex Cría. 21°)
-DUR8-S2-Comisaría 2° - ex Cria. 23 Colonia Santa Rosa
-DUR8-S2-Dsto. Urundel
-DUR8-S2-Sub Cria. Las Palmeras
-DUR8-S3-Dsto. La Unión
-DUR8-S3-Dsto. Rivadavia Banda Sur
-DUR9-S1-Cría.1° Las Lajitas (Ex Cría. 51°)
-DUR9-S1-Dsto. Piquete Cabado
-DUR9-S1-Dsto. Rio del Valle
-DUR9-S2-Dsto. Gral. Pizarro
-DUR9-S2-Dsto. Luis Burela
-DUR9-S2-Dsto. Mollinedo
-DUR9-S2-Subcría.El Dorado
-Dest. Iruya
-Dest. Nazareno
-Sub Cria. San Jorge
-Sub-Cría Santa Victoria Oeste
+# Comisarías y dependencias (datos oficiales SIGETec, actualizado 26/10/2026).
+# Al cargar personal en la tabla 'personal', copiá la COLUMNA 1 (clave) EXACTA en personal.comisarias.
+# Formato:  clave  |  nombre oficial  |  distrito · sector
+# Las que dicen SIN-LIMITES no tienen jurisdicción en el mapa: no reciben trámites por ubicación.
+
+DUR1-S1-Cría 10° (Ex Cria 102)  |  Comisaría 10 - B° La Lonja  |  Distrito 1 (Capital) · Sector 1
+DUR1-S1-Dsto. Atocha  |  Subcomisaría Atocha  |  Distrito 1 (Capital) · Sector 1
+DUR1-S2-Cría 12° (Ex-Cria. 104)  |  Comisaría 12 - B° Palermo  |  Distrito 1 (Capital) · Sector 2
+DUR1-S2-Cria. 13° (Ex Sub-Cria. Asunción)  |  Comisaría 13 - Villa Asunción  |  Distrito 1 (Capital) · Sector 2
+DUR1-S2-Subcria Grand Bourg  |  Comisaría 16 - Grand Bourg  |  Distrito 1 (Capital) · Sector 2
+DUR1-S3-Cría 11° (Ex-cria 103)  |  Comisaría 11 - B° 17 de Octubre  |  Distrito 1 (Capital) · Sector 3
+DUR1-S3-Subcria. Castañares  |  Comisaría 14 - B° Castañares  |  Distrito 1 (Capital) · Sector 3
+DUR1-S3-Cria 6°  |  Comisaría 6 - B° Ciudad del Milagro  |  Distrito 1 (Capital) · Sector 3
+DUR1-S4-Cría 9° (Ex-Cria. 100)  |  Comisaría 9 - San Lorenzo  |  Distrito 1 (Capital) · Sector 4
+DUR1-S4-Subcria Las Costas  |  Subcomisaría Finca Las Costas  |  Distrito 1 (Capital) · Sector 4
+DUR1-S5-Subcria. Vaqueros  |  Comisaría 15 - Vaqueros  |  Distrito 1 (Capital) · Sector 5
+DUR1-S5-Subcria La Caldera  |  Subcomisaría La Caldera  |  Distrito 1 (Capital) · Sector 5
+DUR1-S6- Cria. 1°  |  Comisaría 1 - B° Centro  |  Distrito 1 (Capital) · Sector 6
+DUR1-S6-Cria. 3°  |  Comisaría 3 - B° Tres Cerritos  |  Distrito 1 (Capital) · Sector 6
+DUR1-S7-Cria. 4°  |  Comisaría 4 - Villa Mitre  |  Distrito 1 (Capital) · Sector 7
+DUR1-S7- Subcria. Autodromo  |  Subcomisaría B° Autódromo  |  Distrito 1 (Capital) · Sector 7
+DUR1-S8-Subcria Villa El Sol  |  Comisaría 18 - Villa El Sol  |  Distrito 1 (Capital) · Sector 8
+DUR1-S8-Cría 8° (Ex-Cria. 9na)  |  Comisaría 8 - B° Portezuelo Sur  |  Distrito 1 (Capital) · Sector 8
+DUR1-S9-Sub-cria. Lola Mora  |  Comisaría 17 - Lola Mora  |  Distrito 1 (Capital) · Sector 9
+DUR1-S9-Cria. 5°  |  Comisaría 5 - B° San Martín  |  Distrito 1 (Capital) · Sector 9
+DUR1-S9-Cría 7° (Ex-Cria. 8)  |  Comisaría 7 - B° Santa Lucía  |  Distrito 1 (Capital) · Sector 9
+DUR1-S10-Cria. 2°  |  Comisaría 2 - Villa Cristina  |  Distrito 1 (Capital) · Sector 10
+Dest. Iruya  |  Destacamento Iruya  |  Distrito 1 (Capital) · Sector 11
+Dest. Nazareno  |  Subcomisaría Nazareno  |  Distrito 1 (Capital) · Sector 11
+Sub-Cría Santa Victoria Oeste  |  Subcomisaría Santa Victoria Oeste  |  Distrito 1 (Capital) · Sector 11
+DUR2-S1-Cría. 1° Oran (Ex Cria. 20°)  |  Comisaría 1 - Orán  |  Distrito 2 (Orán) · Sector 1
+DUR2-S1-Pto. Pol. Estacion  |  Puesto Policial Estación  |  Distrito 2 (Orán) · Sector 1
+DUR2-S2-Cría. 2° Hipolito Irigoyen (Ex. Cría. 22°)  |  Comisaría 2 - Hipólito Yrigoyen  |  Distrito 2 (Orán) · Sector 2
+DUR2-S2-Dsto. Tabacal  |  Destacamento Tabacal  |  Distrito 2 (Orán) · Sector 2
+DUR2-S3-Cría.3° Docente (Ex Cría. 24°)  |  Comisaría 3 - B° Docente  |  Distrito 2 (Orán) · Sector 3
+DUR2-S3-Dsto. Balut  |  Comisaría 6 - Abraham Balut  |  Distrito 2 (Orán) · Sector 3
+DUR2-S4-Cría. 4° Aeroparque (Ex Cría. 25°)  |  Comisaría 4 - B° Aeroparque  |  Distrito 2 (Orán) · Sector 4
+DUR2-S4-Subcría.9 de Julio  |  Subcomisaría 9 de Julio  |  Distrito 2 (Orán) · Sector 4
+DUR2-S5-Cría. 5° Aguas Blancas (Ex Cría. 26°)  |  Comisaría 5 - Aguas Blancas  |  Distrito 2 (Orán) · Sector 5
+DUR2-S5-Subcría. Los Toldos  |  Subcomisaría Los Toldos  |  Distrito 2 (Orán) · Sector 5
+DUR2-S6-Dsto. Isla de Cañas  |  Destacamento Isla de Cañas  |  Distrito 2 (Orán) · Sector 6
+DUR2-S6-Dsto. Los Naranjos  |  Destacamento Los Naranjos  |  Distrito 2 (Orán) · Sector 6
+DUR3-S1-Cría. 1° Metán (Ex Cria. 30°)  |  Comisaría 1 - Metán  |  Distrito 3 (Metán) · Sector 1
+DUR3-S2-Cría. 2° El Galpon  |  Comisaría 2 - El Galpón  |  Distrito 3 (Metán) · Sector 2
+DUR3-S2-Dsto. Lumbreras  |  Destacamento Lumbreras  |  Distrito 3 (Metán) · Sector 2
+DUR3-S2-Dsto. Rio Piedras  |  Destacamento Río Piedras  |  Distrito 3 (Metán) · Sector 2
+DUR3-S2-Pto. Pol. El Tunal  |  Puesto Policial El Tunal  |  Distrito 3 (Metán) · Sector 2
+DUR3-S3-Dsto. El Naranjo  |  Destacamento El Naranjo  |  Distrito 3 (Metán) · Sector 3
+DUR3-S3-Dsto. San Felipe  |  Destacamento San Felipe  |  Distrito 3 (Metán) · Sector 3
+DUR4-S1-Cría. 1° Salvador Mazza (Ex Cría. 40°)  |  Comisaría 1 - Salvador Mazza  |  Distrito 4 (Tartagal) · Sector 1
+DUR4-S1-Cría. 5° Aguaray (Ex Cría. 46°)  |  Comisaría 5 - Aguaray  |  Distrito 4 (Tartagal) · Sector 1
+DUR4-S1-Dsto. Acambuco  |  Destacamento Acambuco  |  Distrito 4 (Tartagal) · Sector 1
+DUR4-S1-Dsto. Alto Verde  |  Destacamento Alto Verde  |  Distrito 4 (Tartagal) · Sector 1
+DUR4-S2-Cría. 2° Mosconi (Ex Cria.41°)  |  Comisaría 2 - General Mosconi  |  Distrito 4 (Tartagal) · Sector 2
+DUR4-S2-Dsto. Coronel Cornejo  |  Destacamento Coronel Cornejo  |  Distrito 4 (Tartagal) · Sector 2
+DUR4-S2-Pto. Pol. Aeroparque Mosconi  |  Puesto Policial Aeropuerto Mosconi  |  Distrito 4 (Tartagal) · Sector 2
+DUR4-S2-Subcría.Vespucio  |  Subcomisaría Vespucio  |  Distrito 4 (Tartagal) · Sector 2
+DUR4-S3-Cría. 3° Tartagal-Centro (Ex Cría. 42°)  |  Comisaría 3 - Tartagal  |  Distrito 4 (Tartagal) · Sector 3
+DUR4-S4-Cría. 4° El Portico (Ex Cría. 45°)  |  Comisaría 4 - B° Pórtico  |  Distrito 4 (Tartagal) · Sector 4
+DUR4-S4-Dsto. Villa Guemes  |  Destacamento Villa Güemes  |  Distrito 4 (Tartagal) · Sector 4
+DUR4-S5-Dsto. Alto La Sierra  |  Destacamento Alto La Sierra  |  Distrito 4 (Tartagal) · Sector 5
+DUR4-S5-Subcría. Santa Victoria Este  |  Subcomisaría Santa Victoria Este  |  Distrito 4 (Tartagal) · Sector 5
+DUR5-S1-Cría.1° Joaquin V. Gonzalez (Ex Cría. 50°)  |  Comisaría 1 - Joaquín V. González  |  Distrito 5 (J. V. González) · Sector 1
+DUR5-S1-Dsto. 25 de Junio  |  Destacamento 25 de Junio  |  Distrito 5 (J. V. González) · Sector 1
+DUR5-S1-Dsto. Gaona  |  Destacamento Gaona  |  Distrito 5 (J. V. González) · Sector 1
+DUR5-S2-Subcría. El Quebrachal  |  Comisaría 2 - El Quebrachal  |  Distrito 5 (J. V. González) · Sector 2
+DUR5-S2-Dsto. Los Rosales  |  Destacamento Los Rosales  |  Distrito 5 (J. V. González) · Sector 2
+DUR5-S2-Dsto. San Jose de Orquera  |  Destacamento San José de Orquera  |  Distrito 5 (J. V. González) · Sector 2
+DUR5-S2-Dsto. Talavera  |  Destacamento Nuestra Señora de Talavera  |  Distrito 5 (J. V. González) · Sector 3
+DUR5-S3-Dsto. Tolloche  |  Destacamento Tolloche  |  Distrito 5 (J. V. González) · Sector 3
+DUR6-S1-Cria. 60 Cafayate  |  Comisaría 1 - Cafayate  |  Distrito 6 (Cafayate) · Sector 1
+DUR6-S2-Sub Cria. San Carlos  |  Comisaría 2 - San Carlos  |  Distrito 6 (Cafayate) · Sector 2
+DUR6-S2-Dsto. Angastaco  |  Destacamento Angastaco  |  Distrito 6 (Cafayate) · Sector 2
+DUR6-S2-Dsto. Animana  |  Destacamento Animaná  |  Distrito 6 (Cafayate) · Sector 2
+DUR7-S1-Comisaría 1° - ex Cría.11° Gral. Güemes  |  Comisaría 1 - General Güemes  |  Distrito 7 (Güemes) · Sector 1
+DUR7-S1-Comisaría 3° - ex Cría.101° La Banda  |  Comisaría 3 - La Banda  |  Distrito 7 (Güemes) · Sector 1
+DUR7-S1-Pto.Pol.Parque Industrial  |  Destacamento Parque Industrial  |  Distrito 7 (Güemes) · Sector 1
+DUR7-S2-Comisaría 2° - ex Cría. 16° Campo Santo  |  Comisaría 2 - Campo Santo  |  Distrito 7 (Güemes) · Sector 2
+DUR7-S2-Subcría. El Bordo  |  Comisaría 4 - El Bordo  |  Distrito 7 (Güemes) · Sector 2
+DUR7-S2-Dsto. Betania  |  Destacamento Betania  |  Distrito 7 (Güemes) · Sector 2
+DUR7-S2-Dsto. Cobos  |  Destacamento Cobos  |  Distrito 7 (Güemes) · Sector 2
+DUR8-S1- Comisaría.1° Pichanal (Ex Cría. 21°)  |  Comisaría 1 - Pichanal  |  Distrito 8 (Pichanal) · Sector 1
+DUR8-S2-Comisaría 2° - ex Cria. 23 Colonia Santa Rosa  |  Comisaría 2 - Colonia Santa Rosa  |  Distrito 8 (Pichanal) · Sector 2
+DUR8-S2-Sub Cria. Las Palmeras  |  Subcomisaría Las Palmeras  |  Distrito 8 (Pichanal) · Sector 2
+DUR8-S2-Dsto. Urundel  |  Subcomisaría Urundel  |  Distrito 8 (Pichanal) · Sector 2
+DUR8-S3-Dsto. La Unión  |  Destacamento La Unión  |  Distrito 8 (Pichanal) · Sector 3
+DUR8-S3-Dsto. Rivadavia Banda Sur  |  Subcomisaría Rivadavia Banda Sur  |  Distrito 8 (Pichanal) · Sector 3
+DUR9-S1-Cría.1° Las Lajitas (Ex Cría. 51°)  |  Comisaría 1 - Las Lajitas  |  Distrito 9 (Las Lajitas) · Sector 1
+DUR9-S1-Dsto. Piquete Cabado  |  Destacamento Piquete Cabado  |  Distrito 9 (Las Lajitas) · Sector 1
+DUR9-S1-Dsto. Rio del Valle  |  Destacamento Río del Valle  |  Distrito 9 (Las Lajitas) · Sector 1
+DUR9-S2-Subcría.El Dorado  |  Comisaría 2 - El Dorado  |  Distrito 9 (Las Lajitas) · Sector 2
+DUR9-S2-Dsto. Mollinedo  |  Destacamento Coronel Mollinedo  |  Distrito 9 (Las Lajitas) · Sector 2
+DUR9-S2-Dsto. Luis Burela  |  Puesto Policial Luis Burela  |  Distrito 9 (Las Lajitas) · Sector 2
+DUR9-S2-Dsto. Gral. Pizarro  |  Subcomisaría General Pizarro  |  Distrito 9 (Las Lajitas) · Sector 2
+DUR10-S1-Cría 4° (Ex-Cria. 15)  |  Comisaría 4 - B° San Remo  |  Distrito 10 (Capital Sur) · Sector 1
+DUR10-S1-Cría 6° (Ex-Cria. 106)  |  Comisaría 6 - B° Limache  |  Distrito 10 (Capital Sur) · Sector 1
+DUR10-S1-Dsto. Palacios  |  Destacamento Villa Palacios  |  Distrito 10 (Capital Sur) · Sector 1
+DUR10-S2-Cría 1° (Ex-Cria. 7)  |  Comisaría 1 - B° El Tribuno  |  Distrito 10 (Capital Sur) · Sector 2
+DUR10-S2-Cría 3° (Ex-Cria. 12)  |  Comisaría 3 - B° Santa Ana  |  Distrito 10 (Capital Sur) · Sector 2
+DUR10-S2-Dsto. Docente  |  Subcomisaría Barrio Docente  |  Distrito 10 (Capital Sur) · Sector 2
+DUR10-S2-Dsto. San Carlos  |  Subcomisaría B° San Carlos  |  Distrito 10 (Capital Sur) · Sector 2
+DUR10-S3-Cría 2° (Ex-Cria. 10)  |  Comisaría 2 - B° Santa Cecilia  |  Distrito 10 (Capital Sur) · Sector 3
+DUR10-S3-Dsto. San Ignacio  |  Subcomisaría San Ignacio  |  Distrito 10 (Capital Sur) · Sector 3
+DUR10-S3-Sub Cria. Lavalle  |  Subcomisaría Villa Lavalle  |  Distrito 10 (Capital Sur) · Sector 3
+DUR10-S4-Cría 5° (Ex-Cria. 17)  |  Comisaría 5 - B° Solidaridad  |  Distrito 10 (Capital Sur) · Sector 4
+DUR10-S5-Cría 7° (Ex-Cria. 108 Quijano)  |  Comisaría 7 - Campo Quijano  |  Distrito 10 (Capital Sur) · Sector 5
+DUR10-S5-Cría. 9° (Ex-Subcria. San Luis)  |  Comisaría 9 - San Luis  |  Distrito 10 (Capital Sur) · Sector 5
+DUR10-S5-Dsto. La Silleta  |  Destacamento La Silleta  |  Distrito 10 (Capital Sur) · Sector 5
+DUR10-S5-Subcria. San Antonio  |  Subcomisaría San Antonio Villa Lola  |  Distrito 10 (Capital Sur) · Sector 5
+DUR11-S1-Cría 1° (Ex-Cria. 13 Cerrillos)  |  Comisaría 1 - Cerrillos  |  Distrito 11 (El Carril) · Sector 1
+DUR11-S1-Cría 5° (Ex-Cria. 105 La Merced)  |  Comisaría 5 - La Merced  |  Distrito 11 (El Carril) · Sector 1
+DUR11-S1-Cria.7° Pinares  |  (sin dato en el PDF)  |  Distrito 11 (El Carril) · Sector 1
+DUR11-S1-Dsto La Isla  |  (sin dato en el PDF)  |  Distrito 11 (El Carril) · Sector 1
+DUR11-S1-Subcría. Los Alamos  |  Subcomisaría Los Alamos  |  Distrito 11 (El Carril) · Sector 1
+DUR11-S1-Dsto. San Agustin  |  Subcomisaría San Agustín  |  Distrito 11 (El Carril) · Sector 1
+DUR11-S2-Cría 2° (Ex-Cria. 14 Rosario de Lerma)  |  Comisaría 2 - Rosario de Lerma  |  Distrito 11 (El Carril) · Sector 2
+Sub Cria. San Jorge  |  Subcomisaría San Jorge  |  Distrito 11 (El Carril) · Sector 2
+DUR11-S3-Cría 3° (Ex-Cria. 18 Chicoana)  |  Comisaría 3 - Chicoana  |  Distrito 11 (El Carril) · Sector 3
+DUR11-S3-Cría 4° (Ex-Cria. 19 El Carril)  |  Comisaría 4 - El Carril  |  Distrito 11 (El Carril) · Sector 3
+DUR11-S4-Cria. 6° (Ex-Subcria. Moldes)  |  Comisaría 6 - Coronel Moldes  |  Distrito 11 (El Carril) · Sector 4
+DUR11-S4-Subcria. Guachipas  |  Subcomisaría Guachipas  |  Distrito 11 (El Carril) · Sector 4
+DUR11-S4-Subcria. La Viña  |  Subcomisaría La Viña  |  Distrito 11 (El Carril) · Sector 4
+DUR12-S1-Cria. 1° Cachi (EX Cria. 61°)  |  Comisaría 1 - Cachi  |  Distrito 12 (Cachi) · Sector 1
+DUR12-S1-Dsto. La Poma  |  Destacamento La Poma  |  Distrito 12 (Cachi) · Sector 1
+DUR12-S1-Dsto. Palermo Oeste  |  Destacamento Palermo Oeste  |  Distrito 12 (Cachi) · Sector 1
+DUR12-S1-Dsto. Payogasta  |  Destacamento Payogasta  |  Distrito 12 (Cachi) · Sector 1
+DUR12-S2-Cria. 2° Molinos (Ex Cria. 62°)  |  Comisaría 2 - Molinos  |  Distrito 12 (Cachi) · Sector 2
+DUR12-S2-Dsto. Luracatao  |  Destacamento Luracatao  |  Distrito 12 (Cachi) · Sector 2
+DUR12-S2-Dsto. Seclantas  |  Subcomisaría Seclantas  |  Distrito 12 (Cachi) · Sector 2
+DUR13-S1-Cría. 1° Rosario de la Frontera (Ex Cria. 31°)  |  Comisaría 1 - Rosario de la Frontera  |  Distrito 13 (Rosario de la Frontera) · Sector 1
+DUR13-S1-Dsto. Antillas  |  Destacamento Antillas  |  Distrito 13 (Rosario de la Frontera) · Sector 1
+DUR13-S1-Dsto. Potreros  |  Destacamento El Potrero  |  Distrito 13 (Rosario de la Frontera) · Sector 1
+DUR13-S1-Subcría. El Mirador  |  Subcomisaría El Mirador  |  Distrito 13 (Rosario de la Frontera) · Sector 1
+DUR13-S2-Dsto. El Jardin  |  Destacamento El Jardín  |  Distrito 13 (Rosario de la Frontera) · Sector 2
+DUR13-S2-Dsto. La Candelaria  |  Destacamento La Candelaria  |  Distrito 13 (Rosario de la Frontera) · Sector 2
+DUR13-S2-Subcría. El Tala  |  Subcomisaría El Tala  |  Distrito 13 (Rosario de la Frontera) · Sector 2
+DUR14-S1- Cría 1° - ex Cria. 43 Embarcación  |  Comisaría 1 - Embarcación  |  Distrito 14 (Embarcación) · Sector 1
+DUR14-S1-Dsto. Gral. Ballivian  |  Destacamento Ballivian  |  Distrito 14 (Embarcación) · Sector 1
+DUR14-S1-Dsto Padre Lozano  |  Destacamento Padre Lozano  |  Distrito 14 (Embarcación) · Sector 1
+DUR14-S2-Cría 2° Coronel Juan Solá  |  Comisaría 2 - Coronel Juan Solá Morillo  |  Distrito 14 (Embarcación) · Sector 2
+DUR14-S2-Dsto Dragones  |  Destacamento Dragones  |  Distrito 14 (Embarcación) · Sector 2
+DUR14-S2-Dsto Hickman  |  Destacamento Hickman  |  Distrito 14 (Embarcación) · Sector 2
+DUR14-S2-Dsto. Los Blancos  |  Destacamento Los Blancos  |  Distrito 14 (Embarcación) · Sector 2
+DUR14-S2-Puesto Pluma de Pato  |  Puesto Policial Pluma de Pato  |  Distrito 14 (Embarcación) · Sector 2
+SIN-LIMITES|DDP1|Destacamento Tribunales  |  Destacamento Tribunales  |  Distrito 1 (Capital) · Sector 3
+SIN-LIMITES|DDP1|Puesto Policial Bicentenario  |  Puesto Policial Bicentenario  |  Distrito 1 (Capital) · Sector 3
+SIN-LIMITES|DDP1|Puesto Policial B° La Unión  |  Puesto Policial B° La Unión  |  Distrito 1 (Capital) · Sector 3
+SIN-LIMITES|DDP1|Puesto Policial Universidad Católica  |  Puesto Policial Universidad Católica  |  Distrito 1 (Capital) · Sector 3
+SIN-LIMITES|DDP1|Subcomisaría Barrio El Huaico  |  Subcomisaría Barrio El Huaico  |  Distrito 1 (Capital) · Sector 3
+SIN-LIMITES|DDP1|Base Operativa San Lorenzo  |  Base Operativa San Lorenzo  |  Distrito 1 (Capital) · Sector 4
+SIN-LIMITES|DDP1|Puesto Policial Mercado San Miguel  |  Puesto Policial Mercado San Miguel  |  Distrito 1 (Capital) · Sector 6
+SIN-LIMITES|DDP1|Destacamento 20 de Febrero  |  Destacamento 20 de Febrero  |  Distrito 1 (Capital) · Sector 8
+SIN-LIMITES|DDP1|Destacamento San Bernardo  |  Destacamento San Bernardo  |  Distrito 1 (Capital) · Sector 8
+SIN-LIMITES|DDP1|Destacamento Delmi  |  Destacamento Delmi  |  Distrito 1 (Capital) · Sector 9
+SIN-LIMITES|DDP1|Puesto Policial Rodeo Colorado  |  Puesto Policial Rodeo Colorado  |  Distrito 1 (Capital) · Sector 11
+SIN-LIMITES|DDP2|Puesto Policial San Vicente  |  Puesto Policial San Vicente  |  Distrito 2 (Orán) · Sector 1
+SIN-LIMITES|DDP2|Puesto Policial San Cayetano  |  Puesto Policial San Cayetano  |  Distrito 2 (Orán) · Sector 2
+SIN-LIMITES|DDP2|Base Operativa Taranto  |  Base Operativa Taranto  |  Distrito 2 (Orán) · Sector 4
+SIN-LIMITES|DDP2|Puesto Policial El Condado  |  Puesto Policial El Condado  |  Distrito 2 (Orán) · Sector 5
+SIN-LIMITES|DDP4|Puesto Policial Terminal Ómnibus  |  Puesto Policial Terminal Ómnibus  |  Distrito 4 (Tartagal) · Sector 3
+SIN-LIMITES|DDP7|Puesto Policial El Gallinato  |  Puesto Policial El Gallinato  |  Distrito 7 (Güemes) · Sector 2
+SIN-LIMITES|DDP8|Puesto Policial Nueva Jerusalén  |  Puesto Policial Nueva Jerusalén  |  Distrito 8 (Pichanal) · Sector 1
+SIN-LIMITES|DDP8|Puesto Policial Santa Rosa  |  Puesto Policial Santa Rosa  |  Distrito 8 (Pichanal) · Sector 3
+SIN-LIMITES|DDP10|Base Operativa B° El Círculo  |  Base Operativa B° El Círculo  |  Distrito 10 (Capital Sur) · Sector 1
+SIN-LIMITES|DDP10|Puesto Policial B° Morosini  |  Puesto Policial B° Morosini  |  Distrito 10 (Capital Sur) · Sector 1
+SIN-LIMITES|DDP10|Puesto Policial Cofruthos  |  Puesto Policial Cofruthos  |  Distrito 10 (Capital Sur) · Sector 1
+SIN-LIMITES|DDP10|Puesto Policial Padre E. Martearena  |  Puesto Policial Padre E. Martearena  |  Distrito 10 (Capital Sur) · Sector 1
+SIN-LIMITES|DDP10|Puesto Policial Puente Blanco  |  Puesto Policial Puente Blanco  |  Distrito 10 (Capital Sur) · Sector 3
+SIN-LIMITES|DDP10|Puesto Policial B° Sanidad  |  Puesto Policial B° Sanidad  |  Distrito 10 (Capital Sur) · Sector 4
+SIN-LIMITES|DDP10|Comisaría 8 - San Antonio de los Cobres  |  Comisaría 8 - San Antonio de los Cobres  |  Distrito 10 (Capital Sur) · Sector 6
+SIN-LIMITES|DDP10|Destacamento Los Cobres  |  Destacamento Los Cobres  |  Distrito 10 (Capital Sur) · Sector 6
+SIN-LIMITES|DDP10|Destacamento Olacapato  |  Destacamento Olacapato  |  Distrito 10 (Capital Sur) · Sector 6
+SIN-LIMITES|DDP10|Destacamento Tolar Grande  |  Destacamento Tolar Grande  |  Distrito 10 (Capital Sur) · Sector 6
+SIN-LIMITES|DDP10|Puesto Policial Posco  |  Puesto Policial Posco  |  Distrito 10 (Capital Sur) · Sector 6
+SIN-LIMITES|DDP11|Base Operativa 25 de Mayo  |  Base Operativa 25 de Mayo  |  Distrito 11 (El Carril) · Sector 1
+SIN-LIMITES|DDP11|Base Operativa B° Cielos del Sur  |  Base Operativa B° Cielos del Sur  |  Distrito 11 (El Carril) · Sector 1
+SIN-LIMITES|DDP11|Puesto Policial El Mollar  |  Puesto Policial El Mollar  |  Distrito 11 (El Carril) · Sector 3
