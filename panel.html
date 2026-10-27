@@ -627,7 +627,7 @@
       </select>
       <button id="btn-limpiar" class="btn-filtro" type="button" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);">🧹 Limpiar</button>
       <button id="btn-actualizar" class="btn-filtro" type="button">🔄 Actualizar</button>
-      <button id="btn-exportar" class="btn-filtro" type="button">📥 Exportar</button>
+      <button id="btn-exportar" class="btn-filtro" type="button">📥 Exportar Excel</button>
     </div>
 
     <div class="tabla-wrapper">
@@ -712,6 +712,24 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-exportar">
+  <div class="modal-caja">
+    <h3>📥 Exportar historial</h3>
+    <p id="exportar-quien" style="font-size:0.85rem;opacity:0.85;margin:0 0 10px;"></p>
+    <label style="display:block;margin:8px 0;cursor:pointer;"><input type="radio" name="exportar-alcance" value="filtros" checked> Lo que estoy viendo, con los filtros actuales (<b id="exportar-n-filtros">0</b> trámites)</label>
+    <label style="display:block;margin:8px 0;cursor:pointer;"><input type="radio" name="exportar-alcance" value="todo"> Todo el historial (<b id="exportar-n-todo">0</b> trámites)</label>
+    <label style="margin-top:10px;display:block;">Formato</label>
+    <select id="exportar-formato">
+      <option value="xlsx">Excel (.xlsx) con hoja de resumen</option>
+      <option value="csv">CSV (texto simple)</option>
+    </select>
+    <div class="modal-btns">
+      <button type="button" id="btn-cancelar-exportar" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);">Cancelar</button>
+      <button type="button" id="btn-confirmar-exportar" style="background:linear-gradient(135deg, var(--dorado), var(--dorado-brilloso));color:var(--azul-oscuro);">Descargar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-pass">
   <div class="modal-caja">
     <h3>🔑 Cambiar contraseña</h3>
@@ -758,6 +776,7 @@
 <script src="supabase-config.js"></script>
 <script src="comisarias-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /* ============================================================
    ZONAS DE COMISARÍAS (inline, con guardia anti-conflicto)
@@ -2838,51 +2857,118 @@ document.getElementById('btn-imprimir').addEventListener('click', async () => {
   setTimeout(() => ventana.print(), 500);
 });
 
-/* EXPORTAR CSV */
-document.getElementById('btn-exportar').addEventListener('click', () => {
-  const filtradas = ordenarLista(aplicarFiltros());
-  if (!filtradas.length) { alert('No hay solicitudes para exportar con los filtros actuales.'); return; }
-  const filas = [[
-    'Fecha', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email',
-    'Domicilio', 'Comisaría', 'Zona', 'Estado', 'Urgente', 'Retirado',
-    'Validado por', 'Fecha validación', 'Fecha expiración', 'Motivo denegación',
-    'Ubicación GPS'
-  ]];
-  filtradas.forEach(s => {
-    const d = s.datos || {};
-    const gps = (d._ubicacion_lat != null && d._ubicacion_lon != null)
-      ? `${d._ubicacion_lat}, ${d._ubicacion_lon}` : '-';
-    filas.push([
-      s.created_at ? new Date(s.created_at).toLocaleString('es-AR') : '-',
-      s.codigo || '-',
-      s.tramite_titulo || s.tramite || '-',
-      obtenerNombreSolicitud(s) || '-',
-      obtenerDniSolicitud(s) || '-',
-      d.email || '-',
-      d.domicilio || d.domicilioComun || '-',
-      nombreComisaria(s.comisaria_asignada) || '-',
-      (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada) || '-',
-      s.estado || 'pendiente',
-      s.urgente ? 'SÍ' : 'NO',
-      s.retirado ? 'SÍ' : 'NO',
-      s.validado_por || '-',
-      s.validado_en ? new Date(s.validado_en).toLocaleString('es-AR') : '-',
-      s.fecha_expiracion ? new Date(s.fecha_expiracion).toLocaleString('es-AR') : '-',
-      s.motivo_denegacion || '-',
-      gps
-    ]);
-  });
-  const csv = filas.map(fila =>
-    fila.map(celda => `"${String(celda).replace(/"/g, '""')}"`).join(';')
-  ).join('\r\n');
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+/* EXPORTAR HISTORIAL (Excel / CSV) */
+const ENCABEZADOS_EXPORT = [
+  'Fecha de envío', 'Código', 'Trámite', 'Solicitante', 'DNI', 'Email', 'Domicilio',
+  'Comisaría', 'Distrito', 'Sector', 'Zona', 'Estado', 'Urgente', 'Retirado',
+  'Validado por', 'Fecha de validación', 'Fecha de expiración', 'Motivo de denegación', 'Ubicación GPS'
+];
+const _fechaOVacio = v => v ? new Date(v) : '';
+
+function filaExport(s) {
+  const d = s.datos || {};
+  const of = DEP_OFICIAL[s.comisaria_asignada];
+  const gps = (d._ubicacion_lat != null && d._ubicacion_lon != null) ? `${d._ubicacion_lat}, ${d._ubicacion_lon}` : '';
+  return [
+    _fechaOVacio(s.created_at), s.codigo || '', s.tramite_titulo || s.tramite || '',
+    obtenerNombreSolicitud(s) || '', obtenerDniSolicitud(s) || '', d.email || '',
+    d.domicilio || d.domicilioComun || '',
+    (of && of.oficial) ? of.nombre : (nombreComisaria(s.comisaria_asignada) || ''),
+    (of && of.oficial) ? `${of.distrito} - ${of.distritoNombre}` : '', (of && of.oficial) ? of.sector : '',
+    d.zona || obtenerZona(s.comisaria_asignada) || '',
+    s.estado || 'pendiente', s.urgente ? 'SÍ' : 'NO', s.retirado ? 'SÍ' : 'NO',
+    s.validado_por || '', _fechaOVacio(s.validado_en), _fechaOVacio(s.fecha_expiracion),
+    s.motivo_denegacion || '', gps
+  ];
+}
+
+function filasResumen(lista, quien) {
+  const cuenta = (fn) => { const m = new Map(); lista.forEach(s => { const k = fn(s); m.set(k, (m.get(k) || 0) + 1); }); return [...m.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]), 'es')); };
+  const filas = [
+    ['RESUMEN DEL HISTORIAL'], [],
+    ['Dependencia', quien], ['Generado', new Date()], ['Generado por', (perfilActual && perfilActual.email) || ''],
+    ['Total de trámites', lista.length], [],
+    ['POR ESTADO'], ['Estado', 'Cantidad'], ...cuenta(s => s.estado || 'pendiente'), [],
+    ['POR TRÁMITE'], ['Trámite', 'Cantidad'], ...cuenta(s => s.tramite_titulo || s.tramite || '-'), [],
+    ['POR MES'], ['Mes', 'Cantidad'], ...cuenta(s => s.created_at ? s.created_at.slice(0, 7) : '-'), [],
+    ['RETIRADOS', lista.filter(s => s.retirado).length]
+  ];
+  return filas;
+}
+
+function quienExporta() {
+  if (perfilActual && perfilActual.rol === 'admin') return 'Todas las comisarías (administrador)';
+  if (perfilActual && perfilActual.comisarias && perfilActual.comisarias.length) return perfilActual.comisarias.map(nombreComisaria).join(' · ');
+  return 'Todas las que se ven en el panel';
+}
+
+function nombreArchivoExport(ext) {
+  let base = 'historial';
+  if (perfilActual && perfilActual.rol !== 'admin' && perfilActual.comisarias && perfilActual.comisarias.length === 1)
+    base += '_' + nombreComisaria(perfilActual.comisarias[0]).replace(/\s*\(D\d+·S\d+\)\s*$/, '');
+  base = base.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  return `${base}_${new Date().toISOString().slice(0, 10)}.${ext}`;
+}
+
+function descargarBlob(blob, nombre) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `solicitudes_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  mostrarToast('📥 Exportado', `${filtradas.length} trámites exportados`, 'success', 3000);
+  a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function exportarCSV(lista) {
+  const fmt = v => v instanceof Date ? v.toLocaleString('es-AR') : v;
+  const filas = [ENCABEZADOS_EXPORT, ...lista.map(filaExport)];
+  const csv = filas.map(f => f.map(c => `"${String(fmt(c)).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  descargarBlob(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }), nombreArchivoExport('csv'));
+}
+
+function exportarExcel(lista) {
+  const wb = XLSX.utils.book_new();
+  const hoja = XLSX.utils.aoa_to_sheet([ENCABEZADOS_EXPORT, ...lista.map(filaExport)], { cellDates: true });
+  hoja['!cols'] = [18, 11, 30, 28, 12, 26, 34, 40, 18, 8, 12, 12, 9, 10, 24, 18, 18, 30, 24].map(w => ({ wch: w }));
+  const fechasFmt = [0, 15, 16];
+  const rango = XLSX.utils.decode_range(hoja['!ref']);
+  for (let r = 1; r <= rango.e.r; r++) fechasFmt.forEach(c => {
+    const celda = hoja[XLSX.utils.encode_cell({ r, c })];
+    if (celda && celda.t === 'd') celda.z = 'dd/mm/yyyy hh:mm';
+  });
+  hoja['!autofilter'] = { ref: hoja['!ref'] };
+  XLSX.utils.book_append_sheet(wb, hoja, 'Historial');
+  const resumen = XLSX.utils.aoa_to_sheet(filasResumen(lista, quienExporta()), { cellDates: true });
+  resumen['!cols'] = [{ wch: 34 }, { wch: 40 }];
+  XLSX.utils.book_append_sheet(wb, resumen, 'Resumen');
+  const datos = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  descargarBlob(new Blob([datos], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), nombreArchivoExport('xlsx'));
+}
+
+document.getElementById('btn-exportar').addEventListener('click', () => {
+  document.getElementById('exportar-quien').textContent = 'Dependencia: ' + quienExporta();
+  document.getElementById('exportar-n-filtros').textContent = aplicarFiltros().length;
+  document.getElementById('exportar-n-todo').textContent = solicitudesCache.length;
+  document.getElementById('modal-exportar').classList.add('activo');
+});
+document.getElementById('btn-cancelar-exportar').addEventListener('click', () => {
+  document.getElementById('modal-exportar').classList.remove('activo');
+});
+document.getElementById('btn-confirmar-exportar').addEventListener('click', () => {
+  const alcance = document.querySelector('input[name="exportar-alcance"]:checked').value;
+  const lista = ordenarLista(alcance === 'todo' ? solicitudesCache.slice() : aplicarFiltros());
+  if (!lista.length) { alert('No hay trámites para exportar.'); return; }
+  let formato = document.getElementById('exportar-formato').value;
+  try {
+    if (formato === 'xlsx') {
+      if (typeof XLSX === 'undefined') { mostrarToast('⚠️ Excel no disponible', 'No se pudo cargar la librería: se descarga en CSV (también abre en Excel).', 'error', 6000); formato = 'csv'; }
+      else exportarExcel(lista);
+    }
+    if (formato === 'csv') exportarCSV(lista);
+    document.getElementById('modal-exportar').classList.remove('activo');
+    mostrarToast('📥 Exportado', `${lista.length} trámites descargados`, 'success', 3500);
+  } catch (e) {
+    console.error('Error exportando', e);
+    mostrarToast('❌ No se pudo exportar', String(e.message || e), 'error', 6000);
+  }
 });
 
 /* ============================================================
