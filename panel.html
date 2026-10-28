@@ -394,6 +394,9 @@
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
     z-index:9998;align-items:center;justify-content:center;padding:20px;}
   .modal-overlay.activo{display:flex;}
+  #modal-recuperar select{width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.95rem;background:rgba(0,0,0,0.35);color:#fff;font-family:inherit;}
+  #modal-recuperar select:disabled{opacity:0.5;}
+  #modal-recuperar select option{background:#0d2a4d;color:#fff;}
   .modal-caja{background:var(--azul-oscuro);border:1px solid rgba(201,169,97,0.5);
     border-top:3px solid var(--dorado);border-radius:12px;padding:28px;
     max-width:420px;width:100%;box-shadow:var(--sombra-fuerte);}
@@ -747,13 +750,20 @@
 <div class="modal-overlay" id="modal-recuperar">
   <div class="modal-caja">
     <h3>🔐 Olvidé mi contraseña</h3>
-    <p style="font-size:0.85rem;color:rgba(255,255,255,0.8);margin:0 0 12px;">Dejá tu correo y tu nombre. El administrador verificará tu identidad y te enviará a ese correo un enlace para elegir una contraseña nueva.</p>
+    <p style="font-size:0.85rem;color:rgba(255,255,255,0.8);margin:0 0 12px;">Completá tus datos. El administrador verificará tu identidad y te enviará a ese correo un enlace para elegir una contraseña nueva.</p>
     <label>Tu correo (el que usás para ingresar)</label>
     <input type="email" id="rec-email" placeholder="tu@email.com" autocomplete="username">
-    <label>Tu nombre y comisaría</label>
-    <input type="text" id="rec-nombre" maxlength="120" placeholder="Ej.: Of. Pérez, Comisaría 1ra">
+    <label>Apellido y nombre</label>
+    <input type="text" id="rec-nombre" maxlength="80" placeholder="Ej.: Pérez Juan">
+    <label>Personal</label>
+    <select id="rec-categoria"><option value="">Elegí…</option><option>OFICIAL</option><option>SUB-OFICIAL</option></select>
+    <label>Jerarquía</label>
+    <select id="rec-jerarquia" disabled><option value="">Primero elegí Personal</option></select>
+    <label>Comisaría (elegí de la lista o escribí para buscar)</label>
+    <input type="text" id="rec-comisaria" list="rec-lista-com" autocomplete="off" placeholder="Escribí para buscar…">
+    <datalist id="rec-lista-com"></datalist>
     <label>Teléfono o dato para contactarte (opcional)</label>
-    <input type="text" id="rec-comentario" maxlength="300" placeholder="Para que el administrador pueda verificarte">
+    <input type="text" id="rec-comentario" maxlength="100" placeholder="Para que el administrador pueda verificarte">
     <div class="modal-btns">
       <button type="button" id="btn-cancelar-rec" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);">Cancelar</button>
       <button type="button" id="btn-enviar-rec" style="background:linear-gradient(135deg, var(--dorado), var(--dorado-brilloso));color:var(--azul-oscuro);">Enviar pedido</button>
@@ -1328,16 +1338,47 @@ linkRecuperar.addEventListener('click', (e) => {
 document.getElementById('btn-cancelar-rec').addEventListener('click', () => {
   document.getElementById('modal-recuperar').classList.remove('activo');
 });
+const JERARQUIAS = {
+  'OFICIAL': ['PRINCIPAL', 'AUXILIAR', 'AYUDANTE', 'SUB AYUDANTE'],
+  'SUB-OFICIAL': ['MAYOR', 'PRINCIPAL', 'SGTO AYUDANTE', 'SARGENTO', 'CABO', 'AGENTE']
+};
+document.getElementById('rec-categoria').addEventListener('change', (e) => {
+  const j = document.getElementById('rec-jerarquia');
+  const lista = JERARQUIAS[e.target.value] || [];
+  j.innerHTML = '<option value="">' + (lista.length ? 'Elegí…' : 'Primero elegí Personal') + '</option>' + lista.map(x => '<option>' + x + '</option>').join('');
+  j.disabled = !lista.length;
+});
+let comisariasRec = [];
+async function cargarListaComisariasRec() {
+  if (comisariasRec.length) return;
+  try {
+    const r = await fetch('dependencias.json?v=1');
+    const arr = await r.json();
+    comisariasRec = [...new Set(arr.map(d => d.nombre).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+    document.getElementById('rec-lista-com').innerHTML = comisariasRec.map(n => '<option value="' + n.replace(/"/g, '&quot;') + '"></option>').join('');
+  } catch (e) { console.warn('No se pudo cargar la lista de comisarías', e); }
+}
+linkRecuperar.addEventListener('click', cargarListaComisariasRec);
 document.getElementById('btn-enviar-rec').addEventListener('click', async () => {
   const email = document.getElementById('rec-email').value.trim();
   const nombre = document.getElementById('rec-nombre').value.trim();
-  const coment = document.getElementById('rec-comentario').value.trim();
+  const cat = document.getElementById('rec-categoria').value;
+  const jer = document.getElementById('rec-jerarquia').value;
+  const com = document.getElementById('rec-comisaria').value.trim();
+  const tel = document.getElementById('rec-comentario').value.trim();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Escribí un correo válido.'); return; }
-  if (!nombre) { alert('Escribí tu nombre y comisaría.'); return; }
+  if (!nombre) { alert('Escribí tu apellido y nombre.'); return; }
+  if (!cat) { alert('Elegí si sos OFICIAL o SUB-OFICIAL.'); return; }
+  if (!jer) { alert('Elegí tu jerarquía.'); return; }
+  if (!com || (comisariasRec.length && !comisariasRec.includes(com))) { alert('Elegí tu comisaría de la lista (podés escribir para buscarla).'); return; }
   const btn = document.getElementById('btn-enviar-rec');
   btn.disabled = true; btn.textContent = 'Enviando...';
   try {
-    await supabaseClient.rpc('pedir_restablecer_clave', { p_email: email, p_nombre: nombre, p_comentario: coment });
+    await supabaseClient.rpc('pedir_restablecer_clave', {
+      p_email: email,
+      p_nombre: (nombre + ' — ' + cat + ' ' + jer).slice(0, 120),
+      p_comentario: ('Comisaría: ' + com + (tel ? ' · Contacto: ' + tel : '')).slice(0, 300)
+    });
   } catch (err) { /* misma respuesta siempre */ }
   btn.disabled = false; btn.textContent = 'Enviar pedido';
   document.getElementById('modal-recuperar').classList.remove('activo');
