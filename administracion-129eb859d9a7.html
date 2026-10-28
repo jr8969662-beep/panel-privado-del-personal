@@ -264,9 +264,10 @@ async function cargarAccesos() {
   const box = $('t-accesos');
   const { data, error } = await sb.from('logs_accesos').select('*').order('fecha', { ascending: false }).limit(300);
   if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + '</p>'; return; }
-  let h = '<div class="card scroll"><table><tr><th>Fecha</th><th>Usuario</th><th>Detalle</th></tr>';
-  data.forEach(l => { const { id, fecha, email, usuario, ...resto } = l;
-    h += '<tr><td>' + fmt(fecha) + '</td><td>' + esc(email || usuario || '') + '</td><td><small>' + esc(JSON.stringify(resto)) + '</small></td></tr>'; });
+  const tipos = { login: 'Ingresó al panel', logout: 'Salió del panel', error: 'Intento fallido' };
+  let h = '<div class="card"><p>Registro de cada vez que alguien del personal ingresó al panel: quién, cuándo y desde qué navegador y equipo. Sirve para controlar el uso y detectar ingresos raros. Se muestran los últimos 300.</p></div><div class="card scroll"><table><tr><th>Fecha y hora</th><th>Correo</th><th>Acción</th><th>Navegador / equipo</th></tr>';
+  data.forEach(l => { h += '<tr><td>' + fmt(l.fecha) + '</td><td>' + esc(l.email || '') + '</td><td>' + esc(tipos[l.tipo] || l.tipo || '') + '</td><td>' + esc(l.dispositivo || '') + '</td></tr>'; });
+  if (!data.length) h += '<tr><td colspan="4">Todavía no hay accesos registrados.</td></tr>';
   box.innerHTML = h + '</table></div>';
 }
 
