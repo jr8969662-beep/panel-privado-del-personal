@@ -394,6 +394,8 @@
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
     z-index:9998;align-items:center;justify-content:center;padding:20px;}
   .modal-overlay.activo{display:flex;}
+  #modal-asignacion select{width:100%;margin-top:6px;padding:12px 14px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.95rem;background:rgba(0,0,0,0.35);color:#fff;font-family:inherit;}
+  #modal-asignacion select option{background:#0d2a4d;color:#fff;}
   #modal-recuperar select{width:100%;margin-top:6px;padding:12px 14px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.95rem;background:rgba(0,0,0,0.35);color:#fff;font-family:inherit;}
   #modal-recuperar select:disabled{opacity:0.5;}
   #modal-recuperar select option{background:#0d2a4d;color:#fff;}
@@ -502,7 +504,7 @@
 </header>
 
 <main>
-  <div class="aviso-sin-comisaria" id="aviso-sin-comisaria">⚠️ Tu usuario todavía no tiene una comisaría asignada, por eso no ves trámites. Pedile al administrador que te asigne tu comisaría.</div>
+  <div class="aviso-sin-comisaria" id="aviso-sin-comisaria">⚠️ Tu usuario todavía no tiene una comisaría asignada, por eso no ves trámites. Pedile al administrador que te asigne tu comisaría.<div style="margin-top:10px;"><button type="button" id="btn-pedir-asig" style="background:linear-gradient(135deg, var(--dorado), var(--dorado-brilloso));color:var(--azul-oscuro);border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;font-family:inherit;">📩 Pedir asignación de comisaría</button></div></div>
 
   <!-- LOGIN -->
   <div id="vista-login">
@@ -777,6 +779,22 @@
     <div class="modal-btns">
       <button type="button" id="btn-cancelar-rec" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);">Cancelar</button>
       <button type="button" id="btn-enviar-rec" style="background:linear-gradient(135deg, var(--dorado), var(--dorado-brilloso));color:var(--azul-oscuro);">Enviar pedido</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-asignacion">
+  <div class="modal-caja">
+    <h3>📩 Pedir asignación de comisaría</h3>
+    <p style="font-size:0.85rem;color:rgba(255,255,255,0.8);margin:0 0 12px;">Elegí la comisaría donde prestás servicio. El administrador revisará tu pedido y te la asignará.</p>
+    <label>Comisaría</label>
+    <input type="text" id="asig-buscar" autocomplete="off" placeholder="🔍 Escribí para buscar tu comisaría…">
+    <select id="asig-comisaria"><option value="">Elegí tu comisaría…</option></select>
+    <label>Mensaje para el administrador (opcional)</label>
+    <input type="text" id="asig-mensaje" maxlength="300" placeholder="Ej.: Fui destinado a esta comisaría el 25/10">
+    <div class="modal-btns">
+      <button type="button" id="btn-cancelar-asig" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);">Cancelar</button>
+      <button type="button" id="btn-enviar-asig" style="background:linear-gradient(135deg, var(--dorado), var(--dorado-brilloso));color:var(--azul-oscuro);">Enviar pedido</button>
     </div>
   </div>
 </div>
@@ -1553,6 +1571,7 @@ async function cargarPerfil() {
     }
     perfilActual = data;
     const esAdmin = data.rol === 'admin';
+    if (!esAdmin && !(data.comisarias || []).length) aviso.classList.add('activo');
     const comis = esAdmin ? 'Administrador · todas las comisarías' : (data.comisarias || []).map(nombreComisaria).join(' · ') || 'Sin comisaría';
     caja.innerHTML = `<span class="p-jerarquia">${escapeHtml(esAdmin && !data.jerarquia ? 'Administrador' : (data.jerarquia || ''))}</span><span class="p-nombre">${escapeHtml(data.nombre || data.email || usuarioActual || '')}</span>${escapeHtml(comis)}`;
     btnAud.style.display = esAdmin ? '' : 'none';
@@ -1610,6 +1629,41 @@ function mostrarMapaDetalle(d) {
     mostrarToast('↪ Trámite derivado', 'Pasó a ' + nombreComisaria(destino), 'success', 4000);
   });
 })();
+
+let depsAsig = [];
+function pintarOpcionesAsig(txt) {
+  const norm = (x) => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[°º]/g, '');
+  const pal = norm(txt.trim()).split(/\s+/).filter(Boolean);
+  const lista = pal.length ? depsAsig.filter(d => { const h = norm(d.nombre); return pal.every(w => h.includes(w)); }) : depsAsig;
+  const sel = document.getElementById('asig-comisaria');
+  sel.innerHTML = '<option value="">' + (lista.length ? 'Elegí tu comisaría… (' + lista.length + ')' : 'No hay coincidencias') + '</option>' +
+    lista.map(d => '<option value="' + escapeHtml(d.clave) + '">' + escapeHtml(d.nombre) + '</option>').join('');
+  if (pal.length && lista.length === 1) sel.value = lista[0].clave;
+}
+document.getElementById('btn-pedir-asig').addEventListener('click', async () => {
+  document.getElementById('modal-asignacion').classList.add('activo');
+  if (!depsAsig.length) {
+    try {
+      const arr = await (await fetch('dependencias.json?v=1')).json();
+      const vistos = new Set();
+      depsAsig = arr.filter(d => d.nombre && !vistos.has(d.clave) && vistos.add(d.clave)).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
+    } catch (e) { console.warn('No se pudo cargar la lista de comisarías', e); }
+  }
+  pintarOpcionesAsig(document.getElementById('asig-buscar').value);
+});
+document.getElementById('asig-buscar').addEventListener('input', (e) => pintarOpcionesAsig(e.target.value));
+document.getElementById('btn-cancelar-asig').addEventListener('click', () => document.getElementById('modal-asignacion').classList.remove('activo'));
+document.getElementById('btn-enviar-asig').addEventListener('click', async () => {
+  const clave = document.getElementById('asig-comisaria').value;
+  if (!clave) { alert('Elegí tu comisaría de la lista.'); return; }
+  const btn = document.getElementById('btn-enviar-asig');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  const { error } = await supabaseClient.rpc('pedir_asignacion_comisaria', { p_comisaria: clave, p_mensaje: document.getElementById('asig-mensaje').value.trim() });
+  btn.disabled = false; btn.textContent = 'Enviar pedido';
+  if (error) { alert(error.message || 'No se pudo enviar el pedido.'); return; }
+  document.getElementById('modal-asignacion').classList.remove('activo');
+  alert('Pedido enviado. Cuando el administrador te asigne la comisaría, cerrá sesión y volvé a entrar para ver sus trámites.');
+});
 
 let recuperando = /type=recovery/.test(location.hash || '');
 let verificandoLegajo = false;

@@ -118,6 +118,7 @@
     <button data-t="tramites">📄 Trámites</button>
     <button data-t="comisarias">🏢 Comisarías</button>
     <button data-t="pedidos">🔑 Pedidos de clave<span class="n oculto" id="n-ped"></span></button>
+    <button data-t="asignaciones">📩 Asignaciones<span class="n oculto" id="n-asig"></span></button>
     <button data-t="personal">👮 Personal</button>
     <button data-t="stats">📊 Estadísticas</button>
     <button data-t="accesos">📋 Accesos</button>
@@ -128,6 +129,7 @@
     <section id="t-tramites" class="oculto"></section>
     <section id="t-comisarias" class="oculto"></section>
     <section id="t-pedidos" class="oculto"></section>
+    <section id="t-asignaciones" class="oculto"></section>
     <section id="t-personal" class="oculto"></section>
     <section id="t-stats" class="oculto"></section>
     <section id="t-accesos" class="oculto"></section>
@@ -151,7 +153,7 @@ const fmtDia = (d) => d ? new Date(d).toLocaleDateString('es-AR') : '—';
 const ESTADO = { pendiente: 'Pendiente', procesado: 'Aprobado', denegado: 'Denegado' };
 const DIA = 86400000;
 
-let yo = null, solicitudes = [], deps = [], personal = [], pedidos = [], depPorClave = {};
+let yo = null, solicitudes = [], deps = [], personal = [], pedidos = [], asignaciones = [], depPorClave = {};
 let vistaActual = 'inicio';
 
 function toast(t) { const e = $('toast'); e.textContent = t; e.classList.remove('oculto'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.add('oculto'), 4000); }
@@ -217,16 +219,20 @@ async function cargarTodo(silencioso) {
     try { deps = await (await fetch('dependencias.json?v=1')).json(); } catch (e) { deps = []; }
     deps.forEach(d => { d.nombre = d.nombre || String(d.clave).replace(/^DUR\s*\d+\s*-\s*S\s*\d+\s*-\s*/i, '').trim(); depPorClave[d.clave] = d; });
   }
-  const [s, p, pe] = await Promise.all([
+  const [s, p, pe, as] = await Promise.all([
     sb.from('solicitudes').select('*').order('created_at', { ascending: false }).limit(5000),
     sb.rpc('admin_listar_personal'),
-    sb.from('pedidos_clave').select('*').order('created_at', { ascending: false }).limit(200)
+    sb.from('pedidos_clave').select('*').order('created_at', { ascending: false }).limit(200),
+    sb.from('pedidos_asignacion').select('*').order('created_at', { ascending: false }).limit(200)
   ]);
+  if (!as.error) asignaciones = as.data || [];
   if (!s.error) solicitudes = s.data || [];
   if (!p.error) personal = p.data || [];
   if (!pe.error) pedidos = pe.data || [];
   const pend = pedidos.filter(x => x.estado === 'pendiente').length;
   $('n-ped').textContent = pend; $('n-ped').classList.toggle('oculto', !pend);
+  const nAs = asignaciones.filter(x => x.estado === 'pendiente').length;
+  $('n-asig').textContent = nAs; $('n-asig').classList.toggle('oculto', !nAs);
   $('actualizado').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
   if (!silencioso || vistaActual === 'inicio') pintar(vistaActual, silencioso);
   else if (vistaActual === 'pedidos') pintarPedidos();
@@ -237,7 +243,7 @@ $('menu').addEventListener('click', (e) => { const b = e.target.closest('button'
 function irA(t) {
   vistaActual = t;
   document.querySelectorAll('#menu button').forEach(x => x.classList.toggle('on', x.dataset.t === t));
-  ['inicio','tramites','comisarias','pedidos','personal','stats','accesos','actividad'].forEach(x => $('t-' + x).classList.toggle('oculto', x !== t));
+  ['inicio','tramites','comisarias','pedidos','asignaciones','personal','stats','accesos','actividad'].forEach(x => $('t-' + x).classList.toggle('oculto', x !== t));
   pintar(t);
 }
 const barras = (arr, max) => { const mx = Math.max(1, ...arr.map(x => x.n)); return arr.slice(0, max || 99).map(x => '<div>' + esc(x.k) + ' <b>' + x.n + '</b><div class="barra"><i style="width:' + (100 * x.n / mx) + '%"></i></div></div>').join('') || '<small>Sin datos.</small>'; };
@@ -257,6 +263,8 @@ PINTORES.inicio = () => {
     dias.push({ k: d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }), n: solicitudes.filter(s => new Date(s.created_at).toDateString() === k).length }); }
   const mx = Math.max(1, ...dias.map(d => d.n));
   const alertas = [];
+  const asigPend = asignaciones.filter(x => x.estado === 'pendiente').length;
+  if (asigPend) alertas.push(['', '📩 ' + asigPend + ' pedido(s) de asignación de comisaría esperando tu respuesta', 'asignaciones']);
   if (pedPend) alertas.push(['', '🔑 ' + pedPend + ' pedido(s) de contraseña esperando tu respuesta', 'pedidos']);
   if (urg.length) alertas.push(['roja', '🚨 ' + urg.length + ' trámite(s) marcados como urgentes sin resolver', 'urgentes']);
   if (viejas.length) alertas.push(['roja', '⏱ ' + viejas.length + ' trámite(s) pendientes hace 3 días o más', 'viejas']);
@@ -276,7 +284,7 @@ PINTORES.inicio = () => {
 document.addEventListener('click', (e) => {
   const t = e.target.closest('[data-ir]'); if (!t) return;
   const v = t.dataset.ir;
-  if (v === 'pedidos' || v === 'comisarias') return irA(v);
+  if (v === 'pedidos' || v === 'comisarias' || v === 'asignaciones') return irA(v);
   filtros = { q: '', est: '', tra: '', com: '', urg: false, viejas: false, desde: '', hasta: '' };
   if (v === 'pendientes') filtros.est = 'pendiente';
   if (v === 'urgentes') { filtros.est = 'pendiente'; filtros.urg = true; }
@@ -448,6 +456,25 @@ $('t-pedidos').addEventListener('click', async (e) => {
   }
 });
 
+/* ---------- ASIGNACIONES DE COMISARÍA ---------- */
+PINTORES.asignaciones = () => {
+  const b = $('t-asignaciones');
+  b.innerHTML = '<h2 class="titulo">Pedidos de asignación de comisaría</h2><p class="sub">Personal que entró al panel sin comisaría y pide que se la asignes. Verificá con su jefe antes de aprobar. Al aprobar, se le agrega la comisaría y verá sus trámites la próxima vez que ingrese.</p><div class="card scroll"><table><tr><th>Cuándo</th><th>Persona</th><th>Pide</th><th>Mensaje</th><th>Estado</th><th></th></tr>' +
+    asignaciones.map(a => '<tr><td>' + fmt(a.created_at) + '<br><small>' + hace(a.created_at) + '</small></td><td>' + esc(a.nombre) + '<br><small>' + esc(a.email) + '</small></td><td><b>' + esc(nombreDep(a.comisaria)) + '</b></td><td>' + esc(a.mensaje) + '</td><td><span class="tag ' + (a.estado === 'aprobado' ? 'procesado' : a.estado === 'rechazado' ? 'denegado' : 'pendiente') + '">' + esc(a.estado) + '</span>' + (a.atendido_por ? '<br><small>' + esc(a.atendido_por) + '<br>' + fmt(a.atendido_en) + '</small>' : '') + '</td><td>' +
+      (a.estado === 'pendiente' ? '<button class="b ok chico" data-apr="' + a.id + '">Aprobar</button> <button class="b mal chico" data-rec="' + a.id + '">Rechazar</button>' : '') + '</td></tr>').join('') +
+    (asignaciones.length ? '' : '<tr><td colspan="6">No hay pedidos.</td></tr>') + '</table></div>';
+};
+$('t-asignaciones').addEventListener('click', async (e) => {
+  const apr = e.target.dataset.apr, rec = e.target.dataset.rec; if (!apr && !rec) return;
+  const a = asignaciones.find(x => x.id === (apr || rec)); if (!a) return;
+  if (apr && !confirm('¿Asignar ' + nombreDep(a.comisaria) + ' a ' + a.nombre + '?')) return;
+  let nota = ''; if (rec) { nota = prompt('Motivo (opcional):'); if (nota === null) return; }
+  const r = await sb.rpc('admin_resolver_asignacion', { p_id: a.id, p_aprobar: !!apr, p_comisaria: a.comisaria, p_nota: nota });
+  if (r.error) return alert(r.error.message);
+  registrar(apr ? 'aprobar_asignacion' : 'rechazar_asignacion', { correo: a.email, comisaria: nombreDep(a.comisaria) });
+  toast(apr ? 'Comisaría asignada' : 'Pedido rechazado'); cargarTodo();
+});
+
 /* ---------- PERSONAL ---------- */
 const JERARQUIAS = { 'OFICIAL': ['PRINCIPAL', 'AUXILIAR', 'AYUDANTE', 'SUB AYUDANTE'], 'SUB-OFICIAL': ['MAYOR', 'PRINCIPAL', 'SGTO AYUDANTE', 'SARGENTO', 'CABO', 'AGENTE'] };
 const selCategoria = (id, val) => '<select id="' + id + '"><option value="">Personal…</option><option' + (val === 'OFICIAL' ? ' selected' : '') + '>OFICIAL</option><option' + (val === 'SUB-OFICIAL' ? ' selected' : '') + '>SUB-OFICIAL</option></select>';
@@ -528,7 +555,7 @@ PINTORES.actividad = async () => {
   b.innerHTML = '<h2 class="titulo">Mi actividad</h2><p class="sub">Registro de todo lo que hace el administrador en esta web: ingresos, trámites abiertos, derivaciones, altas y bajas de personal, envíos de enlaces y exportaciones. Últimos 500.</p><div class="card scroll" id="act-l">Cargando…</div>';
   const { data, error } = await sb.from('acciones_admin').select('*').order('fecha', { ascending: false }).limit(500);
   if (error) { $('act-l').innerHTML = '<p class="msg">' + esc(error.message) + ' (¿ejecutaste administrador-seguridad.sql?)</p>'; return; }
-  const nom = { ingreso: 'Ingresó', salida: 'Salió', cierre_por_inactividad: 'Sesión cerrada por inactividad', ver_tramite: 'Abrió un trámite', derivar_tramite: 'Derivó un trámite', marcar_urgente: 'Marcó urgente', quitar_urgente: 'Quitó urgente', exportar_excel: 'Exportó a Excel', enviar_enlace_clave: 'Envió enlace de contraseña', rechazar_pedido_clave: 'Rechazó pedido de contraseña', alta_personal: 'Dio de alta personal', editar_personal: 'Editó personal' };
+  const nom = { ingreso: 'Ingresó', salida: 'Salió', cierre_por_inactividad: 'Sesión cerrada por inactividad', ver_tramite: 'Abrió un trámite', derivar_tramite: 'Derivó un trámite', marcar_urgente: 'Marcó urgente', quitar_urgente: 'Quitó urgente', exportar_excel: 'Exportó a Excel', enviar_enlace_clave: 'Envió enlace de contraseña', rechazar_pedido_clave: 'Rechazó pedido de contraseña', alta_personal: 'Dio de alta personal', editar_personal: 'Editó personal', aprobar_asignacion: 'Aprobó asignación de comisaría', rechazar_asignacion: 'Rechazó asignación de comisaría' };
   $('act-l').innerHTML = '<table><tr><th>Fecha y hora</th><th>Administrador</th><th>Acción</th><th>Detalle</th></tr>' + data.map(a => '<tr><td>' + fmt(a.fecha) + '</td><td>' + esc(a.admin_email) + '</td><td>' + esc(nom[a.accion] || a.accion) + '</td><td><small>' + esc(Object.entries(a.detalle || {}).filter(([k]) => k !== 'id').map(([k, v]) => k + ': ' + (Array.isArray(v) ? v.join(', ') : v)).join(' · ')) + '</small></td></tr>').join('') + (data.length ? '' : '<tr><td colspan="4">Sin registros.</td></tr>') + '</table>';
 };
 iniciar();
