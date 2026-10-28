@@ -1353,8 +1353,10 @@ let comisariasRec = [];
 function pintarOpcionesCom(txt) {
   const sel = document.getElementById('rec-comisaria');
   const actual = sel.value;
-  const t = txt.trim().toLowerCase();
-  const lista = t ? comisariasRec.filter(n => n.toLowerCase().includes(t)) : comisariasRec;
+  const norm = (x) => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[°º]/g, '');
+  const t = norm(txt.trim());
+  const palabras = t.split(/\s+/).filter(Boolean);
+  const lista = palabras.length ? comisariasRec.filter(n => { const h = norm(n); return palabras.every(w => h.includes(w)); }) : comisariasRec;
   sel.innerHTML = '<option value="">' + (lista.length ? 'Elegí tu comisaría… (' + lista.length + ')' : 'No hay coincidencias') + '</option>' +
     lista.map(n => '<option>' + n.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</option>').join('');
   if (actual && lista.includes(actual)) sel.value = actual;
