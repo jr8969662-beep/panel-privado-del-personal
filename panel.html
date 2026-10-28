@@ -2624,7 +2624,7 @@ async function mostrarDetalle(s) {
     const tel = await obtenerContactoDependencia(s.comisaria_asignada);
     if (tel && tel.length) {
       camposSol.push(['📞 Teléfonos de la dependencia',
-        tel.map(t => (typeof t === 'string' ? `${t} (Red WIN)` : `${t.etiqueta}: ${t.numero}${t.medio === 'Red WIN' ? ' (Red WIN)' : ''}`)).join(' · ')]);
+        tel.map(t => (typeof t === 'string' ? t : `${t.etiqueta}: ${t.numero}${t.medio === 'Red WIN' ? ' (Red WIN)' : ''}`)).join(' · ')]);
     }
   } catch (e) {}
   const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
