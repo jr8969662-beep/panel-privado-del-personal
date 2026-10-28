@@ -1527,7 +1527,15 @@ function mostrarMapaDetalle(d) {
   });
 })();
 
+let recuperando = /type=recovery/.test(location.hash || '');
 function mostrarSesion(sesionActiva) {
+  if (sesionActiva && recuperando) {
+    // Elegir nueva contraseña: no se muestra el panel ni el login de fondo
+    vistaLogin.style.display = 'none';
+    vistaPanel.style.display = 'none';
+    document.getElementById('modal-pass').style.background = 'var(--azul-oscuro, #0b1f3a)';
+    return;
+  }
   if (sesionActiva) {
     vistaLogin.style.display = 'none';
     vistaPanel.style.display = 'block';
@@ -1557,6 +1565,7 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
 });
 let enRecuperacion = /type=recovery/.test(location.hash || '');
 supabaseClient.auth.onAuthStateChange((_event, session) => {
+  if (_event === 'PASSWORD_RECOVERY') recuperando = true;
   if (session && session.user) usuarioActual = session.user.email;
   mostrarSesion(!!session);
   if (_event === 'PASSWORD_RECOVERY' || (enRecuperacion && session)) {
@@ -1602,6 +1611,17 @@ document.getElementById('btn-guardar-pass').addEventListener('click', async () =
   btn.textContent = 'Guardar';
   if (error) { alert('No se pudo cambiar la contraseña: ' + error.message); return; }
   modalPass.classList.remove('activo');
+  if (modalPass.dataset.obligatorio) {
+    // Terminó de elegir su clave: se cierra la sesión y entra con la nueva
+    recuperando = false;
+    modalPass.style.background = '';
+    delete modalPass.dataset.obligatorio;
+    document.querySelector('#modal-pass h3').textContent = '🔑 Cambiar contraseña';
+    document.getElementById('btn-cancelar-pass').style.display = '';
+    await supabaseClient.auth.signOut();
+    alert('Contraseña actualizada. Ingresá con tu correo y tu nueva contraseña.');
+    return;
+  }
   delete modalPass.dataset.obligatorio;
   document.getElementById('btn-cancelar-pass').style.display = '';
   mostrarToast('🔑 Contraseña actualizada', 'Tu nueva contraseña ya está activa', 'success', 4000);
