@@ -394,7 +394,7 @@
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
     z-index:9998;align-items:center;justify-content:center;padding:20px;}
   .modal-overlay.activo{display:flex;}
-  #modal-recuperar select{width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.95rem;background:rgba(0,0,0,0.35);color:#fff;font-family:inherit;}
+  #modal-recuperar select{width:100%;margin-top:6px;padding:12px 14px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.95rem;background:rgba(0,0,0,0.35);color:#fff;font-family:inherit;}
   #modal-recuperar select:disabled{opacity:0.5;}
   #modal-recuperar select option{background:#0d2a4d;color:#fff;}
   .modal-caja{background:var(--azul-oscuro);border:1px solid rgba(201,169,97,0.5);
@@ -759,9 +759,10 @@
     <select id="rec-categoria"><option value="">Elegí…</option><option>OFICIAL</option><option>SUB-OFICIAL</option></select>
     <label>Jerarquía</label>
     <select id="rec-jerarquia" disabled><option value="">Primero elegí Personal</option></select>
-    <label>Comisaría (elegí de la lista o escribí para buscar)</label>
-    <input type="text" id="rec-comisaria" list="rec-lista-com" autocomplete="off" placeholder="Escribí para buscar…">
-    <datalist id="rec-lista-com"></datalist>
+    <label>Comisaría</label>
+    <input type="text" id="rec-buscar" autocomplete="off" placeholder="🔍 Escribí para buscar tu comisaría…">
+    <select id="rec-comisaria"><option value="">Elegí tu comisaría…</option></select>
+    <div id="rec-cuenta" style="font-size:0.78rem;color:rgba(255,255,255,0.6);margin:4px 0 0;"></div>
     <label>Teléfono o dato para contactarte (opcional)</label>
     <input type="text" id="rec-comentario" maxlength="100" placeholder="Para que el administrador pueda verificarte">
     <div class="modal-btns">
@@ -1349,13 +1350,25 @@ document.getElementById('rec-categoria').addEventListener('change', (e) => {
   j.disabled = !lista.length;
 });
 let comisariasRec = [];
+function pintarOpcionesCom(txt) {
+  const sel = document.getElementById('rec-comisaria');
+  const actual = sel.value;
+  const t = txt.trim().toLowerCase();
+  const lista = t ? comisariasRec.filter(n => n.toLowerCase().includes(t)) : comisariasRec;
+  sel.innerHTML = '<option value="">' + (lista.length ? 'Elegí tu comisaría… (' + lista.length + ')' : 'No hay coincidencias') + '</option>' +
+    lista.map(n => '<option>' + n.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</option>').join('');
+  if (actual && lista.includes(actual)) sel.value = actual;
+  else if (t && lista.length === 1) sel.value = lista[0];
+  document.getElementById('rec-cuenta').textContent = t ? lista.length + ' resultado(s)' : '';
+}
+document.getElementById('rec-buscar').addEventListener('input', (e) => pintarOpcionesCom(e.target.value));
 async function cargarListaComisariasRec() {
   if (comisariasRec.length) return;
   try {
     const r = await fetch('dependencias.json?v=1');
     const arr = await r.json();
     comisariasRec = [...new Set(arr.map(d => d.nombre).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
-    document.getElementById('rec-lista-com').innerHTML = comisariasRec.map(n => '<option value="' + n.replace(/"/g, '&quot;') + '"></option>').join('');
+    pintarOpcionesCom('');
   } catch (e) { console.warn('No se pudo cargar la lista de comisarías', e); }
 }
 linkRecuperar.addEventListener('click', cargarListaComisariasRec);
@@ -1370,7 +1383,7 @@ document.getElementById('btn-enviar-rec').addEventListener('click', async () => 
   if (!nombre) { alert('Escribí tu apellido y nombre.'); return; }
   if (!cat) { alert('Elegí si sos OFICIAL o SUB-OFICIAL.'); return; }
   if (!jer) { alert('Elegí tu jerarquía.'); return; }
-  if (!com || (comisariasRec.length && !comisariasRec.includes(com))) { alert('Elegí tu comisaría de la lista (podés escribir para buscarla).'); return; }
+  if (!com || (comisariasRec.length && !comisariasRec.includes(com))) { alert('Elegí tu comisaría de la lista (podés escribir arriba para buscarla).'); return; }
   const btn = document.getElementById('btn-enviar-rec');
   btn.disabled = true; btn.textContent = 'Enviando...';
   try {
