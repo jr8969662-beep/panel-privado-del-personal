@@ -1,7 +1,6 @@
 -- =====================================================================
 --  MI COMISARÍA - Seguridad de la web de administrador
 --   * Registro de todo lo que hace el administrador (tabla acciones_admin)
---   * Verificación en 2 pasos (MFA) obligatoria, que se ACTIVA a pedido (ver al final)
 --  Requiere haber ejecutado administrador.sql. Se puede ejecutar más de una vez.
 --  Supabase > SQL Editor > New query > pegar todo > Run.
 -- =====================================================================
@@ -153,11 +152,3 @@ end $$;
 
 commit;
 
--- =====================================================================
---  CUANDO YA ACTIVASTE TU VERIFICACIÓN EN 2 PASOS Y ENTRASTE CON ELLA A LA WEB DE
---  ADMINISTRACIÓN, ejecutá SOLO esta línea para hacerla obligatoria en la base:
---
---     update public.config_admin set valor = 'true' where clave = 'mfa_obligatorio';
---
---  Para apagarla otra vez:  ... set valor = 'false' ...
--- =====================================================================

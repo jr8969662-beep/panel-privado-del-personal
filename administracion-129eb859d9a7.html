@@ -90,10 +90,6 @@
   .chip button{background:none;border:0;color:#fff;cursor:pointer;font-size:1rem;line-height:1}
   #toast{position:fixed;bottom:20px;right:20px;background:var(--azul);border:1px solid var(--dorado);border-radius:10px;padding:12px 16px;z-index:99;box-shadow:0 6px 24px rgba(0,0,0,.5);max-width:340px}
   small{color:rgba(255,255,255,.7)}
-  #mfa{max-width:420px;margin:50px auto;text-align:center}
-  #mfa input{width:100%;margin-bottom:10px;text-align:center;font-size:1.4rem;letter-spacing:.3em}
-  #mfa img{display:block;margin:10px auto;background:#fff;padding:8px;border-radius:8px;width:200px;height:200px}
-  #mfa code{display:block;word-break:break-all;background:rgba(0,0,0,.35);padding:8px;border-radius:6px;font-size:.8rem;margin:8px 0}
   #aviso-inact{position:fixed;top:0;left:0;right:0;background:var(--aviso);color:#000;text-align:center;padding:8px;z-index:90;font-weight:600}
   @media(max-width:820px){#app{flex-direction:column}#menu{width:100%;display:flex;overflow-x:auto;padding:0;border-right:0}
     #menu button{width:auto;white-space:nowrap;border-left:0;border-bottom:3px solid transparent;padding:11px 14px}
@@ -114,7 +110,6 @@
   <p class="msg" id="l-msg"></p>
 </div>
 
-<div id="mfa" class="card oculto"></div>
 <div id="aviso-inact" class="oculto"></div>
 
 <div id="app" class="oculto">
@@ -174,57 +169,12 @@ async function iniciar() {
 }
 function registrar(accion, detalle) { try { sb.rpc('admin_registrar_accion', { p_accion: accion, p_detalle: detalle || {} }).then(() => {}, () => {}); } catch (e) {} }
 
-/* Verificación en 2 pasos (app de autenticación) */
-async function continuarSesion(user) {
-  const { data: nivel, error } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (error) { $('l-msg').textContent = 'No se pudo verificar la seguridad: ' + error.message; return; }
-  if (nivel.currentLevel === 'aal2') return verificarAdmin(user);
-  $('login').classList.add('oculto'); $('mfa').classList.remove('oculto');
-  if (nivel.nextLevel === 'aal2') return pedirCodigo(user);
-  return activarMFA(user);
-}
-async function pedirCodigo(user) {
-  const { data: f } = await sb.auth.mfa.listFactors();
-  const factor = (f.totp || []).find(x => x.status === 'verified');
-  if (!factor) return activarMFA(user);
-  $('mfa').innerHTML = '<h2 style="color:var(--dorado-brilloso)">Verificación en 2 pasos</h2><p>Abrí tu app de autenticación y escribí el código de 6 números.</p><input id="m-cod" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"><button class="b oro" id="m-ok" style="width:100%;padding:11px">Verificar</button><p class="msg" id="m-msg"></p><button class="b gris chico" id="m-salir">Cancelar</button>';
-  $('m-cod').focus();
-  const ir = async () => {
-    $('m-msg').textContent = '';
-    const c = await sb.auth.mfa.challenge({ factorId: factor.id });
-    if (c.error) { $('m-msg').textContent = c.error.message; return; }
-    const v = await sb.auth.mfa.verify({ factorId: factor.id, challengeId: c.data.id, code: $('m-cod').value.trim() });
-    if (v.error) { $('m-msg').textContent = 'Código incorrecto. Probá con el que se muestra ahora.'; $('m-cod').value = ''; return; }
-    $('mfa').classList.add('oculto'); verificarAdmin(user);
-  };
-  $('m-ok').onclick = ir; $('m-cod').addEventListener('keydown', e => { if (e.key === 'Enter') ir(); });
-  $('m-salir').onclick = async () => { await sb.auth.signOut(); location.reload(); };
-}
-async function activarMFA(user) {
-  const { data: f } = await sb.auth.mfa.listFactors();
-  for (const x of ((f && f.all) || [])) if (x.status !== 'verified') await sb.auth.mfa.unenroll({ factorId: x.id });
-  const en = await sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Administrador ' + Date.now() });
-  if (en.error) {
-    $('mfa').innerHTML = '<h2 style="color:var(--dorado-brilloso)">No se pudo activar</h2><p class="msg">' + esc(en.error.message) + '</p><p>Revisá en Supabase: Authentication → Sign In / Providers → Multi-Factor → activá <b>TOTP</b>.</p><button class="b gris" id="m-salir">Salir</button>';
-    $('m-salir').onclick = async () => { await sb.auth.signOut(); location.reload(); }; return;
-  }
-  $('mfa').innerHTML = '<h2 style="color:var(--dorado-brilloso)">Activá la verificación en 2 pasos</h2><p>Por seguridad, la cuenta de administrador necesita un código extra. Hacelo una sola vez:</p><ol style="text-align:left"><li>Instalá <b>Google Authenticator</b> (o Microsoft Authenticator) en tu celular.</li><li>Elegí "Agregar cuenta" → "Escanear código QR" y escaneá esta imagen.</li><li>Escribí abajo el código de 6 números que te muestra.</li></ol><img alt="QR" src="' + esc(en.data.totp.qr_code) + '"><small>Si no podés escanear, ingresá esta clave a mano:</small><code>' + esc(en.data.totp.secret) + '</code><input id="m-cod" inputmode="numeric" maxlength="6" placeholder="000000"><button class="b oro" id="m-ok" style="width:100%;padding:11px">Activar y entrar</button><p class="msg" id="m-msg"></p><button class="b gris chico" id="m-salir">Cancelar</button>';
-  const ir = async () => {
-    $('m-msg').textContent = '';
-    const c = await sb.auth.mfa.challenge({ factorId: en.data.id });
-    if (c.error) { $('m-msg').textContent = c.error.message; return; }
-    const v = await sb.auth.mfa.verify({ factorId: en.data.id, challengeId: c.data.id, code: $('m-cod').value.trim() });
-    if (v.error) { $('m-msg').textContent = 'Código incorrecto. Probá con el que se muestra ahora.'; $('m-cod').value = ''; return; }
-    $('mfa').classList.add('oculto'); await verificarAdmin(user); registrar('activar_mfa');
-  };
-  $('m-ok').onclick = ir; $('m-cod').addEventListener('keydown', e => { if (e.key === 'Enter') ir(); });
-  $('m-salir').onclick = async () => { await sb.auth.signOut(); location.reload(); };
-}
+async function continuarSesion(user) { return verificarAdmin(user); }
 async function verificarAdmin(user) {
   const { data, error } = await sb.from('personal').select('rol,activo').eq('user_id', user.id).maybeSingle();
   if (error || !data || data.rol !== 'admin' || !data.activo) {
     await sb.auth.signOut();
-    $('mfa').classList.add('oculto'); $('login').classList.remove('oculto');
+    $('login').classList.remove('oculto');
     $('l-msg').textContent = 'Esta cuenta no es de administrador.';
     return;
   }
@@ -564,7 +514,7 @@ PINTORES.actividad = async () => {
   b.innerHTML = '<h2 class="titulo">Mi actividad</h2><p class="sub">Registro de todo lo que hace el administrador en esta web: ingresos, trámites abiertos, derivaciones, altas y bajas de personal, envíos de enlaces y exportaciones. Últimos 500.</p><div class="card scroll" id="act-l">Cargando…</div>';
   const { data, error } = await sb.from('acciones_admin').select('*').order('fecha', { ascending: false }).limit(500);
   if (error) { $('act-l').innerHTML = '<p class="msg">' + esc(error.message) + ' (¿ejecutaste administrador-seguridad.sql?)</p>'; return; }
-  const nom = { ingreso: 'Ingresó', salida: 'Salió', cierre_por_inactividad: 'Sesión cerrada por inactividad', activar_mfa: 'Activó verificación en 2 pasos', ver_tramite: 'Abrió un trámite', derivar_tramite: 'Derivó un trámite', marcar_urgente: 'Marcó urgente', quitar_urgente: 'Quitó urgente', exportar_excel: 'Exportó a Excel', enviar_enlace_clave: 'Envió enlace de contraseña', rechazar_pedido_clave: 'Rechazó pedido de contraseña', alta_personal: 'Dio de alta personal', editar_personal: 'Editó personal' };
+  const nom = { ingreso: 'Ingresó', salida: 'Salió', cierre_por_inactividad: 'Sesión cerrada por inactividad', ver_tramite: 'Abrió un trámite', derivar_tramite: 'Derivó un trámite', marcar_urgente: 'Marcó urgente', quitar_urgente: 'Quitó urgente', exportar_excel: 'Exportó a Excel', enviar_enlace_clave: 'Envió enlace de contraseña', rechazar_pedido_clave: 'Rechazó pedido de contraseña', alta_personal: 'Dio de alta personal', editar_personal: 'Editó personal' };
   $('act-l').innerHTML = '<table><tr><th>Fecha y hora</th><th>Administrador</th><th>Acción</th><th>Detalle</th></tr>' + data.map(a => '<tr><td>' + fmt(a.fecha) + '</td><td>' + esc(a.admin_email) + '</td><td>' + esc(nom[a.accion] || a.accion) + '</td><td><small>' + esc(Object.entries(a.detalle || {}).filter(([k]) => k !== 'id').map(([k, v]) => k + ': ' + (Array.isArray(v) ? v.join(', ') : v)).join(' · ')) + '</small></td></tr>').join('') + (data.length ? '' : '<tr><td colspan="4">Sin registros.</td></tr>') + '</table>';
 };
 iniciar();
