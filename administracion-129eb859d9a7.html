@@ -484,8 +484,16 @@ const juntarJerarquia = (cat, rango) => cat && rango ? cat + ' ' + rango : '';
 function enlazarJerarquia(idCat, idRango) { $(idCat).onchange = () => { $(idRango).outerHTML = selRango(idRango, $(idCat).value, ''); }; }
 let editandoCom = null;
 function chipsHtml(arr) { return arr.map((c, i) => '<span class="chip">' + esc(nombreDep(c)) + '<button data-quitar="' + i + '">×</button></span>').join('') || '<small>Ninguna</small>'; }
-const opcionesDeps = () => deps.slice().sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true })).map(x => '<option value="' + esc(x.nombre) + '"></option>').join('');
-const claveDeNombre = (n) => (deps.find(d => d.nombre === n.trim()) || {}).clave;
+const normTxt = (x) => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[°º]/g, '');
+const pickerHtml = (id) => '<input id="' + id + '-q" placeholder="🔍 Escribí para buscar comisaría…" size="30" autocomplete="off"><select id="' + id + '-s"><option value="">Elegí una comisaría…</option></select>';
+function pintarPicker(id) {
+  const pal = normTxt($(id + '-q').value.trim()).split(/\s+/).filter(Boolean);
+  const todas = deps.slice().sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
+  const l = pal.length ? todas.filter(d => { const h = normTxt(d.nombre); return pal.every(w => h.includes(w)); }) : todas;
+  $(id + '-s').innerHTML = '<option value="">' + (l.length ? 'Elegí una comisaría… (' + l.length + ')' : 'No hay coincidencias') + '</option>' + l.map(d => '<option value="' + esc(d.clave) + '">' + esc(d.nombre) + '</option>').join('');
+  if (pal.length && l.length === 1) $(id + '-s').value = l[0].clave;
+}
+function enlazarPicker(id) { pintarPicker(id); $(id + '-q').addEventListener('input', () => pintarPicker(id)); }
 let altaCom = [], persQ = '';
 PINTORES.personal = () => {
   const lista = personal.filter(p => !persQ || (p.nombre + ' ' + p.email).toLowerCase().includes(persQ));
@@ -493,15 +501,16 @@ PINTORES.personal = () => {
   const tabla = (t, l) => '<div class="card scroll"><h3>' + t + ' (' + l.length + ')</h3><table><tr><th>Nombre y jerarquía</th><th>Legajo</th><th>Correo</th><th>Comisarías</th><th>Último ingreso</th><th>Estado</th><th></th></tr>' + (l.map(fila).join('') || '<tr><td colspan="7">Nadie cargado.</td></tr>') + '</table></div>';
   $('t-personal').innerHTML = '<h2 class="titulo">Personal</h2><p class="sub">Cuentas que usan el panel privado.</p>' +
     '<div class="card"><h3>Dar de alta</h3><p><small>Primero creá el usuario en Supabase → Authentication → Users → Add user (con "Auto Confirm User"), después cargalo acá.</small></p><div class="fila"><input id="a-mail" type="email" placeholder="correo" size="26"><input id="a-nom" placeholder="Apellido y nombre" size="22"><input id="a-leg" inputmode="numeric" maxlength="5" placeholder="Legajo (5 números)" size="16"></div><div class="fila">' + selCategoria('a-cat', '') + selRango('a-ran', '', '') + '</div>' +
-    '<div class="fila"><input id="a-com" list="dl-deps" placeholder="Agregar comisaría (escribí para buscar)" size="38" autocomplete="off"><datalist id="dl-deps">' + opcionesDeps() + '</datalist><button class="b chico" id="a-add">+ Agregar</button></div><div id="a-chips">' + chipsHtml(altaCom) + '</div><div class="fila" style="margin-top:10px"><button class="b ok" id="a-alta">Dar de alta</button></div></div>' +
+    '<div class="fila">' + pickerHtml('a-com') + '<button class="b chico" id="a-add">+ Agregar</button></div><div id="a-chips">' + chipsHtml(altaCom) + '</div><div class="fila" style="margin-top:10px"><button class="b ok" id="a-alta">Dar de alta</button></div></div>' +
     '<div class="card"><input id="p-q" placeholder="🔍 Buscar persona…" size="28" value="' + esc(persQ) + '"></div>' +
     tabla('👑 Administradores', lista.filter(p => p.rol === 'admin')) + tabla('👮 Personal de comisarías', lista.filter(p => p.rol !== 'admin'));
   enlazarJerarquia('a-cat', 'a-ran');
+  enlazarPicker('a-com');
   $('p-q').addEventListener('input', (e) => { persQ = e.target.value.toLowerCase(); const pos = e.target.selectionStart; PINTORES.personal(); $('p-q').focus(); $('p-q').setSelectionRange(pos, pos); });
 };
 $('t-personal').addEventListener('click', async (e) => {
   const t = e.target;
-  if (t.id === 'a-add') { const c = claveDeNombre($('a-com').value); if (!c) return alert('Elegí una comisaría de la lista.'); if (!altaCom.includes(c)) altaCom.push(c); $('a-com').value = ''; $('a-chips').innerHTML = chipsHtml(altaCom); }
+  if (t.id === 'a-add') { const c = $('a-com-s').value; if (!c) return alert('Elegí una comisaría de la lista.'); if (!altaCom.includes(c)) altaCom.push(c); $('a-com-q').value = ''; pintarPicker('a-com'); $('a-chips').innerHTML = chipsHtml(altaCom); }
   else if (t.dataset.quitar != null && t.closest('#a-chips')) { altaCom.splice(+t.dataset.quitar, 1); $('a-chips').innerHTML = chipsHtml(altaCom); }
   else if (t.id === 'a-alta') { const r = await sb.rpc('admin_alta_personal', { p_email: $('a-mail').value, p_nombre: $('a-nom').value, p_comisarias: altaCom, p_legajo: $('a-leg').value, p_jerarquia: juntarJerarquia($('a-cat').value, $('a-ran').value) }); if (r.error) return alert(r.error.message); registrar('alta_personal', { correo: $('a-mail').value, legajo: $('a-leg').value, comisarias: altaCom }); altaCom = []; toast('Persona dada de alta'); cargarTodo(); }
   else if (t.dataset.edit) editarPersona(t.dataset.edit);
@@ -510,11 +519,12 @@ function editarPersona(uid) {
   const p = personal.find(x => x.user_id === uid); if (!p) return; editandoCom = (p.comisarias || []).slice();
   $('modal').innerHTML = '<div style="max-width:620px"><div class="fila"><h3 style="flex:1">Editar: ' + esc(p.email) + '</h3><button class="b gris chico" data-cerrar="1">✕</button></div>' +
     '<div class="fila"><input id="e-nom" value="' + esc(p.nombre || '') + '" placeholder="Nombre" size="30"><input id="e-leg" inputmode="numeric" maxlength="5" value="' + esc(p.legajo || '') + '" placeholder="Legajo (5 números)" size="16"></div><div class="fila">' + selCategoria('e-cat', partirJerarquia(p.jerarquia)[0]) + selRango('e-ran', partirJerarquia(p.jerarquia)[0], partirJerarquia(p.jerarquia)[1]) + '</div><p><b>Comisarías que puede ver</b></p><div id="e-chips">' + chipsHtml(editandoCom) + '</div>' +
-    '<div class="fila"><input id="e-com" list="dl-deps2" placeholder="Agregar comisaría…" size="34" autocomplete="off"><datalist id="dl-deps2">' + opcionesDeps() + '</datalist><button class="b chico" id="e-add">+ Agregar</button></div>' +
+    '<div class="fila">' + pickerHtml('e-com') + '<button class="b chico" id="e-add">+ Agregar</button></div>' +
     '<div class="fila"><label><input type="checkbox" id="e-act"' + (p.activo ? ' checked' : '') + '> Cuenta activa (si la destildás, no puede ingresar)</label></div><div class="fila"><button class="b ok" id="e-guardar">Guardar</button></div></div>';
   $('modal').classList.remove('oculto');
   enlazarJerarquia('e-cat', 'e-ran');
-  $('e-add').onclick = () => { const c = claveDeNombre($('e-com').value); if (!c) return alert('Elegí una comisaría de la lista.'); if (!editandoCom.includes(c)) editandoCom.push(c); $('e-com').value = ''; $('e-chips').innerHTML = chipsHtml(editandoCom); };
+  enlazarPicker('e-com');
+  $('e-add').onclick = () => { const c = $('e-com-s').value; if (!c) return alert('Elegí una comisaría de la lista.'); if (!editandoCom.includes(c)) editandoCom.push(c); $('e-com-q').value = ''; pintarPicker('e-com'); $('e-chips').innerHTML = chipsHtml(editandoCom); };
   $('e-chips').onclick = (e) => { if (e.target.dataset.quitar != null) { editandoCom.splice(+e.target.dataset.quitar, 1); $('e-chips').innerHTML = chipsHtml(editandoCom); } };
   $('e-guardar').onclick = async () => { const r = await sb.rpc('admin_actualizar_personal', { p_user_id: uid, p_nombre: $('e-nom').value, p_comisarias: editandoCom, p_activo: $('e-act').checked, p_legajo: $('e-leg').value, p_jerarquia: juntarJerarquia($('e-cat').value, $('e-ran').value) }); if (r.error) return alert(r.error.message); registrar('editar_personal', { correo: p.email, activo: $('e-act').checked, comisarias: editandoCom }); cerrarModal(); toast('Guardado'); cargarTodo(); };
 }
