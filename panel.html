@@ -685,7 +685,7 @@
       <h3 id="detalle-titulo"></h3>
       <p class="detalle-fecha" id="detalle-fecha"></p>
       <div id="detalle-contenido"></div>
-      <div id="detalle-mapa-caja" style="display:none;"><h4>📍 Ubicación del domicilio</h4><div id="detalle-mapa"></div><a id="detalle-mapa-link" target="_blank" rel="noopener">Abrir en Google Maps ↗</a></div>
+      <div id="detalle-mapa-caja" style="display:none;"><h4>📍 Domicilio y comisaría</h4><div id="detalle-mapa"></div><div id="detalle-mapa-extra"></div></div>
       <div class="btns">
         <button id="btn-validar">✓ Validar</button>
         <button id="btn-denegar">✕ Denegar</button>
@@ -1419,7 +1419,7 @@ document.getElementById('rec-buscar').addEventListener('input', (e) => pintarOpc
 async function cargarListaComisariasRec() {
   if (comisariasRec.length) return;
   try {
-    const r = await fetch('dependencias.json?v=1');
+    const r = await fetch('dependencias.json?v=2');
     const arr = await r.json();
     comisariasRec = [...new Set(arr.map(d => d.nombre).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
     pintarOpcionesCom('');
@@ -1517,7 +1517,7 @@ const LISTA_COMISARIAS = ["DUR1-S1-Cría 10° (Ex Cria 102)", "DUR1-S1-Dsto. Ato
 let DEP_OFICIAL = {};
 async function cargarDepOficial() {
   try {
-    const r = await fetch('dependencias.json?v=1');
+    const r = await fetch('dependencias.json?v=2');
     if (!r.ok) return;
     (await r.json()).forEach(d => { DEP_OFICIAL[d.clave] = d; });
   } catch (e) { console.warn('No se pudo cargar dependencias.json', e); }
@@ -1606,12 +1606,35 @@ function mostrarMapaDetalle(d) {
   const caja = document.getElementById('detalle-mapa-caja');
   if (mapaDetalle) { mapaDetalle.remove(); mapaDetalle = null; }
   const lat = parseFloat(d && d._ubicacion_lat), lon = parseFloat(d && d._ubicacion_lon);
-  if (!isFinite(lat) || !isFinite(lon) || typeof L === 'undefined') { caja.style.display = 'none'; return; }
+  const tieneDom = isFinite(lat) && isFinite(lon);
+  const dep = (typeof solicitudAbierta !== 'undefined' && solicitudAbierta) ? DEP_OFICIAL[solicitudAbierta.comisaria_asignada] : null;
+  const dl = dep ? parseFloat(dep.lat) : NaN, dn = dep ? parseFloat(dep.lon) : NaN;
+  const tieneDep = isFinite(dl) && isFinite(dn);
+  if ((!tieneDom && !tieneDep) || typeof L === 'undefined') { caja.style.display = 'none'; return; }
   caja.style.display = 'block';
-  document.getElementById('detalle-mapa-link').href = `https://www.google.com/maps?q=${lat},${lon}`;
-  mapaDetalle = L.map('detalle-mapa', { center: [lat, lon], zoom: 17 });
+  mapaDetalle = L.map('detalle-mapa', { center: tieneDom ? [lat, lon] : [dl, dn], zoom: 16 });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaDetalle);
-  L.marker([lat, lon]).addTo(mapaDetalle);
+  const pts = [];
+  if (tieneDom) { L.marker([lat, lon]).addTo(mapaDetalle).bindPopup('<strong>Domicilio del ciudadano</strong>'); pts.push([lat, lon]); }
+  if (tieneDep) {
+    const ic = L.divIcon({ className: '', html: '<div style="background:#1d4ed8;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)">🏢</div>', iconSize: [30, 30], iconAnchor: [15, 15] });
+    L.marker([dl, dn], { icon: ic }).addTo(mapaDetalle).bindPopup('<strong>' + escapeHtml(nombreComisaria(solicitudAbierta.comisaria_asignada)) + '</strong>');
+    pts.push([dl, dn]);
+  }
+  if (pts.length > 1) mapaDetalle.fitBounds(pts, { padding: [40, 40], maxZoom: 17 });
+  else mapaDetalle.setView(pts[0], 17);
+  let info = '';
+  if (tieneDom && tieneDep) {
+    const R = 6371, rad = x => x * Math.PI / 180;
+    const h = Math.sin(rad(dl - lat) / 2) ** 2 + Math.cos(rad(lat)) * Math.cos(rad(dl)) * Math.sin(rad(dn - lon) / 2) ** 2;
+    const km = 2 * R * Math.asin(Math.sqrt(h));
+    info = `<div style="margin-top:8px;font-size:.85rem;">🏢 Comisaría a unos <strong>${km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1) + ' km'}</strong> del domicilio (en línea recta). 🔴 Domicilio · 🔵 Comisaría</div>`;
+  }
+  const links = [];
+  if (tieneDom) links.push(`<a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" rel="noopener">Ver domicilio ↗</a>`);
+  if (tieneDep) links.push(`<a href="https://www.google.com/maps/dir/?api=1&destination=${dl},${dn}" target="_blank" rel="noopener">Cómo llegar a la comisaría ↗</a>`);
+  if (tieneDom && tieneDep) links.push(`<a href="https://www.google.com/maps/dir/?api=1&origin=${dl},${dn}&destination=${lat},${lon}" target="_blank" rel="noopener">Ruta comisaría → domicilio ↗</a>`);
+  document.getElementById('detalle-mapa-extra').innerHTML = info + '<div style="display:flex;gap:14px;flex-wrap:wrap;">' + links.join('') + '</div>';
   setTimeout(() => mapaDetalle && mapaDetalle.invalidateSize(), 250);
 }
 
@@ -1656,7 +1679,7 @@ document.getElementById('btn-pedir-asig').addEventListener('click', async () => 
   document.getElementById('modal-asignacion').classList.add('activo');
   if (!depsAsig.length) {
     try {
-      const arr = await (await fetch('dependencias.json?v=1')).json();
+      const arr = await (await fetch('dependencias.json?v=2')).json();
       const vistos = new Set();
       depsAsig = arr.filter(d => d.nombre && !vistos.has(d.clave) && vistos.add(d.clave)).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
     } catch (e) { console.warn('No se pudo cargar la lista de comisarías', e); }

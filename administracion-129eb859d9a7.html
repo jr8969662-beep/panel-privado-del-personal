@@ -216,7 +216,7 @@ $('refrescar').onclick = () => cargarTodo();
 /* ---------- Carga de datos ---------- */
 async function cargarTodo(silencioso) {
   if (!deps.length) {
-    try { deps = await (await fetch('dependencias.json?v=1')).json(); } catch (e) { deps = []; }
+    try { deps = await (await fetch('dependencias.json?v=2')).json(); } catch (e) { deps = []; }
     deps.forEach(d => { d.nombre = d.nombre || String(d.clave).replace(/^DUR\s*\d+\s*-\s*S\s*\d+\s*-\s*/i, '').trim(); depPorClave[d.clave] = d; });
   }
   const [s, p, pe, as] = await Promise.all([
