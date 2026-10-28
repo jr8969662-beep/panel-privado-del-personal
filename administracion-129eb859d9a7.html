@@ -237,13 +237,14 @@ async function cargarPersonal() {
   const { data, error } = await sb.rpc('admin_listar_personal');
   if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + '</p>'; return; }
   let h = '<div class="card"><h3>Dar de alta</h3><p><small>Primero creá el usuario en Supabase → Authentication → Users → Add user (con "Auto Confirm User"), después cargalo acá.</small></p><div class="fila"><input id="a-mail" type="email" placeholder="correo" size="26"><input id="a-nom" placeholder="Nombre" size="20"><input id="a-com" placeholder="Comisarías (separadas por ;)" size="36"><button class="b ok" id="a-alta">Dar de alta</button></div></div>' +
-    '<div class="card scroll"><table><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Comisarías</th><th>Último ingreso</th><th>Activo</th><th></th></tr>';
-  data.forEach(p => {
-    h += '<tr data-u="' + p.user_id + '"><td><input class="p-nom" value="' + esc(p.nombre) + '"></td><td>' + esc(p.email) + '</td><td>' + esc(p.rol) +
+    '';
+  const fila = (p) => '<tr data-u="' + p.user_id + '"><td><input class="p-nom" value="' + esc(p.nombre) + '"></td><td>' + esc(p.email) + '</td><td>' + esc(p.rol) +
       '</td><td><input class="p-com" size="30" value="' + esc((p.comisarias || []).join('; ')) + '"></td><td>' + fmt(p.ultimo_ingreso) +
       '</td><td><input type="checkbox" class="p-act"' + (p.activo ? ' checked' : '') + '></td><td><button class="b" data-gp="1">Guardar</button></td></tr>';
-  });
-  box.innerHTML = h + '</table></div>';
+  const tabla = (titulo, lista) => '<div class="card scroll"><h3>' + titulo + ' (' + lista.length + ')</h3><table><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Comisarías</th><th>Último ingreso</th><th>Activo</th><th></th></tr>' +
+      (lista.map(fila).join('') || '<tr><td colspan="7">Nadie cargado.</td></tr>') + '</table></div>';
+  h += tabla('👑 Administradores', data.filter(p => p.rol === 'admin')) + tabla('👮 Personal de comisarías', data.filter(p => p.rol !== 'admin'));
+  box.innerHTML = h;
 }
 const listaCom = (t) => t.split(';').map(x => x.trim()).filter(Boolean);
 $('t-personal').addEventListener('click', async (e) => {
