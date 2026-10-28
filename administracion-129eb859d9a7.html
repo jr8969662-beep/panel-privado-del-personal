@@ -7,90 +7,133 @@
 <title>Administración · Mi Comisaría</title>
 <style>
   :root{--azul-fondo:#0a1e3d;--azul-oscuro:#0d2a4d;--azul:#1a3a6b;--azul-claro:#2c5aa0;
-    --dorado:#c9a961;--dorado-claro:#e6c988;--dorado-brilloso:#f0d78c;--ok:#15803d;--mal:#b91c1c;}
+    --dorado:#c9a961;--dorado-claro:#e6c988;--dorado-brilloso:#f0d78c;--ok:#15803d;--mal:#b91c1c;--aviso:#ca8a04;}
   *{box-sizing:border-box}
   html{background:var(--azul-fondo);min-height:100%}
   body{margin:0;font-family:'Segoe UI',-apple-system,Arial,sans-serif;background:var(--azul-fondo);color:#fff;position:relative;min-height:100vh}
   body::before{content:'';position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:100vmin;height:100vmin;
     background-image:url('logo-policia.png.jpeg');background-size:contain;background-repeat:no-repeat;background-position:center;
-    opacity:.55;pointer-events:none;z-index:0}
+    opacity:.45;pointer-events:none;z-index:0}
   body>*{position:relative;z-index:1}
-  header{background:linear-gradient(135deg,var(--azul-oscuro),var(--azul));padding:16px 24px;display:flex;align-items:center;
+  header{background:linear-gradient(135deg,var(--azul-oscuro),var(--azul));padding:12px 22px;display:flex;align-items:center;
     justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:3px solid var(--dorado);box-shadow:0 4px 16px rgba(0,0,0,.3)}
-  header h1{font-size:1.2rem;margin:0;color:var(--dorado-brilloso);display:flex;align-items:center;gap:12px}
-  header h1::before{content:'';width:44px;height:44px;background:url('logo-policia.png.jpeg') center/contain no-repeat;filter:drop-shadow(0 2px 10px rgba(201,169,97,.5))}
-  header small{color:var(--dorado-claro)}
-  nav{background:rgba(13,42,77,.92);display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(201,169,97,.3)}
-  nav button{background:none;border:0;color:#b8c7e0;padding:13px 18px;cursor:pointer;font-size:.95rem;border-bottom:3px solid transparent}
-  nav button:hover{color:#fff}
-  nav button.on{color:var(--dorado-brilloso);border-bottom-color:var(--dorado)}
-  nav .n{background:var(--mal);color:#fff;border-radius:10px;padding:1px 7px;font-size:.75rem;margin-left:6px}
-  main{padding:20px;max-width:1300px;margin:0 auto}
-  .card{background:rgba(13,42,77,.88);backdrop-filter:blur(8px);border:1px solid rgba(201,169,97,.3);border-radius:12px;padding:18px;box-shadow:0 4px 16px rgba(0,0,0,.35);margin-bottom:16px}
-  .card h2,.card h3{color:var(--dorado-brilloso);margin-top:0}
-  table{width:100%;border-collapse:collapse;font-size:.88rem}
-  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.12);vertical-align:top}
-  th{background:rgba(10,30,61,.95);color:var(--dorado-claro);position:sticky;top:0}
+  header h1{font-size:1.1rem;margin:0;color:var(--dorado-brilloso);display:flex;align-items:center;gap:12px}
+  header h1::before{content:'';width:42px;height:42px;background:url('logo-policia.png.jpeg') center/contain no-repeat;filter:drop-shadow(0 2px 10px rgba(201,169,97,.5))}
+  header h1 small{display:block;font-size:.72rem;font-weight:400;color:var(--dorado-claro)}
+  .quien{font-size:.85rem;color:var(--dorado-claro);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  #app{display:flex;min-height:calc(100vh - 70px)}
+  #menu{width:215px;flex-shrink:0;background:rgba(10,30,61,.94);border-right:1px solid rgba(201,169,97,.25);padding:10px 0}
+  #menu button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;color:#b8c7e0;padding:12px 18px;cursor:pointer;font-size:.93rem;text-align:left;border-left:4px solid transparent}
+  #menu button:hover{background:rgba(255,255,255,.06);color:#fff}
+  #menu button.on{color:var(--dorado-brilloso);background:rgba(201,169,97,.12);border-left-color:var(--dorado)}
+  #menu .n{margin-left:auto;background:var(--mal);color:#fff;border-radius:10px;padding:1px 8px;font-size:.72rem}
+  main{flex:1;padding:20px;min-width:0;max-width:1400px}
+  h2.titulo{margin:0 0 4px;color:var(--dorado-brilloso);font-size:1.3rem}
+  p.sub{margin:0 0 16px;color:rgba(255,255,255,.7);font-size:.88rem}
+  .card{background:rgba(13,42,77,.9);backdrop-filter:blur(8px);border:1px solid rgba(201,169,97,.3);border-radius:12px;padding:16px;box-shadow:0 4px 16px rgba(0,0,0,.35);margin-bottom:16px}
+  .card h3{color:var(--dorado-brilloso);margin:0 0 10px;font-size:1rem}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.1);vertical-align:top}
+  th{background:rgba(10,30,61,.97);color:var(--dorado-claro);position:sticky;top:0;white-space:nowrap;cursor:default}
+  th.ord{cursor:pointer} th.ord:hover{color:#fff}
+  tr.clic{cursor:pointer} tr.clic:hover{background:rgba(255,255,255,.07)}
+  tr.urg{background:rgba(185,28,28,.18)}
   button.b,a.b{background:linear-gradient(135deg,var(--azul),var(--azul-claro));color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.85rem;text-decoration:none;display:inline-block}
-  button.b:hover{border-color:var(--dorado)}
+  button.b:hover{border-color:var(--dorado)} button.b:disabled{opacity:.5;cursor:default}
   button.b.ok{background:linear-gradient(135deg,#166534,var(--ok))}
   button.b.mal{background:linear-gradient(135deg,#991b1b,var(--mal))}
   button.b.gris{background:rgba(255,255,255,.12)}
-  #l-entrar{background:linear-gradient(135deg,var(--dorado),var(--dorado-brilloso));color:var(--azul-oscuro);font-weight:700;width:100%;padding:11px}
-  input,select{padding:9px;border:1px solid rgba(255,255,255,.25);border-radius:8px;font-size:.9rem;max-width:100%;background:rgba(0,0,0,.35);color:#fff}
+  button.b.oro{background:linear-gradient(135deg,var(--dorado),var(--dorado-brilloso));color:var(--azul-oscuro);font-weight:700}
+  button.b.chico{padding:4px 9px;font-size:.78rem}
+  input,select{padding:9px;border:1px solid rgba(255,255,255,.25);border-radius:8px;font-size:.9rem;max-width:100%;background:rgba(0,0,0,.35);color:#fff;font-family:inherit}
   input:focus,select:focus{outline:none;border-color:var(--dorado);box-shadow:0 0 0 3px rgba(201,169,97,.2)}
   input::placeholder{color:rgba(255,255,255,.5)}
   select option{background:var(--azul-oscuro);color:#fff}
   .fila{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
-  .tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:.75rem;background:rgba(255,255,255,.15)}
+  .tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:.74rem;background:rgba(255,255,255,.15);white-space:nowrap}
   .tag.pendiente{background:rgba(202,138,4,.35);color:#ffe082}
-  .tag.enviado,.tag.validado{background:rgba(21,128,61,.4);color:#a7f3c0}
+  .tag.enviado,.tag.procesado{background:rgba(21,128,61,.4);color:#a7f3c0}
   .tag.rechazado,.tag.denegado{background:rgba(185,28,28,.4);color:#fecaca}
+  .tag.rojo{background:rgba(185,28,28,.45);color:#fecaca} .tag.amar{background:rgba(202,138,4,.4);color:#ffe082}
   #login{max-width:380px;margin:60px auto;text-align:center}
   #login::before{content:'';display:block;width:100px;height:100px;margin:0 auto 14px;background:url('logo-policia.png.jpeg') center/contain no-repeat;filter:drop-shadow(0 4px 20px rgba(201,169,97,.5))}
   #login input{width:100%;margin-bottom:10px}
   .msg{color:#fca5a5;font-size:.88rem;min-height:1.2em}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-  .kpi{background:rgba(13,42,77,.88);border:1px solid rgba(201,169,97,.3);border-radius:12px;padding:16px;box-shadow:0 4px 16px rgba(0,0,0,.35)}
-  .kpi b{font-size:1.9rem;display:block;color:var(--dorado-brilloso)}
-  .barra{background:rgba(255,255,255,.15);border-radius:4px;height:12px;margin:2px 0 8px}
-  .barra i{display:block;height:12px;background:linear-gradient(90deg,var(--dorado),var(--dorado-claro));border-radius:4px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}
+  .kpi{background:rgba(13,42,77,.9);border:1px solid rgba(201,169,97,.3);border-radius:12px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,.35);cursor:default}
+  .kpi.clic{cursor:pointer} .kpi.clic:hover{border-color:var(--dorado)}
+  .kpi b{font-size:1.9rem;display:block;color:var(--dorado-brilloso);line-height:1.1}
+  .kpi span{font-size:.82rem;color:rgba(255,255,255,.75)}
+  .kpi.alerta b{color:#fca5a5}
+  .barra{background:rgba(255,255,255,.14);border-radius:4px;height:10px;margin:2px 0 9px}
+  .barra i{display:block;height:10px;background:linear-gradient(90deg,var(--dorado),var(--dorado-claro));border-radius:4px}
+  .dias{display:flex;align-items:flex-end;gap:2px;height:110px;margin-top:8px}
+  .dias div{flex:1;background:linear-gradient(0deg,var(--dorado),var(--dorado-claro));border-radius:2px 2px 0 0;min-height:2px}
+  .alerta-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:rgba(0,0,0,.25);margin-bottom:8px;cursor:pointer;border-left:4px solid var(--aviso)}
+  .alerta-item.roja{border-left-color:var(--mal)} .alerta-item.verde{border-left-color:var(--ok);cursor:default}
+  .alerta-item:hover{background:rgba(255,255,255,.08)}
   .oculto{display:none !important}
-  .fotos img{max-width:220px;border:2px solid var(--dorado);border-radius:8px;margin:4px;cursor:pointer}
-  pre{white-space:pre-wrap;word-break:break-word;font-size:.82rem;background:rgba(0,0,0,.3);padding:10px;border-radius:6px}
   .scroll{overflow-x:auto}
+  .pag{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px;font-size:.85rem}
+  .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+  .modal>div{background:var(--azul-oscuro);border:1px solid var(--dorado);border-radius:14px;max-width:880px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  .modal h3{margin:0 0 4px;color:var(--dorado-brilloso)}
+  dl.det{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:12px 0}
+  dl.det div{background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px}
+  dl.det dt{font-size:.72rem;color:var(--dorado-claro);text-transform:uppercase;letter-spacing:.03em}
+  dl.det dd{margin:2px 0 0;word-break:break-word}
+  .fotos{display:flex;flex-wrap:wrap;gap:10px}
+  .fotos figure{margin:0;text-align:center;font-size:.75rem}
+  .fotos img{max-width:230px;border:2px solid var(--dorado);border-radius:8px;cursor:zoom-in;display:block}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:rgba(201,169,97,.2);border:1px solid var(--dorado);border-radius:14px;padding:2px 4px 2px 10px;font-size:.78rem;margin:2px}
+  .chip button{background:none;border:0;color:#fff;cursor:pointer;font-size:1rem;line-height:1}
+  #toast{position:fixed;bottom:20px;right:20px;background:var(--azul);border:1px solid var(--dorado);border-radius:10px;padding:12px 16px;z-index:99;box-shadow:0 6px 24px rgba(0,0,0,.5);max-width:340px}
   small{color:rgba(255,255,255,.7)}
+  @media(max-width:820px){#app{flex-direction:column}#menu{width:100%;display:flex;overflow-x:auto;padding:0;border-right:0}
+    #menu button{width:auto;white-space:nowrap;border-left:0;border-bottom:3px solid transparent;padding:11px 14px}
+    #menu button.on{border-bottom-color:var(--dorado)}main{padding:12px}}
 </style>
 </head>
 <body>
-<header><h1>Administración · Mi Comisaría</h1><span><small id="quien"></small> <button class="b gris oculto" id="salir">Salir</button></span></header>
+<header>
+  <h1><span>Administración · Mi Comisaría<small>Policía de Salta · Control de trámites de toda la provincia</small></span></h1>
+  <div class="quien"><span id="quien"></span><span id="actualizado"></span><button class="b gris chico oculto" id="refrescar">⟳ Actualizar</button><button class="b gris chico oculto" id="salir">Salir</button></div>
+</header>
 
 <div id="login" class="card">
-  <h2>Acceso de administrador</h2>
+  <h2 style="color:var(--dorado-brilloso)">Acceso de administrador</h2>
   <input type="email" id="l-email" placeholder="Correo" autocomplete="username">
   <input type="password" id="l-pass" placeholder="Contraseña" autocomplete="current-password">
-  <button class="b" id="l-entrar">Ingresar</button>
+  <button class="b oro" id="l-entrar" style="width:100%;padding:11px">Ingresar</button>
   <p class="msg" id="l-msg"></p>
 </div>
 
 <div id="app" class="oculto">
-  <nav id="tabs">
-    <button data-t="pedidos" class="on">🔑 Pedidos de contraseña<span class="n oculto" id="n-ped"></span></button>
+  <nav id="menu">
+    <button data-t="inicio" class="on">🏠 Inicio</button>
     <button data-t="tramites">📄 Trámites</button>
+    <button data-t="comisarias">🏢 Comisarías</button>
+    <button data-t="pedidos">🔑 Pedidos de clave<span class="n oculto" id="n-ped"></span></button>
     <button data-t="personal">👮 Personal</button>
-    <button data-t="accesos">📋 Accesos</button>
     <button data-t="stats">📊 Estadísticas</button>
+    <button data-t="accesos">📋 Accesos</button>
   </nav>
   <main>
-    <section id="t-pedidos"></section>
+    <section id="t-inicio"></section>
     <section id="t-tramites" class="oculto"></section>
+    <section id="t-comisarias" class="oculto"></section>
+    <section id="t-pedidos" class="oculto"></section>
     <section id="t-personal" class="oculto"></section>
-    <section id="t-accesos" class="oculto"></section>
     <section id="t-stats" class="oculto"></section>
+    <section id="t-accesos" class="oculto"></section>
   </main>
 </div>
+<div id="modal" class="modal oculto"></div>
+<div id="toast" class="oculto"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="supabase-config.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -98,9 +141,23 @@ const sb = supabaseClient;
 const BUCKET = 'fotos-tramites';
 const PANEL_URL = location.origin + location.pathname.replace(/[^\/]*$/, '') + 'panel.html';
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmt = (d) => d ? new Date(d).toLocaleString('es-AR') : '—';
-let yo = null;
+const fmt = (d) => d ? new Date(d).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+const fmtDia = (d) => d ? new Date(d).toLocaleDateString('es-AR') : '—';
+const ESTADO = { pendiente: 'Pendiente', procesado: 'Aprobado', denegado: 'Denegado' };
+const DIA = 86400000;
 
+let yo = null, solicitudes = [], deps = [], personal = [], pedidos = [], depPorClave = {};
+let vistaActual = 'inicio';
+
+function toast(t) { const e = $('toast'); e.textContent = t; e.classList.remove('oculto'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.add('oculto'), 4000); }
+const nombreDep = (c) => !c ? '(sin asignar)' : (depPorClave[c] ? depPorClave[c].nombre : String(c).replace(/^DUR\s*\d+\s*-\s*S\s*\d+\s*-\s*/i, '').trim());
+const datos = (s) => s.datos || {};
+const nombreDe = (s) => { const d = datos(s); return d.nombre || d.nombreSolicitante || d.nombreMenor || d.nombreProgenitor || ''; };
+const dniDe = (s) => { const d = datos(s); return d.dni || d.dniSolicitante || d.dniMenor || d.dniProgenitor || ''; };
+const tramiteDe = (s) => s.tramite_titulo || s.tramite || '';
+const diasEspera = (s) => s.estado === 'pendiente' ? Math.floor((Date.now() - new Date(s.created_at)) / DIA) : null;
+
+/* ---------- Sesión ---------- */
 async function iniciar() {
   const { data: { session } } = await sb.auth.getSession();
   if (session) await verificarAdmin(session.user);
@@ -115,9 +172,10 @@ async function verificarAdmin(user) {
   yo = user;
   $('login').classList.add('oculto');
   $('app').classList.remove('oculto');
-  $('salir').classList.remove('oculto');
-  $('quien').textContent = user.email;
-  cargarPedidos();
+  $('salir').classList.remove('oculto'); $('refrescar').classList.remove('oculto');
+  $('quien').textContent = '👑 ' + user.email;
+  await cargarTodo();
+  setInterval(() => cargarTodo(true), 90000);
 }
 $('l-entrar').onclick = async () => {
   $('l-msg').textContent = '';
@@ -127,34 +185,220 @@ $('l-entrar').onclick = async () => {
 };
 $('l-pass').addEventListener('keydown', e => { if (e.key === 'Enter') $('l-entrar').click(); });
 $('salir').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+$('refrescar').onclick = () => cargarTodo();
 
-$('tabs').addEventListener('click', (e) => {
-  const b = e.target.closest('button'); if (!b) return;
-  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
-  ['pedidos','tramites','personal','accesos','stats'].forEach(t => $('t-' + t).classList.toggle('oculto', t !== b.dataset.t));
-  ({ pedidos: cargarPedidos, tramites: cargarTramites, personal: cargarPersonal, accesos: cargarAccesos, stats: cargarStats })[b.dataset.t]();
+/* ---------- Carga de datos ---------- */
+async function cargarTodo(silencioso) {
+  if (!deps.length) {
+    try { deps = await (await fetch('dependencias.json?v=1')).json(); } catch (e) { deps = []; }
+    deps.forEach(d => { d.nombre = d.nombre || String(d.clave).replace(/^DUR\s*\d+\s*-\s*S\s*\d+\s*-\s*/i, '').trim(); depPorClave[d.clave] = d; });
+  }
+  const [s, p, pe] = await Promise.all([
+    sb.from('solicitudes').select('*').order('created_at', { ascending: false }).limit(5000),
+    sb.rpc('admin_listar_personal'),
+    sb.from('pedidos_clave').select('*').order('created_at', { ascending: false }).limit(200)
+  ]);
+  if (!s.error) solicitudes = s.data || [];
+  if (!p.error) personal = p.data || [];
+  if (!pe.error) pedidos = pe.data || [];
+  const pend = pedidos.filter(x => x.estado === 'pendiente').length;
+  $('n-ped').textContent = pend; $('n-ped').classList.toggle('oculto', !pend);
+  $('actualizado').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  if (!silencioso || vistaActual === 'inicio') pintar(vistaActual, silencioso);
+  else if (vistaActual === 'pedidos') pintarPedidos();
+}
+const PINTORES = {};
+function pintar(v, silencioso) { (PINTORES[v] || (() => {}))(silencioso); }
+$('menu').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) irA(b.dataset.t); });
+function irA(t) {
+  vistaActual = t;
+  document.querySelectorAll('#menu button').forEach(x => x.classList.toggle('on', x.dataset.t === t));
+  ['inicio','tramites','comisarias','pedidos','personal','stats','accesos'].forEach(x => $('t-' + x).classList.toggle('oculto', x !== t));
+  pintar(t);
+}
+const barras = (arr, max) => { const mx = Math.max(1, ...arr.map(x => x.n)); return arr.slice(0, max || 99).map(x => '<div>' + esc(x.k) + ' <b>' + x.n + '</b><div class="barra"><i style="width:' + (100 * x.n / mx) + '%"></i></div></div>').join('') || '<small>Sin datos.</small>'; };
+const contar = (lista, f) => { const m = {}; lista.forEach(s => { const k = f(s) || '(sin dato)'; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).map(([k, n]) => ({ k, n })).sort((a, b) => b.n - a.n); };
+
+/* ---------- INICIO ---------- */
+PINTORES.inicio = () => {
+  const pend = solicitudes.filter(s => s.estado === 'pendiente');
+  const hoy = new Date().toDateString();
+  const urg = pend.filter(s => s.urgente);
+  const viejas = pend.filter(s => diasEspera(s) >= 3);
+  const hoyN = solicitudes.filter(s => new Date(s.created_at).toDateString() === hoy).length;
+  const resHoy = solicitudes.filter(s => s.validado_en && new Date(s.validado_en).toDateString() === hoy).length;
+  const pedPend = pedidos.filter(p => p.estado === 'pendiente').length;
+  const sinPersonal = comisariasResumen().filter(c => c.pend > 0 && !c.personal).length;
+  const dias = []; for (let i = 29; i >= 0; i--) { const d = new Date(Date.now() - i * DIA); const k = d.toDateString();
+    dias.push({ k: d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }), n: solicitudes.filter(s => new Date(s.created_at).toDateString() === k).length }); }
+  const mx = Math.max(1, ...dias.map(d => d.n));
+  const alertas = [];
+  if (pedPend) alertas.push(['', '🔑 ' + pedPend + ' pedido(s) de contraseña esperando tu respuesta', 'pedidos']);
+  if (urg.length) alertas.push(['roja', '🚨 ' + urg.length + ' trámite(s) marcados como urgentes sin resolver', 'urgentes']);
+  if (viejas.length) alertas.push(['roja', '⏱ ' + viejas.length + ' trámite(s) pendientes hace 3 días o más', 'viejas']);
+  if (sinPersonal) alertas.push(['', '🏢 ' + sinPersonal + ' comisaría(s) con trámites pendientes y SIN personal asignado', 'comisarias']);
+  $('t-inicio').innerHTML = '<h2 class="titulo">Panel de control</h2><p class="sub">Resumen de toda la provincia de Salta. Hacé clic en los cuadros para ver el detalle.</p>' +
+    '<div class="grid"><div class="kpi clic" data-ir="todos"><b>' + solicitudes.length + '</b><span>Trámites totales</span></div>' +
+    '<div class="kpi clic ' + (pend.length ? 'alerta' : '') + '" data-ir="pendientes"><b>' + pend.length + '</b><span>Pendientes de resolver</span></div>' +
+    '<div class="kpi clic ' + (urg.length ? 'alerta' : '') + '" data-ir="urgentes"><b>' + urg.length + '</b><span>Urgentes</span></div>' +
+    '<div class="kpi clic ' + (viejas.length ? 'alerta' : '') + '" data-ir="viejas"><b>' + viejas.length + '</b><span>Pendientes +3 días</span></div>' +
+    '<div class="kpi"><b>' + hoyN + '</b><span>Ingresaron hoy</span></div><div class="kpi"><b>' + resHoy + '</b><span>Resueltos hoy</span></div>' +
+    '<div class="kpi"><b>' + personal.filter(p => p.activo && p.rol !== 'admin').length + '</b><span>Personal activo</span></div></div>' +
+    '<div class="card"><h3>⚠️ Requiere tu atención</h3>' + (alertas.map(a => '<div class="alerta-item ' + a[0] + '" data-ir="' + a[2] + '">' + a[1] + '</div>').join('') || '<div class="alerta-item verde">✅ Todo en orden: no hay nada urgente.</div>') + '</div>' +
+    '<div class="grid2"><div class="card"><h3>Trámites por día (últimos 30)</h3><div class="dias">' + dias.map(d => '<div title="' + d.k + ': ' + d.n + '" style="height:' + (100 * d.n / mx) + '%"></div>').join('') + '</div></div>' +
+    '<div class="card"><h3>Comisarías con más pendientes</h3>' + barras(comisariasResumen().filter(c => c.pend).sort((a, b) => b.pend - a.pend).map(c => ({ k: c.nombre, n: c.pend })), 8) + '</div>' +
+    '<div class="card"><h3>Por tipo de trámite</h3>' + barras(contar(solicitudes, tramiteDe), 8) + '</div></div>';
+};
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-ir]'); if (!t) return;
+  const v = t.dataset.ir;
+  if (v === 'pedidos' || v === 'comisarias') return irA(v);
+  filtros = { q: '', est: '', tra: '', com: '', urg: false, viejas: false, desde: '', hasta: '' };
+  if (v === 'pendientes') filtros.est = 'pendiente';
+  if (v === 'urgentes') { filtros.est = 'pendiente'; filtros.urg = true; }
+  if (v === 'viejas') { filtros.est = 'pendiente'; filtros.viejas = true; }
+  tramPag = 0; tramiteListo = false; irA('tramites');
 });
 
-/* ---------- Pedidos de contraseña ---------- */
-async function cargarPedidos() {
-  const box = $('t-pedidos');
-  box.innerHTML = '<p>Cargando…</p>';
-  const { data, error } = await sb.from('pedidos_clave').select('*').order('created_at', { ascending: false }).limit(200);
-  if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + ' (¿ejecutaste administrador.sql?)</p>'; return; }
-  const pend = data.filter(p => p.estado === 'pendiente').length;
-  $('n-ped').textContent = pend; $('n-ped').classList.toggle('oculto', !pend);
-  let h = '<div class="card"><p>Verificá la identidad de la persona (llamala o confirmá con su jefe) <b>antes</b> de enviar el enlace. El enlace llega a su correo y ella elige su nueva contraseña; vos nunca la ves.</p><div class="scroll"><table><tr><th>Fecha</th><th>Correo</th><th>Nombre / comisaría</th><th>Contacto</th><th>Estado</th><th>Acciones</th></tr>';
-  data.forEach(p => {
-    h += '<tr><td>' + fmt(p.created_at) + '</td><td>' + esc(p.email) + '</td><td>' + esc(p.nombre) + '</td><td>' + esc(p.comentario) +
-      '</td><td><span class="tag ' + p.estado + '">' + p.estado + '</span>' + (p.atendido_por ? '<br><small>' + esc(p.atendido_por) + '<br>' + fmt(p.atendido_en) + '</small>' : '') + '</td><td>';
-    if (p.estado === 'pendiente') {
-      h += '<button class="b ok" data-env="' + p.id + '" data-mail="' + esc(p.email) + '">Enviar enlace</button> <button class="b mal" data-rech="' + p.id + '">Rechazar</button>';
-    }
-    h += '</td></tr>';
+/* ---------- TRÁMITES ---------- */
+let filtros = { q: '', est: '', tra: '', com: '', urg: false, viejas: false, desde: '', hasta: '' };
+let tramPag = 0, orden = { k: 'created_at', d: -1 }, tramiteListo = false, tramFiltrados = [];
+const POR_PAG = 25;
+PINTORES.tramites = () => {
+  if (!tramiteListo) {
+    tramiteListo = true;
+    $('t-tramites').innerHTML = '<h2 class="titulo">Trámites de toda la provincia</h2><p class="sub">Buscá por nombre, DNI, código, correo o comisaría. Hacé clic en una fila para ver el trámite completo.</p>' +
+      '<div class="card"><div class="fila"><input id="f-q" placeholder="🔍 Buscar nombre, DNI, código…" size="28"><select id="f-est"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="procesado">Aprobado</option><option value="denegado">Denegado</option></select>' +
+      '<select id="f-tra"></select><select id="f-com"></select></div>' +
+      '<div class="fila"><label>Desde <input type="date" id="f-desde"></label><label>Hasta <input type="date" id="f-hasta"></label>' +
+      '<label><input type="checkbox" id="f-urg"> 🚨 Solo urgentes</label><label><input type="checkbox" id="f-viejas"> ⏱ Pendientes +3 días</label>' +
+      '<button class="b gris chico" id="f-limpiar">Limpiar filtros</button><button class="b ok chico" id="f-excel" style="margin-left:auto">⬇ Exportar a Excel</button></div><div id="tr-info"></div></div>' +
+      '<div class="card"><div class="scroll" id="tr-lista"></div><div class="pag" id="tr-pag"></div></div>';
+    ['f-q','f-est','f-tra','f-com','f-desde','f-hasta','f-urg','f-viejas'].forEach(i => $(i).addEventListener('input', () => { leerFiltros(); tramPag = 0; pintarTramites(); }));
+    $('f-limpiar').onclick = () => { filtros = { q: '', est: '', tra: '', com: '', urg: false, viejas: false, desde: '', hasta: '' }; sincronizarFiltros(); tramPag = 0; pintarTramites(); };
+    $('f-excel').onclick = exportarExcel;
+    $('t-tramites').addEventListener('click', clicTramites);
+  }
+  const tr = [...new Set(solicitudes.map(tramiteDe).filter(Boolean))].sort();
+  const cs = [...new Set(solicitudes.map(s => s.comisaria_asignada).filter(Boolean))].sort((a, b) => nombreDep(a).localeCompare(nombreDep(b), 'es', { numeric: true }));
+  $('f-tra').innerHTML = '<option value="">Todos los trámites</option>' + tr.map(x => '<option>' + esc(x) + '</option>').join('');
+  $('f-com').innerHTML = '<option value="">Todas las comisarías</option>' + cs.map(x => '<option value="' + esc(x) + '">' + esc(nombreDep(x)) + '</option>').join('');
+  sincronizarFiltros(); pintarTramites();
+};
+function leerFiltros() { filtros = { q: $('f-q').value.trim().toLowerCase(), est: $('f-est').value, tra: $('f-tra').value, com: $('f-com').value, urg: $('f-urg').checked, viejas: $('f-viejas').checked, desde: $('f-desde').value, hasta: $('f-hasta').value }; }
+function sincronizarFiltros() { $('f-q').value = filtros.q; $('f-est').value = filtros.est; $('f-tra').value = filtros.tra; $('f-com').value = filtros.com; $('f-urg').checked = filtros.urg; $('f-viejas').checked = filtros.viejas; $('f-desde').value = filtros.desde; $('f-hasta').value = filtros.hasta; }
+function filtrarTramites() {
+  const f = filtros, d0 = f.desde ? new Date(f.desde + 'T00:00:00') : null, d1 = f.hasta ? new Date(f.hasta + 'T23:59:59') : null;
+  let l = solicitudes.filter(s => {
+    if (f.est && s.estado !== f.est) return false;
+    if (f.tra && tramiteDe(s) !== f.tra) return false;
+    if (f.com && s.comisaria_asignada !== f.com) return false;
+    if (f.urg && !s.urgente) return false;
+    if (f.viejas && !(diasEspera(s) >= 3)) return false;
+    const c = new Date(s.created_at); if (d0 && c < d0) return false; if (d1 && c > d1) return false;
+    if (f.q) { const h = (nombreDe(s) + ' ' + dniDe(s) + ' ' + (s.codigo || '') + ' ' + (datos(s).email || '') + ' ' + nombreDep(s.comisaria_asignada) + ' ' + tramiteDe(s)).toLowerCase(); if (!h.includes(f.q)) return false; }
+    return true;
   });
-  if (!data.length) h += '<tr><td colspan="6">No hay pedidos.</td></tr>';
-  box.innerHTML = h + '</table></div></div>';
+  const val = (s) => orden.k === 'nombre' ? nombreDe(s).toLowerCase() : orden.k === 'comisaria' ? nombreDep(s.comisaria_asignada) : orden.k === 'espera' ? (diasEspera(s) == null ? -1 : diasEspera(s)) : orden.k === 'tramite' ? tramiteDe(s) : orden.k === 'estado' ? s.estado : s.created_at;
+  l.sort((a, b) => { const x = val(a), y = val(b); return (x > y ? 1 : x < y ? -1 : 0) * orden.d; });
+  return l;
 }
+function pintarTramites() {
+  tramFiltrados = filtrarTramites();
+  const tot = tramFiltrados.length, pags = Math.max(1, Math.ceil(tot / POR_PAG)); if (tramPag >= pags) tramPag = pags - 1;
+  const pg = tramFiltrados.slice(tramPag * POR_PAG, (tramPag + 1) * POR_PAG);
+  const th = (k, t) => '<th class="ord" data-ord="' + k + '">' + t + (orden.k === k ? (orden.d > 0 ? ' ▲' : ' ▼') : '') + '</th>';
+  let h = '<table><tr>' + th('created_at', 'Fecha') + '<th>Código</th>' + th('tramite', 'Trámite') + th('nombre', 'Solicitante') + th('comisaria', 'Comisaría') + th('estado', 'Estado') + th('espera', 'Espera') + '</tr>';
+  pg.forEach(s => { const de = diasEspera(s);
+    h += '<tr class="clic' + (s.urgente && s.estado === 'pendiente' ? ' urg' : '') + '" data-ver="' + s.id + '"><td>' + fmt(s.created_at) + '</td><td>' + esc(s.codigo || '') + '</td><td>' + esc(tramiteDe(s)) + '</td><td>' + esc(nombreDe(s)) + '<br><small>' + esc(dniDe(s)) + '</small></td><td>' + esc(nombreDep(s.comisaria_asignada)) +
+      '</td><td><span class="tag ' + esc(s.estado) + '">' + esc(ESTADO[s.estado] || s.estado) + '</span>' + (s.urgente ? ' 🚨' : '') + '</td><td>' + (de == null ? '' : '<span class="tag ' + (de >= 3 ? 'rojo' : de >= 1 ? 'amar' : '') + '">' + de + ' d</span>') + '</td></tr>'; });
+  if (!pg.length) h += '<tr><td colspan="7">No hay trámites con esos filtros.</td></tr>';
+  $('tr-lista').innerHTML = h + '</table>';
+  $('tr-info').innerHTML = '<small>' + tot + ' trámite(s) · ' + tramFiltrados.filter(s => s.estado === 'pendiente').length + ' pendientes' + (solicitudes.length >= 5000 ? ' · (se cargan los últimos 5000)' : '') + '</small>';
+  $('tr-pag').innerHTML = '<button class="b gris chico" data-pag="-1"' + (tramPag ? '' : ' disabled') + '>◀ Anterior</button><span>Página ' + (tramPag + 1) + ' de ' + pags + '</span><button class="b gris chico" data-pag="1"' + (tramPag < pags - 1 ? '' : ' disabled') + '>Siguiente ▶</button>';
+}
+function clicTramites(e) {
+  const o = e.target.closest('[data-ord]'); if (o) { orden = { k: o.dataset.ord, d: orden.k === o.dataset.ord ? -orden.d : -1 }; return pintarTramites(); }
+  const p = e.target.closest('[data-pag]'); if (p) { tramPag += +p.dataset.pag; return pintarTramites(); }
+  const v = e.target.closest('[data-ver]'); if (v) abrirTramite(v.dataset.ver);
+}
+function exportarExcel() {
+  if (!tramFiltrados.length) return toast('No hay trámites para exportar.');
+  const filas = tramFiltrados.map(s => ({ 'Fecha': fmt(s.created_at), 'Código': s.codigo || '', 'Trámite': tramiteDe(s), 'Solicitante': nombreDe(s), 'DNI': dniDe(s), 'Correo': datos(s).email || '', 'Comisaría': nombreDep(s.comisaria_asignada), 'Estado': ESTADO[s.estado] || s.estado, 'Días de espera': diasEspera(s) == null ? '' : diasEspera(s), 'Urgente': s.urgente ? 'Sí' : '', 'Validado por': s.validado_por || '', 'Fecha de validación': fmt(s.validado_en), 'Motivo de denegación': s.motivo_denegacion || '' }));
+  const ws = XLSX.utils.json_to_sheet(filas);
+  const cols = Object.keys(filas[0]); ws['!cols'] = cols.map(c => ({ wch: Math.min(45, Math.max(c.length, ...filas.map(f => String(f[c]).length)) + 2) }));
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Trámites');
+  XLSX.writeFile(wb, 'tramites-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+}
+
+/* Detalle de un trámite */
+const ETQ = { nombre: 'Nombre completo', dni: 'DNI', fechaNacimiento: 'Fecha de nacimiento', email: 'Correo de contacto', domicilio: 'Domicilio', localidad: 'Localidad', tiempoResidencia: 'Tiempo de residencia', motivo: 'Motivo', nombreMenor: 'Nombre del menor', dniMenor: 'DNI del menor', nombreProgenitor: 'Progenitor que autoriza', dniProgenitor: 'DNI del progenitor', destino: 'Destino', fechaSalida: 'Fecha de salida', fechaRegreso: 'Fecha de regreso', zona: 'Zona', estadoCivil: 'Estado civil', situacionLaboral: 'Situación laboral', testigo1Nombre: 'Testigo 1', testigo1Dni: 'DNI testigo 1', testigo2Nombre: 'Testigo 2', testigo2Dni: 'DNI testigo 2', nombreConviviente: 'Conviviente 1', dniConviviente: 'DNI conviviente 1', parentesco: 'Parentesco 1' };
+const etq = (k) => ETQ[k] || (/^foto_/.test(k) ? 'Foto DNI — ' + k.replace(/^foto_/, '') : k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()));
+function cerrarModal() { $('modal').classList.add('oculto'); $('modal').innerHTML = ''; }
+$('modal').addEventListener('click', (e) => { if (e.target.id === 'modal' || e.target.dataset.cerrar) cerrarModal(); });
+async function abrirTramite(id) {
+  const s = solicitudes.find(x => String(x.id) === String(id)); if (!s) return;
+  const d = datos(s), fotos = [];
+  let h = '<div><div class="fila"><h3 style="flex:1">' + esc(tramiteDe(s)) + ' <span class="tag ' + esc(s.estado) + '">' + esc(ESTADO[s.estado] || s.estado) + '</span>' + (s.urgente ? ' 🚨' : '') + '</h3><button class="b gris chico" data-cerrar="1">✕ Cerrar</button></div>' +
+    '<small>Código <b>' + esc(s.codigo || '—') + '</b> · Ingresó ' + fmt(s.created_at) + ' · Comisaría: <b>' + esc(nombreDep(s.comisaria_asignada)) + '</b></small><dl class="det">';
+  const fila = (k, v) => '<div><dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd></div>';
+  Object.entries(d).forEach(([k, v]) => { if (v == null || v === '' || typeof v === 'object') return; if (/^foto_/.test(k)) fotos.push([k, v]); else h += fila(etq(k), v); });
+  if (s.motivo_denegacion) h += fila('Motivo de denegación', s.motivo_denegacion);
+  if (s.validado_por) h += fila('Resuelto por', s.validado_por + ' · ' + fmt(s.validado_en));
+  h += '</dl><div class="fila"><span id="dt-tel"></span></div><div class="fotos" id="dt-fotos"></div><hr style="border-color:rgba(255,255,255,.15)">' +
+    '<div class="fila"><b>Acciones de administrador:</b><button class="b ' + (s.urgente ? 'gris' : 'mal') + '" id="a-urg">' + (s.urgente ? 'Quitar urgente' : '🚨 Marcar urgente') + '</button>' +
+    '<select id="a-dest"><option value="">Derivar a otra comisaría…</option>' + deps.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true })).map(x => '<option value="' + esc(x.clave) + '">' + esc(x.nombre) + '</option>').join('') + '</select><button class="b" id="a-derivar">↪ Derivar</button>' +
+    '<button class="b gris" id="a-copiar">Copiar código</button></div></div>';
+  $('modal').innerHTML = h; $('modal').classList.remove('oculto');
+  $('a-copiar').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(s.codigo || ''); toast('Código copiado'); };
+  $('a-urg').onclick = async () => { const r = await sb.from('solicitudes').update({ urgente: !s.urgente }).eq('id', s.id); if (r.error) return alert(r.error.message); s.urgente = !s.urgente; toast(s.urgente ? 'Marcado como urgente' : 'Urgente quitado'); cerrarModal(); pintar(vistaActual); };
+  $('a-derivar').onclick = async () => { const dest = $('a-dest').value; if (!dest) return alert('Elegí la comisaría de destino.');
+    if (dest === s.comisaria_asignada) return alert('Elegí una comisaría distinta a la actual.');
+    if (!confirm('¿Derivar este trámite a:\n' + nombreDep(dest) + '?')) return;
+    const r = await sb.rpc('derivar_solicitud', { p_id: s.id, p_comisaria: dest }); if (r.error) return alert('No se pudo derivar: ' + r.error.message);
+    s.comisaria_asignada = dest; toast('Trámite derivado'); cerrarModal(); pintar(vistaActual); };
+  sb.from('dependencias_contacto').select('telefonos').eq('clave', s.comisaria_asignada).maybeSingle().then(r => {
+    const t = r.data && r.data.telefonos; if (t && t.length) $('dt-tel') && ($('dt-tel').innerHTML = '📞 Teléfonos de la dependencia: <b>' + t.map(x => esc(typeof x === 'string' ? x : x.numero)).join(' · ') + '</b>'); });
+  for (const [k, v] of fotos) {
+    let url = v; if (!String(v).startsWith('http')) { const r = await sb.storage.from(BUCKET).createSignedUrl(v, 600); url = r.data && r.data.signedUrl; }
+    if (url && $('dt-fotos')) $('dt-fotos').insertAdjacentHTML('beforeend', '<figure><img src="' + esc(url) + '" onclick="window.open(this.src)"><figcaption>' + esc(etq(k)) + '</figcaption></figure>');
+  }
+}
+
+/* ---------- COMISARÍAS ---------- */
+function comisariasResumen() {
+  const m = {};
+  deps.forEach(d => { m[d.clave] = { clave: d.clave, nombre: d.nombre, tipo: d.tipo, distrito: d.distritoNombre || '', pend: 0, total: 0, aprob: 0, deneg: 0, max: 0, personal: 0 }; });
+  solicitudes.forEach(s => { const c = s.comisaria_asignada || '(sin asignar)';
+    if (!m[c]) m[c] = { clave: c, nombre: nombreDep(c), tipo: '', distrito: '', pend: 0, total: 0, aprob: 0, deneg: 0, max: 0, personal: 0 };
+    m[c].total++; if (s.estado === 'pendiente') { m[c].pend++; m[c].max = Math.max(m[c].max, diasEspera(s)); } else if (s.estado === 'procesado') m[c].aprob++; else if (s.estado === 'denegado') m[c].deneg++; });
+  personal.filter(p => p.activo && p.rol !== 'admin').forEach(p => (p.comisarias || []).forEach(c => { if (m[c]) m[c].personal++; }));
+  return Object.values(m);
+}
+let comQ = '', comSolo = false;
+PINTORES.comisarias = () => {
+  if (!$('c-q')) {
+    $('t-comisarias').innerHTML = '<h2 class="titulo">Comisarías y dependencias</h2><p class="sub">Estado de cada dependencia de la provincia. Hacé clic en una para ver sus trámites pendientes.</p><div class="card"><div class="fila"><input id="c-q" placeholder="🔍 Buscar comisaría…" size="28"><label><input type="checkbox" id="c-solo"> Solo con trámites pendientes</label></div><div class="scroll" id="c-lista"></div></div>';
+    $('c-q').addEventListener('input', () => { comQ = $('c-q').value.toLowerCase(); PINTORES.comisarias(); });
+    $('c-solo').addEventListener('input', () => { comSolo = $('c-solo').checked; PINTORES.comisarias(); });
+    $('c-lista').addEventListener('click', (e) => { const r = e.target.closest('[data-com]'); if (!r) return; filtros = { q: '', est: 'pendiente', tra: '', com: r.dataset.com, urg: false, viejas: false, desde: '', hasta: '' }; tramPag = 0; tramiteListo = false; irA('tramites'); });
+  }
+  let l = comisariasResumen().filter(c => (!comQ || c.nombre.toLowerCase().includes(comQ)) && (!comSolo || c.pend));
+  l.sort((a, b) => b.pend - a.pend || b.total - a.total || a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
+  $('c-lista').innerHTML = '<table><tr><th>Dependencia</th><th>Distrito</th><th>Pendientes</th><th>Más antiguo</th><th>Aprobados</th><th>Denegados</th><th>Total</th><th>Personal</th></tr>' +
+    l.map(c => '<tr class="clic" data-com="' + esc(c.clave) + '"><td>' + esc(c.nombre) + '</td><td>' + esc(c.distrito) + '</td><td><b>' + c.pend + '</b></td><td>' + (c.pend ? '<span class="tag ' + (c.max >= 3 ? 'rojo' : c.max >= 1 ? 'amar' : '') + '">' + c.max + ' d</span>' : '') + '</td><td>' + c.aprob + '</td><td>' + c.deneg + '</td><td>' + c.total + '</td><td>' + (c.personal ? c.personal : (c.pend ? '<span class="tag rojo">Sin personal</span>' : '<small>—</small>')) + '</td></tr>').join('') + '</table>';
+};
+
+/* ---------- PEDIDOS DE CONTRASEÑA ---------- */
+function hace(f) { const m = Math.floor((Date.now() - new Date(f)) / 60000); return m < 60 ? 'hace ' + m + ' min' : m < 1440 ? 'hace ' + Math.floor(m / 60) + ' h' : 'hace ' + Math.floor(m / 1440) + ' d'; }
+function pintarPedidos() {
+  const b = $('t-pedidos');
+  b.innerHTML = '<h2 class="titulo">Pedidos de contraseña</h2><p class="sub">Verificá la identidad de la persona (llamala o confirmá con su jefe) <b>antes</b> de enviar el enlace. El enlace llega a su correo y ella elige su nueva contraseña; vos nunca la ves.</p><div class="card scroll"><table><tr><th>Cuándo</th><th>Correo</th><th>Persona</th><th>Comisaría y contacto</th><th>Estado</th><th>Acciones</th></tr>' +
+    pedidos.map(p => '<tr><td>' + fmt(p.created_at) + '<br><small>' + hace(p.created_at) + '</small></td><td>' + esc(p.email) + '</td><td>' + esc(p.nombre) + '</td><td>' + esc(p.comentario) + '</td><td><span class="tag ' + esc(p.estado) + '">' + esc(p.estado) + '</span>' + (p.atendido_por ? '<br><small>' + esc(p.atendido_por) + '<br>' + fmt(p.atendido_en) + '</small>' : '') + '</td><td>' +
+      (p.estado === 'pendiente' ? '<button class="b ok chico" data-env="' + p.id + '" data-mail="' + esc(p.email) + '">Enviar enlace</button> <button class="b mal chico" data-rech="' + p.id + '">Rechazar</button>' : '<button class="b gris chico" data-env="' + p.id + '" data-mail="' + esc(p.email) + '">Reenviar</button>') + '</td></tr>').join('') +
+    (pedidos.length ? '' : '<tr><td colspan="6">No hay pedidos.</td></tr>') + '</table></div>';
+}
+PINTORES.pedidos = pintarPedidos;
 $('t-pedidos').addEventListener('click', async (e) => {
   const env = e.target.dataset.env, rech = e.target.dataset.rech;
   if (env) {
@@ -163,123 +407,81 @@ $('t-pedidos').addEventListener('click', async (e) => {
     e.target.disabled = true; e.target.textContent = 'Enviando…';
     const { error } = await sb.auth.resetPasswordForEmail(mail, { redirectTo: PANEL_URL });
     if (error) { alert('No se pudo enviar: ' + error.message); e.target.disabled = false; e.target.textContent = 'Enviar enlace'; return; }
-    const r = await sb.rpc('admin_atender_pedido', { p_id: env, p_estado: 'enviado' });
-    if (r.error) alert(r.error.message);
-    alert('Enlace enviado a ' + mail);
-    cargarPedidos();
+    const r = await sb.rpc('admin_atender_pedido', { p_id: env, p_estado: 'enviado' }); if (r.error) alert(r.error.message);
+    toast('Enlace enviado a ' + mail); cargarTodo();
   } else if (rech) {
-    const nota = prompt('Motivo (opcional):') ; if (nota === null) return;
-    const r = await sb.rpc('admin_atender_pedido', { p_id: rech, p_estado: 'rechazado', p_nota: nota });
-    if (r.error) alert(r.error.message);
-    cargarPedidos();
+    const nota = prompt('Motivo (opcional):'); if (nota === null) return;
+    const r = await sb.rpc('admin_atender_pedido', { p_id: rech, p_estado: 'rechazado', p_nota: nota }); if (r.error) alert(r.error.message);
+    cargarTodo();
   }
 });
 
-/* ---------- Trámites ---------- */
-let tramitesCache = [];
-async function cargarTramites() {
-  const box = $('t-tramites');
-  if (!box.dataset.listo) {
-    box.dataset.listo = '1';
-    box.innerHTML = '<div class="card"><div class="fila"><input id="f-q" placeholder="Buscar nombre, DNI, correo…" size="30"><select id="f-est"><option value="">Todos los estados</option></select><select id="f-tra"><option value="">Todos los trámites</option></select><select id="f-com"><option value="">Todas las comisarías</option></select><button class="b" id="f-rec">Actualizar</button></div><div id="tr-lista" class="scroll"></div></div><div id="tr-det" class="card oculto"></div>';
-    $('f-rec').onclick = cargarTramites;
-    ['f-q','f-est','f-tra','f-com'].forEach(i => $(i).addEventListener('input', pintarTramites));
-  }
-  $('tr-lista').textContent = 'Cargando…';
-  const { data, error } = await sb.from('solicitudes').select('*').order('created_at', { ascending: false }).limit(2000);
-  if (error) { $('tr-lista').textContent = error.message; return; }
-  tramitesCache = data;
-  const opts = (id, key, f) => { const v = $(id).value; const u = [...new Set(data.map(f || (s => s[key])).filter(Boolean))].sort();
-    $(id).innerHTML = $(id).options[0].outerHTML + u.map(x => '<option>' + esc(x) + '</option>').join(''); $(id).value = v; };
-  opts('f-est', 'estado'); opts('f-tra', 'tramite', s => s.tramite_titulo || s.tramite); opts('f-com', 'comisaria_asignada');
-  pintarTramites();
-}
-function pintarTramites() {
-  const q = $('f-q').value.toLowerCase(), est = $('f-est').value, tra = $('f-tra').value, com = $('f-com').value;
-  const lista = tramitesCache.filter(s =>
-    (!est || s.estado === est) && (!tra || (s.tramite_titulo || s.tramite) === tra) && (!com || s.comisaria_asignada === com) &&
-    (!q || JSON.stringify(s.datos || {}).toLowerCase().includes(q) || String(s.codigo || s.id).toLowerCase().includes(q)));
-  let h = '<table><tr><th>Fecha</th><th>Trámite</th><th>Solicitante</th><th>Comisaría</th><th>Estado</th><th></th></tr>';
-  lista.slice(0, 300).forEach(s => {
-    const d = s.datos || {};
-    const nom = d.nombre_completo || [d.apellido, d.nombre].filter(Boolean).join(' ') || d.nombre || '';
-    h += '<tr><td>' + fmt(s.created_at) + '</td><td>' + esc(s.tramite_titulo || s.tramite) + '</td><td>' + esc(nom) + '<br><small>' + esc(d.dni || '') + '</small></td><td>' + esc(s.comisaria_asignada) +
-      '</td><td><span class="tag ' + esc(s.estado) + '">' + esc(s.estado) + '</span></td><td><button class="b" data-ver="' + s.id + '">Ver</button></td></tr>';
-  });
-  $('tr-lista').innerHTML = h + '</table>' + (lista.length > 300 ? '<p>Mostrando 300 de ' + lista.length + '. Usá los filtros.</p>' : '');
-}
-$('t-tramites').addEventListener('click', async (e) => {
-  const id = e.target.dataset.ver; if (!id) return;
-  const s = tramitesCache.find(x => String(x.id) === String(id)); if (!s) return;
-  const det = $('tr-det'); det.classList.remove('oculto');
-  let h = '<h3>' + esc(s.tramite_titulo || s.tramite) + ' · ' + esc(s.comisaria_asignada) + '</h3><p>Estado: <b>' + esc(s.estado) + '</b> · ' + fmt(s.created_at) + '</p><table>';
-  const fotos = [];
-  Object.entries(s.datos || {}).forEach(([k, v]) => {
-    if (v == null || v === '' || typeof v === 'object') return;
-    if (/^foto_/.test(k)) fotos.push([k, v]); else h += '<tr><th>' + esc(k) + '</th><td>' + esc(v) + '</td></tr>';
-  });
-  h += '</table><div class="fotos" id="det-fotos"></div>';
-  det.innerHTML = h; det.scrollIntoView({ behavior: 'smooth' });
-  for (const [k, v] of fotos) {
-    let url = v;
-    if (!String(v).startsWith('http')) {
-      const r = await sb.storage.from(BUCKET).createSignedUrl(v, 600);
-      url = r.data && r.data.signedUrl;
-    }
-    if (url) $('det-fotos').insertAdjacentHTML('beforeend', '<figure style="display:inline-block;margin:0"><img src="' + esc(url) + '" onclick="window.open(this.src)"><figcaption><small>' + esc(k) + '</small></figcaption></figure>');
-  }
-});
-
-/* ---------- Personal ---------- */
-async function cargarPersonal() {
-  const box = $('t-personal');
-  box.innerHTML = '<p>Cargando…</p>';
-  const { data, error } = await sb.rpc('admin_listar_personal');
-  if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + '</p>'; return; }
-  let h = '<div class="card"><h3>Dar de alta</h3><p><small>Primero creá el usuario en Supabase → Authentication → Users → Add user (con "Auto Confirm User"), después cargalo acá.</small></p><div class="fila"><input id="a-mail" type="email" placeholder="correo" size="26"><input id="a-nom" placeholder="Nombre" size="20"><input id="a-com" placeholder="Comisarías (separadas por ;)" size="36"><button class="b ok" id="a-alta">Dar de alta</button></div></div>' +
-    '';
-  const fila = (p) => '<tr data-u="' + p.user_id + '"><td><input class="p-nom" value="' + esc(p.nombre) + '"></td><td>' + esc(p.email) + '</td><td>' + esc(p.rol) +
-      '</td><td><input class="p-com" size="30" value="' + esc((p.comisarias || []).join('; ')) + '"></td><td>' + fmt(p.ultimo_ingreso) +
-      '</td><td><input type="checkbox" class="p-act"' + (p.activo ? ' checked' : '') + '></td><td><button class="b" data-gp="1">Guardar</button></td></tr>';
-  const tabla = (titulo, lista) => '<div class="card scroll"><h3>' + titulo + ' (' + lista.length + ')</h3><table><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Comisarías</th><th>Último ingreso</th><th>Activo</th><th></th></tr>' +
-      (lista.map(fila).join('') || '<tr><td colspan="7">Nadie cargado.</td></tr>') + '</table></div>';
-  h += tabla('👑 Administradores', data.filter(p => p.rol === 'admin')) + tabla('👮 Personal de comisarías', data.filter(p => p.rol !== 'admin'));
-  box.innerHTML = h;
-}
-const listaCom = (t) => t.split(';').map(x => x.trim()).filter(Boolean);
+/* ---------- PERSONAL ---------- */
+let editandoCom = null;
+function chipsHtml(arr) { return arr.map((c, i) => '<span class="chip">' + esc(nombreDep(c)) + '<button data-quitar="' + i + '">×</button></span>').join('') || '<small>Ninguna</small>'; }
+const opcionesDeps = () => deps.slice().sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true })).map(x => '<option value="' + esc(x.nombre) + '"></option>').join('');
+const claveDeNombre = (n) => (deps.find(d => d.nombre === n.trim()) || {}).clave;
+let altaCom = [], persQ = '';
+PINTORES.personal = () => {
+  const lista = personal.filter(p => !persQ || (p.nombre + ' ' + p.email).toLowerCase().includes(persQ));
+  const fila = (p) => '<tr><td>' + esc(p.nombre || '') + '</td><td>' + esc(p.email) + '</td><td>' + ((p.comisarias || []).map(c => esc(nombreDep(c))).join(', ') || '<small>—</small>') + '</td><td>' + fmt(p.ultimo_ingreso) + '</td><td><span class="tag ' + (p.activo ? 'procesado' : 'denegado') + '">' + (p.activo ? 'Activo' : 'Baja') + '</span></td><td><button class="b chico" data-edit="' + p.user_id + '">Editar</button></td></tr>';
+  const tabla = (t, l) => '<div class="card scroll"><h3>' + t + ' (' + l.length + ')</h3><table><tr><th>Nombre</th><th>Correo</th><th>Comisarías</th><th>Último ingreso</th><th>Estado</th><th></th></tr>' + (l.map(fila).join('') || '<tr><td colspan="6">Nadie cargado.</td></tr>') + '</table></div>';
+  $('t-personal').innerHTML = '<h2 class="titulo">Personal</h2><p class="sub">Cuentas que usan el panel privado.</p>' +
+    '<div class="card"><h3>Dar de alta</h3><p><small>Primero creá el usuario en Supabase → Authentication → Users → Add user (con "Auto Confirm User"), después cargalo acá.</small></p><div class="fila"><input id="a-mail" type="email" placeholder="correo" size="26"><input id="a-nom" placeholder="Apellido y nombre" size="22"></div>' +
+    '<div class="fila"><input id="a-com" list="dl-deps" placeholder="Agregar comisaría (escribí para buscar)" size="38" autocomplete="off"><datalist id="dl-deps">' + opcionesDeps() + '</datalist><button class="b chico" id="a-add">+ Agregar</button></div><div id="a-chips">' + chipsHtml(altaCom) + '</div><div class="fila" style="margin-top:10px"><button class="b ok" id="a-alta">Dar de alta</button></div></div>' +
+    '<div class="card"><input id="p-q" placeholder="🔍 Buscar persona…" size="28" value="' + esc(persQ) + '"></div>' +
+    tabla('👑 Administradores', lista.filter(p => p.rol === 'admin')) + tabla('👮 Personal de comisarías', lista.filter(p => p.rol !== 'admin'));
+  $('p-q').addEventListener('input', (e) => { persQ = e.target.value.toLowerCase(); const pos = e.target.selectionStart; PINTORES.personal(); $('p-q').focus(); $('p-q').setSelectionRange(pos, pos); });
+};
 $('t-personal').addEventListener('click', async (e) => {
-  if (e.target.id === 'a-alta') {
-    const r = await sb.rpc('admin_alta_personal', { p_email: $('a-mail').value, p_nombre: $('a-nom').value, p_comisarias: listaCom($('a-com').value) });
-    if (r.error) alert(r.error.message); else cargarPersonal();
-  } else if (e.target.dataset.gp) {
-    const tr = e.target.closest('tr');
-    const r = await sb.rpc('admin_actualizar_personal', { p_user_id: tr.dataset.u, p_nombre: tr.querySelector('.p-nom').value,
-      p_comisarias: listaCom(tr.querySelector('.p-com').value), p_activo: tr.querySelector('.p-act').checked });
-    if (r.error) alert(r.error.message); else { e.target.textContent = '✔ Guardado'; setTimeout(() => e.target.textContent = 'Guardar', 1500); }
-  }
+  const t = e.target;
+  if (t.id === 'a-add') { const c = claveDeNombre($('a-com').value); if (!c) return alert('Elegí una comisaría de la lista.'); if (!altaCom.includes(c)) altaCom.push(c); $('a-com').value = ''; $('a-chips').innerHTML = chipsHtml(altaCom); }
+  else if (t.dataset.quitar != null && t.closest('#a-chips')) { altaCom.splice(+t.dataset.quitar, 1); $('a-chips').innerHTML = chipsHtml(altaCom); }
+  else if (t.id === 'a-alta') { const r = await sb.rpc('admin_alta_personal', { p_email: $('a-mail').value, p_nombre: $('a-nom').value, p_comisarias: altaCom }); if (r.error) return alert(r.error.message); altaCom = []; toast('Persona dada de alta'); cargarTodo(); }
+  else if (t.dataset.edit) editarPersona(t.dataset.edit);
 });
-
-/* ---------- Accesos ---------- */
-async function cargarAccesos() {
-  const box = $('t-accesos');
-  const { data, error } = await sb.from('logs_accesos').select('*').order('fecha', { ascending: false }).limit(300);
-  if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + '</p>'; return; }
-  const tipos = { login: 'Ingresó al panel', logout: 'Salió del panel', error: 'Intento fallido' };
-  let h = '<div class="card"><p>Registro de cada vez que alguien del personal ingresó al panel: quién, cuándo y desde qué navegador y equipo. Sirve para controlar el uso y detectar ingresos raros. Se muestran los últimos 300.</p></div><div class="card scroll"><table><tr><th>Fecha y hora</th><th>Correo</th><th>Acción</th><th>Navegador / equipo</th></tr>';
-  data.forEach(l => { h += '<tr><td>' + fmt(l.fecha) + '</td><td>' + esc(l.email || '') + '</td><td>' + esc(tipos[l.tipo] || l.tipo || '') + '</td><td>' + esc(l.dispositivo || '') + '</td></tr>'; });
-  if (!data.length) h += '<tr><td colspan="4">Todavía no hay accesos registrados.</td></tr>';
-  box.innerHTML = h + '</table></div>';
+function editarPersona(uid) {
+  const p = personal.find(x => x.user_id === uid); if (!p) return; editandoCom = (p.comisarias || []).slice();
+  $('modal').innerHTML = '<div style="max-width:620px"><div class="fila"><h3 style="flex:1">Editar: ' + esc(p.email) + '</h3><button class="b gris chico" data-cerrar="1">✕</button></div>' +
+    '<div class="fila"><input id="e-nom" value="' + esc(p.nombre || '') + '" placeholder="Nombre" size="30"></div><p><b>Comisarías que puede ver</b></p><div id="e-chips">' + chipsHtml(editandoCom) + '</div>' +
+    '<div class="fila"><input id="e-com" list="dl-deps2" placeholder="Agregar comisaría…" size="34" autocomplete="off"><datalist id="dl-deps2">' + opcionesDeps() + '</datalist><button class="b chico" id="e-add">+ Agregar</button></div>' +
+    '<div class="fila"><label><input type="checkbox" id="e-act"' + (p.activo ? ' checked' : '') + '> Cuenta activa (si la destildás, no puede ingresar)</label></div><div class="fila"><button class="b ok" id="e-guardar">Guardar</button></div></div>';
+  $('modal').classList.remove('oculto');
+  $('e-add').onclick = () => { const c = claveDeNombre($('e-com').value); if (!c) return alert('Elegí una comisaría de la lista.'); if (!editandoCom.includes(c)) editandoCom.push(c); $('e-com').value = ''; $('e-chips').innerHTML = chipsHtml(editandoCom); };
+  $('e-chips').onclick = (e) => { if (e.target.dataset.quitar != null) { editandoCom.splice(+e.target.dataset.quitar, 1); $('e-chips').innerHTML = chipsHtml(editandoCom); } };
+  $('e-guardar').onclick = async () => { const r = await sb.rpc('admin_actualizar_personal', { p_user_id: uid, p_nombre: $('e-nom').value, p_comisarias: editandoCom, p_activo: $('e-act').checked }); if (r.error) return alert(r.error.message); cerrarModal(); toast('Guardado'); cargarTodo(); };
 }
 
-/* ---------- Estadísticas ---------- */
-async function cargarStats() {
-  const box = $('t-stats');
-  const { data, error } = await sb.rpc('admin_estadisticas');
-  if (error) { box.innerHTML = '<p class="msg">' + esc(error.message) + '</p>'; return; }
-  const barras = (t, arr) => { const mx = Math.max(1, ...arr.map(x => x.n));
-    return '<div class="card"><h3>' + t + '</h3>' + arr.map(x => '<div>' + esc(x.clave) + ' <b>' + x.n + '</b><div class="barra"><i style="width:' + (100 * x.n / mx) + '%"></i></div></div>').join('') + '</div>'; };
-  box.innerHTML = '<div class="grid"><div class="kpi"><b>' + data.total + '</b>Trámites totales</div><div class="kpi"><b>' + data.pendientes + '</b>Pendientes</div><div class="kpi"><b>' + data.personal_activo + '</b>Personal activo</div><div class="kpi"><b>' + data.pedidos_pendientes + '</b>Pedidos de contraseña</div></div><br>' +
-    '<div class="grid">' + barras('Por trámite', data.por_tramite) + barras('Por estado', data.por_estado) + barras('Por comisaría', data.por_comisaria) + barras('Últimos 30 días', data.por_dia) + '</div>';
+/* ---------- ESTADÍSTICAS ---------- */
+let statDias = 30;
+PINTORES.stats = () => {
+  const desde = statDias ? Date.now() - statDias * DIA : 0;
+  const l = solicitudes.filter(s => new Date(s.created_at) >= desde);
+  const res = l.filter(s => s.estado !== 'pendiente' && s.validado_en);
+  const horas = res.map(s => (new Date(s.validado_en) - new Date(s.created_at)) / 3600000).filter(x => x >= 0);
+  const prom = horas.length ? horas.reduce((a, b) => a + b, 0) / horas.length : null;
+  const deneg = l.filter(s => s.estado === 'denegado').length, resueltos = l.filter(s => s.estado !== 'pendiente').length;
+  $('t-stats').innerHTML = '<h2 class="titulo">Estadísticas</h2><div class="fila"><span>Período:</span><select id="s-per"><option value="7">Últimos 7 días</option><option value="30">Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="0">Todo</option></select></div>' +
+    '<div class="grid"><div class="kpi"><b>' + l.length + '</b><span>Trámites en el período</span></div><div class="kpi"><b>' + (prom == null ? '—' : prom < 48 ? prom.toFixed(1) + ' h' : (prom / 24).toFixed(1) + ' d') + '</b><span>Tiempo promedio de resolución</span></div><div class="kpi"><b>' + (resueltos ? Math.round(100 * deneg / resueltos) + '%' : '—') + '</b><span>Tasa de denegación</span></div><div class="kpi"><b>' + l.filter(s => s.estado === 'pendiente').length + '</b><span>Siguen pendientes</span></div></div>' +
+    '<div class="grid2"><div class="card"><h3>Por trámite</h3>' + barras(contar(l, tramiteDe), 12) + '</div><div class="card"><h3>Por estado</h3>' + barras(contar(l, s => ESTADO[s.estado] || s.estado)) + '</div>' +
+    '<div class="card"><h3>Comisarías con más trámites</h3>' + barras(contar(l, s => nombreDep(s.comisaria_asignada)), 15) + '</div><div class="card"><h3>Denegaciones por comisaría</h3>' + barras(contar(l.filter(s => s.estado === 'denegado'), s => nombreDep(s.comisaria_asignada)), 10) + '</div></div>';
+  $('s-per').value = String(statDias); $('s-per').onchange = (e) => { statDias = +e.target.value; PINTORES.stats(); };
+};
+
+/* ---------- ACCESOS ---------- */
+let accesos = [], accQ = '', accFalla = false;
+PINTORES.accesos = async () => {
+  const b = $('t-accesos');
+  if (!b.dataset.listo) { b.dataset.listo = '1'; b.innerHTML = '<h2 class="titulo">Accesos al panel</h2><p class="sub">Cada vez que alguien del personal ingresó: quién, cuándo y desde qué navegador y equipo. Sirve para detectar ingresos raros. Últimos 500.</p><div class="card"><div class="fila"><input id="ac-q" placeholder="🔍 Filtrar por correo o equipo…" size="30"><label><input type="checkbox" id="ac-f"> Solo intentos fallidos</label><button class="b gris chico" id="ac-r">⟳ Actualizar</button></div><div class="scroll" id="ac-l"></div></div>';
+    $('ac-q').oninput = () => { accQ = $('ac-q').value.toLowerCase(); pintarAccesos(); }; $('ac-f').oninput = () => { accFalla = $('ac-f').checked; pintarAccesos(); }; $('ac-r').onclick = () => { b.dataset.listo = ''; PINTORES.accesos(); }; }
+  const { data, error } = await sb.from('logs_accesos').select('*').order('fecha', { ascending: false }).limit(500);
+  if (error) { $('ac-l').innerHTML = '<p class="msg">' + esc(error.message) + '</p>'; return; }
+  accesos = data; pintarAccesos();
+};
+function pintarAccesos() {
+  const tipos = { login: 'Ingresó', logout: 'Salió', error: 'Intento fallido', fallo: 'Intento fallido' };
+  const l = accesos.filter(a => (!accQ || ((a.email || '') + ' ' + (a.dispositivo || '')).toLowerCase().includes(accQ)) && (!accFalla || /error|fall/.test(a.tipo || '')));
+  $('ac-l').innerHTML = '<table><tr><th>Fecha y hora</th><th>Correo</th><th>Acción</th><th>Navegador / equipo</th></tr>' + l.map(a => '<tr><td>' + fmt(a.fecha) + '</td><td>' + esc(a.email || '') + '</td><td>' + esc(tipos[a.tipo] || a.tipo || '') + '</td><td>' + esc(a.dispositivo || '') + '</td></tr>').join('') + (l.length ? '' : '<tr><td colspan="4">Sin registros.</td></tr>') + '</table>';
 }
 iniciar();
 </script>
