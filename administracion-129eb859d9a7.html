@@ -417,10 +417,16 @@ PINTORES.comisarias = () => {
 
 /* ---------- PEDIDOS DE CONTRASEÑA ---------- */
 function hace(f) { const m = Math.floor((Date.now() - new Date(f)) / 60000); return m < 60 ? 'hace ' + m + ' min' : m < 1440 ? 'hace ' + Math.floor(m / 60) + ' h' : 'hace ' + Math.floor(m / 1440) + ' d'; }
+function legajoTag(p) {
+  const m = /Legajo:\s*(\d{5})/.exec(p.comentario || ''); const reg = personal.find(x => (x.email || '').toLowerCase() === (p.email || '').toLowerCase());
+  if (!m) return '<br><span class="tag amar">Sin legajo</span>';
+  if (!reg || !reg.legajo) return '<br><span class="tag amar">Legajo no cargado en su cuenta</span>';
+  return reg.legajo === m[1] ? '<br><span class="tag procesado">✔ Legajo coincide</span>' : '<br><span class="tag rojo">✖ El legajo NO coincide</span>';
+}
 function pintarPedidos() {
   const b = $('t-pedidos');
   b.innerHTML = '<h2 class="titulo">Pedidos de contraseña</h2><p class="sub">Verificá la identidad de la persona (llamala o confirmá con su jefe) <b>antes</b> de enviar el enlace. El enlace llega a su correo y ella elige su nueva contraseña; vos nunca la ves.</p><div class="card scroll"><table><tr><th>Cuándo</th><th>Correo</th><th>Persona</th><th>Comisaría y contacto</th><th>Estado</th><th>Acciones</th></tr>' +
-    pedidos.map(p => '<tr><td>' + fmt(p.created_at) + '<br><small>' + hace(p.created_at) + '</small></td><td>' + esc(p.email) + '</td><td>' + esc(p.nombre) + '</td><td>' + esc(p.comentario) + '</td><td><span class="tag ' + esc(p.estado) + '">' + esc(p.estado) + '</span>' + (p.atendido_por ? '<br><small>' + esc(p.atendido_por) + '<br>' + fmt(p.atendido_en) + '</small>' : '') + '</td><td>' +
+    pedidos.map(p => '<tr><td>' + fmt(p.created_at) + '<br><small>' + hace(p.created_at) + '</small></td><td>' + esc(p.email) + '</td><td>' + esc(p.nombre) + '</td><td>' + esc(p.comentario) + legajoTag(p) + '</td><td><span class="tag ' + esc(p.estado) + '">' + esc(p.estado) + '</span>' + (p.atendido_por ? '<br><small>' + esc(p.atendido_por) + '<br>' + fmt(p.atendido_en) + '</small>' : '') + '</td><td>' +
       (p.estado === 'pendiente' ? '<button class="b ok chico" data-env="' + p.id + '" data-mail="' + esc(p.email) + '">Enviar enlace</button> <button class="b mal chico" data-rech="' + p.id + '">Rechazar</button>' : '<button class="b gris chico" data-env="' + p.id + '" data-mail="' + esc(p.email) + '">Reenviar</button>') + '</td></tr>').join('') +
     (pedidos.length ? '' : '<tr><td colspan="6">No hay pedidos.</td></tr>') + '</table></div>';
 }
@@ -443,6 +449,12 @@ $('t-pedidos').addEventListener('click', async (e) => {
 });
 
 /* ---------- PERSONAL ---------- */
+const JERARQUIAS = { 'OFICIAL': ['PRINCIPAL', 'AUXILIAR', 'AYUDANTE', 'SUB AYUDANTE'], 'SUB-OFICIAL': ['MAYOR', 'PRINCIPAL', 'SGTO AYUDANTE', 'SARGENTO', 'CABO', 'AGENTE'] };
+const selCategoria = (id, val) => '<select id="' + id + '"><option value="">Personal…</option><option' + (val === 'OFICIAL' ? ' selected' : '') + '>OFICIAL</option><option' + (val === 'SUB-OFICIAL' ? ' selected' : '') + '>SUB-OFICIAL</option></select>';
+const selRango = (id, cat, val) => '<select id="' + id + '"><option value="">Jerarquía…</option>' + (JERARQUIAS[cat] || []).map(r => '<option' + (r === val ? ' selected' : '') + '>' + r + '</option>').join('') + '</select>';
+const partirJerarquia = (j) => { j = j || ''; const cat = j.startsWith('SUB-OFICIAL') ? 'SUB-OFICIAL' : j.startsWith('OFICIAL') ? 'OFICIAL' : ''; return [cat, cat ? j.slice(cat.length).trim() : '']; };
+const juntarJerarquia = (cat, rango) => cat && rango ? cat + ' ' + rango : '';
+function enlazarJerarquia(idCat, idRango) { $(idCat).onchange = () => { $(idRango).outerHTML = selRango(idRango, $(idCat).value, ''); }; }
 let editandoCom = null;
 function chipsHtml(arr) { return arr.map((c, i) => '<span class="chip">' + esc(nombreDep(c)) + '<button data-quitar="' + i + '">×</button></span>').join('') || '<small>Ninguna</small>'; }
 const opcionesDeps = () => deps.slice().sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true })).map(x => '<option value="' + esc(x.nombre) + '"></option>').join('');
@@ -450,32 +462,34 @@ const claveDeNombre = (n) => (deps.find(d => d.nombre === n.trim()) || {}).clave
 let altaCom = [], persQ = '';
 PINTORES.personal = () => {
   const lista = personal.filter(p => !persQ || (p.nombre + ' ' + p.email).toLowerCase().includes(persQ));
-  const fila = (p) => '<tr><td>' + esc(p.nombre || '') + '</td><td>' + esc(p.email) + '</td><td>' + ((p.comisarias || []).map(c => esc(nombreDep(c))).join(', ') || '<small>—</small>') + '</td><td>' + fmt(p.ultimo_ingreso) + '</td><td><span class="tag ' + (p.activo ? 'procesado' : 'denegado') + '">' + (p.activo ? 'Activo' : 'Baja') + '</span></td><td><button class="b chico" data-edit="' + p.user_id + '">Editar</button></td></tr>';
-  const tabla = (t, l) => '<div class="card scroll"><h3>' + t + ' (' + l.length + ')</h3><table><tr><th>Nombre</th><th>Correo</th><th>Comisarías</th><th>Último ingreso</th><th>Estado</th><th></th></tr>' + (l.map(fila).join('') || '<tr><td colspan="6">Nadie cargado.</td></tr>') + '</table></div>';
+  const fila = (p) => '<tr><td>' + esc(p.nombre || '') + '<br><small>' + esc(p.jerarquia || '') + '</small></td><td>' + esc(p.legajo || '—') + '</td><td>' + esc(p.email) + '</td><td>' + ((p.comisarias || []).map(c => esc(nombreDep(c))).join(', ') || '<small>—</small>') + '</td><td>' + fmt(p.ultimo_ingreso) + '</td><td><span class="tag ' + (p.activo ? 'procesado' : 'denegado') + '">' + (p.activo ? 'Activo' : 'Baja') + '</span></td><td><button class="b chico" data-edit="' + p.user_id + '">Editar</button></td></tr>';
+  const tabla = (t, l) => '<div class="card scroll"><h3>' + t + ' (' + l.length + ')</h3><table><tr><th>Nombre y jerarquía</th><th>Legajo</th><th>Correo</th><th>Comisarías</th><th>Último ingreso</th><th>Estado</th><th></th></tr>' + (l.map(fila).join('') || '<tr><td colspan="7">Nadie cargado.</td></tr>') + '</table></div>';
   $('t-personal').innerHTML = '<h2 class="titulo">Personal</h2><p class="sub">Cuentas que usan el panel privado.</p>' +
-    '<div class="card"><h3>Dar de alta</h3><p><small>Primero creá el usuario en Supabase → Authentication → Users → Add user (con "Auto Confirm User"), después cargalo acá.</small></p><div class="fila"><input id="a-mail" type="email" placeholder="correo" size="26"><input id="a-nom" placeholder="Apellido y nombre" size="22"></div>' +
+    '<div class="card"><h3>Dar de alta</h3><p><small>Primero creá el usuario en Supabase → Authentication → Users → Add user (con "Auto Confirm User"), después cargalo acá.</small></p><div class="fila"><input id="a-mail" type="email" placeholder="correo" size="26"><input id="a-nom" placeholder="Apellido y nombre" size="22"><input id="a-leg" inputmode="numeric" maxlength="5" placeholder="Legajo (5 números)" size="16"></div><div class="fila">' + selCategoria('a-cat', '') + selRango('a-ran', '', '') + '</div>' +
     '<div class="fila"><input id="a-com" list="dl-deps" placeholder="Agregar comisaría (escribí para buscar)" size="38" autocomplete="off"><datalist id="dl-deps">' + opcionesDeps() + '</datalist><button class="b chico" id="a-add">+ Agregar</button></div><div id="a-chips">' + chipsHtml(altaCom) + '</div><div class="fila" style="margin-top:10px"><button class="b ok" id="a-alta">Dar de alta</button></div></div>' +
     '<div class="card"><input id="p-q" placeholder="🔍 Buscar persona…" size="28" value="' + esc(persQ) + '"></div>' +
     tabla('👑 Administradores', lista.filter(p => p.rol === 'admin')) + tabla('👮 Personal de comisarías', lista.filter(p => p.rol !== 'admin'));
+  enlazarJerarquia('a-cat', 'a-ran');
   $('p-q').addEventListener('input', (e) => { persQ = e.target.value.toLowerCase(); const pos = e.target.selectionStart; PINTORES.personal(); $('p-q').focus(); $('p-q').setSelectionRange(pos, pos); });
 };
 $('t-personal').addEventListener('click', async (e) => {
   const t = e.target;
   if (t.id === 'a-add') { const c = claveDeNombre($('a-com').value); if (!c) return alert('Elegí una comisaría de la lista.'); if (!altaCom.includes(c)) altaCom.push(c); $('a-com').value = ''; $('a-chips').innerHTML = chipsHtml(altaCom); }
   else if (t.dataset.quitar != null && t.closest('#a-chips')) { altaCom.splice(+t.dataset.quitar, 1); $('a-chips').innerHTML = chipsHtml(altaCom); }
-  else if (t.id === 'a-alta') { const r = await sb.rpc('admin_alta_personal', { p_email: $('a-mail').value, p_nombre: $('a-nom').value, p_comisarias: altaCom }); if (r.error) return alert(r.error.message); registrar('alta_personal', { correo: $('a-mail').value, comisarias: altaCom }); altaCom = []; toast('Persona dada de alta'); cargarTodo(); }
+  else if (t.id === 'a-alta') { const r = await sb.rpc('admin_alta_personal', { p_email: $('a-mail').value, p_nombre: $('a-nom').value, p_comisarias: altaCom, p_legajo: $('a-leg').value, p_jerarquia: juntarJerarquia($('a-cat').value, $('a-ran').value) }); if (r.error) return alert(r.error.message); registrar('alta_personal', { correo: $('a-mail').value, legajo: $('a-leg').value, comisarias: altaCom }); altaCom = []; toast('Persona dada de alta'); cargarTodo(); }
   else if (t.dataset.edit) editarPersona(t.dataset.edit);
 });
 function editarPersona(uid) {
   const p = personal.find(x => x.user_id === uid); if (!p) return; editandoCom = (p.comisarias || []).slice();
   $('modal').innerHTML = '<div style="max-width:620px"><div class="fila"><h3 style="flex:1">Editar: ' + esc(p.email) + '</h3><button class="b gris chico" data-cerrar="1">✕</button></div>' +
-    '<div class="fila"><input id="e-nom" value="' + esc(p.nombre || '') + '" placeholder="Nombre" size="30"></div><p><b>Comisarías que puede ver</b></p><div id="e-chips">' + chipsHtml(editandoCom) + '</div>' +
+    '<div class="fila"><input id="e-nom" value="' + esc(p.nombre || '') + '" placeholder="Nombre" size="30"><input id="e-leg" inputmode="numeric" maxlength="5" value="' + esc(p.legajo || '') + '" placeholder="Legajo (5 números)" size="16"></div><div class="fila">' + selCategoria('e-cat', partirJerarquia(p.jerarquia)[0]) + selRango('e-ran', partirJerarquia(p.jerarquia)[0], partirJerarquia(p.jerarquia)[1]) + '</div><p><b>Comisarías que puede ver</b></p><div id="e-chips">' + chipsHtml(editandoCom) + '</div>' +
     '<div class="fila"><input id="e-com" list="dl-deps2" placeholder="Agregar comisaría…" size="34" autocomplete="off"><datalist id="dl-deps2">' + opcionesDeps() + '</datalist><button class="b chico" id="e-add">+ Agregar</button></div>' +
     '<div class="fila"><label><input type="checkbox" id="e-act"' + (p.activo ? ' checked' : '') + '> Cuenta activa (si la destildás, no puede ingresar)</label></div><div class="fila"><button class="b ok" id="e-guardar">Guardar</button></div></div>';
   $('modal').classList.remove('oculto');
+  enlazarJerarquia('e-cat', 'e-ran');
   $('e-add').onclick = () => { const c = claveDeNombre($('e-com').value); if (!c) return alert('Elegí una comisaría de la lista.'); if (!editandoCom.includes(c)) editandoCom.push(c); $('e-com').value = ''; $('e-chips').innerHTML = chipsHtml(editandoCom); };
   $('e-chips').onclick = (e) => { if (e.target.dataset.quitar != null) { editandoCom.splice(+e.target.dataset.quitar, 1); $('e-chips').innerHTML = chipsHtml(editandoCom); } };
-  $('e-guardar').onclick = async () => { const r = await sb.rpc('admin_actualizar_personal', { p_user_id: uid, p_nombre: $('e-nom').value, p_comisarias: editandoCom, p_activo: $('e-act').checked }); if (r.error) return alert(r.error.message); registrar('editar_personal', { correo: p.email, activo: $('e-act').checked, comisarias: editandoCom }); cerrarModal(); toast('Guardado'); cargarTodo(); };
+  $('e-guardar').onclick = async () => { const r = await sb.rpc('admin_actualizar_personal', { p_user_id: uid, p_nombre: $('e-nom').value, p_comisarias: editandoCom, p_activo: $('e-act').checked, p_legajo: $('e-leg').value, p_jerarquia: juntarJerarquia($('e-cat').value, $('e-ran').value) }); if (r.error) return alert(r.error.message); registrar('editar_personal', { correo: p.email, activo: $('e-act').checked, comisarias: editandoCom }); cerrarModal(); toast('Guardado'); cargarTodo(); };
 }
 
 /* ---------- ESTADÍSTICAS ---------- */

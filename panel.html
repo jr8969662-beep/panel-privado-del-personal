@@ -468,7 +468,9 @@
     #aviso-inactividad{left:10px;right:10px;transform:none;font-size:0.82rem;}
   }
 
-  #perfil-personal{font-size:0.78rem;line-height:1.3;text-align:right;color:rgba(255,255,255,0.85);margin-right:12px;max-width:260px;}
+  #perfil-personal{flex:1;font-size:0.78rem;line-height:1.35;text-align:center;color:rgba(255,255,255,0.85);margin:0 12px;}
+  #perfil-personal .p-jerarquia{display:block;color:var(--dorado-brilloso,#ffd24d);font-weight:700;font-size:0.82rem;letter-spacing:0.04em;text-transform:uppercase;}
+  #perfil-personal .p-nombre{display:block;color:#fff;font-weight:600;font-size:0.95rem;}
   #perfil-personal strong{color:var(--dorado-brilloso,#ffd24d);display:block;}
   .aviso-sin-comisaria{display:none;margin:0 0 16px;padding:14px 18px;border-radius:8px;background:rgba(185,28,28,0.25);border:1px solid rgba(252,165,165,0.5);color:#fecaca;font-weight:600;}
   .aviso-sin-comisaria.activo{display:block;}
@@ -512,6 +514,11 @@
     <label for="login-email">Usuario (email)</label>
     <div class="input-wrapper">
       <input type="email" id="login-email" autocomplete="username" placeholder="tu@email.com">
+    </div>
+
+    <label for="login-legajo">Legajo personal (5 números)</label>
+    <div class="input-wrapper">
+      <input type="text" id="login-legajo" inputmode="numeric" pattern="[0-9]*" maxlength="5" autocomplete="off" placeholder="12345">
     </div>
 
     <label for="login-pass">Contraseña</label>
@@ -763,6 +770,8 @@
     <input type="text" id="rec-buscar" autocomplete="off" placeholder="🔍 Escribí para buscar tu comisaría…">
     <select id="rec-comisaria"><option value="">Elegí tu comisaría…</option></select>
     <div id="rec-cuenta" style="font-size:0.78rem;color:rgba(255,255,255,0.6);margin:4px 0 0;"></div>
+    <label>Legajo personal (5 números)</label>
+    <input type="text" id="rec-legajo" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="12345">
     <label>Teléfono o dato para contactarte (opcional)</label>
     <input type="text" id="rec-comentario" maxlength="100" placeholder="Para que el administrador pueda verificarte">
     <div class="modal-btns">
@@ -1242,16 +1251,21 @@ async function intentarLogin() {
   if (bloqueadoHasta && Date.now() < bloqueadoHasta) { vibrarLogin(); return; }
 
   const email = inputEmail.value.trim();
+  const legajo = document.getElementById('login-legajo').value.trim();
   const pass = inputPass.value;
   errorLogin.classList.remove('activo');
   errorLogin.textContent = '';
 
-  if (!email || !pass) {
-    errorLogin.textContent = 'Completá usuario y contraseña.';
+  if (!email || !pass || !legajo) {
+    errorLogin.textContent = 'Completá usuario, legajo y contraseña.';
     errorLogin.classList.add('activo'); vibrarLogin(); return;
   }
   if (!email.includes('@') || !email.includes('.')) {
     errorLogin.textContent = 'El email no es válido.';
+    errorLogin.classList.add('activo'); vibrarLogin(); return;
+  }
+  if (!/^[0-9]{5}$/.test(legajo)) {
+    errorLogin.textContent = 'El legajo personal tiene 5 números.';
     errorLogin.classList.add('activo'); vibrarLogin(); return;
   }
   if (pass.length < 6) {
@@ -1262,7 +1276,15 @@ async function intentarLogin() {
   btnEntrar.disabled = true;
   btnEntrar.innerHTML = '<span class="spinner"></span>Verificando...';
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+  verificandoLegajo = true;
+  let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+  let legajoMal = false;
+  if (!error) {
+    let ok = false;
+    try { const r = await supabaseClient.rpc('verificar_legajo', { p_legajo: legajo }); ok = !r.error && r.data === true; } catch (e) { ok = false; }
+    if (!ok) { legajoMal = true; error = { message: 'legajo' }; await supabaseClient.auth.signOut(); }
+  }
+  verificandoLegajo = false;
 
   if (error) {
     intentosFallidos++;
@@ -1276,8 +1298,8 @@ async function intentarLogin() {
       vibrarLogin(); return;
     }
     localStorage.setItem(LOGIN_KEY, JSON.stringify({ intentos: intentosFallidos, bloqueadoHasta: 0 }));
-    let mensaje = 'Usuario o contraseña incorrectos.';
-    if (error.message && error.message.toLowerCase().includes('email')) {
+    let mensaje = legajoMal ? 'Usuario, legajo o contraseña incorrectos.' : 'Usuario o contraseña incorrectos.';
+    if (!legajoMal && error.message && error.message.toLowerCase().includes('email')) {
       mensaje = 'El email no está registrado o es inválido.';
     }
     errorLogin.textContent = `${mensaje} (${restantes} intento${restantes === 1 ? '' : 's'} restante${restantes === 1 ? '' : 's'})`;
@@ -1289,6 +1311,8 @@ async function intentarLogin() {
 
   intentosFallidos = 0;
   localStorage.removeItem(LOGIN_KEY);
+  document.getElementById('login-legajo').value = '';
+  mostrarSesion(true);
   bloqueadoHasta = 0;
   if (intervalBloqueo) { clearInterval(intervalBloqueo); intervalBloqueo = null; }
   document.getElementById('aviso-bloqueo').classList.remove('activo');
@@ -1321,8 +1345,10 @@ async function intentarLogin() {
   mostrarToast('✅ Bienvenido/a', 'Sesión iniciada correctamente', 'success', 3000);
 }
 
+document.getElementById('login-legajo').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 5); });
+document.getElementById('login-legajo').addEventListener('keypress', (e) => { if (e.key === 'Enter') inputPass.focus(); });
 btnEntrar.addEventListener('click', intentarLogin);
-inputEmail.addEventListener('keypress', (e) => { if (e.key === 'Enter') inputPass.focus(); });
+inputEmail.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('login-legajo').focus(); });
 inputPass.addEventListener('keypress', (e) => { if (e.key === 'Enter') intentarLogin(); });
 
 setTimeout(() => {
@@ -1381,8 +1407,10 @@ document.getElementById('btn-enviar-rec').addEventListener('click', async () => 
   const jer = document.getElementById('rec-jerarquia').value;
   const com = document.getElementById('rec-comisaria').value.trim();
   const tel = document.getElementById('rec-comentario').value.trim();
+  const leg = document.getElementById('rec-legajo').value.trim();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Escribí un correo válido.'); return; }
   if (!nombre) { alert('Escribí tu apellido y nombre.'); return; }
+  if (!/^[0-9]{5}$/.test(leg)) { alert('Escribí tu legajo personal (5 números).'); return; }
   if (!cat) { alert('Elegí si sos OFICIAL o SUB-OFICIAL.'); return; }
   if (!jer) { alert('Elegí tu jerarquía.'); return; }
   if (!com || (comisariasRec.length && !comisariasRec.includes(com))) { alert('Elegí tu comisaría de la lista (podés escribir arriba para buscarla).'); return; }
@@ -1392,7 +1420,7 @@ document.getElementById('btn-enviar-rec').addEventListener('click', async () => 
     await supabaseClient.rpc('pedir_restablecer_clave', {
       p_email: email,
       p_nombre: (nombre + ' — ' + cat + ' ' + jer).slice(0, 120),
-      p_comentario: ('Comisaría: ' + com + (tel ? ' · Contacto: ' + tel : '')).slice(0, 300)
+      p_comentario: ('Legajo: ' + leg + ' · Comisaría: ' + com + (tel ? ' · Contacto: ' + tel : '')).slice(0, 300)
     });
   } catch (err) { /* misma respuesta siempre */ }
   btn.disabled = false; btn.textContent = 'Enviar pedido';
@@ -1526,7 +1554,7 @@ async function cargarPerfil() {
     perfilActual = data;
     const esAdmin = data.rol === 'admin';
     const comis = esAdmin ? 'Administrador · todas las comisarías' : (data.comisarias || []).map(nombreComisaria).join(' · ') || 'Sin comisaría';
-    caja.innerHTML = `<strong>${escapeHtml(data.nombre || data.email || usuarioActual || '')}</strong>${escapeHtml(comis)}`;
+    caja.innerHTML = `<span class="p-jerarquia">${escapeHtml(esAdmin && !data.jerarquia ? 'Administrador' : (data.jerarquia || ''))}</span><span class="p-nombre">${escapeHtml(data.nombre || data.email || usuarioActual || '')}</span>${escapeHtml(comis)}`;
     btnAud.style.display = esAdmin ? '' : 'none';
   } catch (e) { console.warn('Error cargando perfil', e); }
 }
@@ -1584,7 +1612,9 @@ function mostrarMapaDetalle(d) {
 })();
 
 let recuperando = /type=recovery/.test(location.hash || '');
+let verificandoLegajo = false;
 function mostrarSesion(sesionActiva) {
+  if (sesionActiva && verificandoLegajo) return;
   if (sesionActiva && recuperando) {
     // Elegir nueva contraseña: no se muestra el panel ni el login de fondo
     vistaLogin.style.display = 'none';
