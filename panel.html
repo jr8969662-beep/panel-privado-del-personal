@@ -285,20 +285,31 @@
   #btn-validar:hover{background:#166534;}
   #btn-denegar{background:#b91c1c;color:#fff;}
   #btn-denegar:hover{background:#991b1b;}
-  #btn-pendiente{background:#ca8a04;color:#fff;}
-  #btn-pendiente:hover{background:#a16207;}
   #btn-imprimir{background:var(--azul);color:#fff;border:1px solid rgba(255,255,255,0.2);}
   #btn-imprimir:hover{background:var(--azul-claro);}
   #btn-cerrar-detalle{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);}
   #btn-cerrar-detalle:hover{background:rgba(255,255,255,0.25);}
-  #btn-urgente{background:rgba(185,28,28,0.7);color:#fff;border:1px solid rgba(252,165,165,0.5);}
-  #btn-urgente:hover{background:rgba(185,28,28,0.9);}
   #btn-retirado{background:#0d9488;color:#fff;border:1px solid rgba(94,234,212,0.4);}
   #btn-retirado:hover{background:#0f766e;}
   #btn-retirado:disabled{opacity:0.5;cursor:not-allowed;}
-  #btn-invalidar-ubicacion{background:rgba(185,28,28,0.5);color:#fff;
-    border:1px solid rgba(252,165,165,0.5);}
-  #btn-invalidar-ubicacion:hover{background:rgba(185,28,28,0.75);}
+
+  /* Botones del detalle: redondeados, con relieve y movimiento */
+  #detalle .btns{gap:12px;align-items:center;padding:16px;margin-top:26px;border-top:0;
+    background:rgba(0,0,0,0.25);border:1px solid rgba(201,169,97,0.25);border-radius:22px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);}
+  #detalle .btns button{border-radius:999px;padding:11px 22px;font-size:0.88rem;letter-spacing:0.02em;
+    border:1px solid rgba(255,255,255,0.22);
+    box-shadow:0 4px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.28);
+    transition:transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;}
+  #detalle .btns button:hover{transform:translateY(-2px);filter:brightness(1.12);
+    box-shadow:0 8px 16px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.35);}
+  #detalle .btns button:active{transform:translateY(1px) scale(0.98);box-shadow:0 2px 4px rgba(0,0,0,0.4);}
+  #detalle .btns #btn-validar{background:linear-gradient(180deg,#22a34f,#15803d);padding:12px 28px !important;font-size:0.95rem !important;}
+  #detalle .btns #btn-denegar{background:linear-gradient(180deg,#dc3b3b,#b91c1c);padding:12px 28px !important;font-size:0.95rem !important;}
+  #detalle .btns #btn-retirado{background:linear-gradient(180deg,#14b8a6,#0d9488);}
+  #detalle .btns #btn-derivar,#detalle .btns #btn-imprimir{background:linear-gradient(180deg,#3a6cb5,#1f4a8a);color:#fff;}
+  #detalle .btns #btn-cerrar-detalle{background:rgba(255,255,255,0.12);margin-left:auto;}
+  @media(max-width:600px){#detalle .btns button{flex:1 1 calc(50% - 12px);justify-content:center;}}
 
   .vacio{padding:40px 20px;text-align:center;color:rgba(255,255,255,0.7);font-size:0.9rem;}
   .vacio .vacio-icono{font-size:3rem;margin-bottom:12px;opacity:0.5;}
@@ -678,10 +689,7 @@
       <div class="btns">
         <button id="btn-validar">✓ Validar</button>
         <button id="btn-denegar">✕ Denegar</button>
-        <button id="btn-pendiente">⏱ Marcar pendiente</button>
-        <button id="btn-urgente">🚨 Marcar urgente</button>
         <button id="btn-retirado">📦 Marcar como retirado</button>
-        <button id="btn-invalidar-ubicacion">🚫 Invalidar ubicación del DNI</button>
         <button id="btn-derivar" style="display:none;">↪ Derivar a otra comisaría</button>
         <button id="btn-imprimir">🖨 Imprimir</button>
         <button id="btn-cerrar-detalle">Cerrar</button>
@@ -2947,19 +2955,6 @@ async function cambiarEstado(nuevoEstado) {
 
 document.getElementById('btn-validar').addEventListener('click', () => cambiarEstado('procesado'));
 document.getElementById('btn-denegar').addEventListener('click', () => cambiarEstado('denegado'));
-document.getElementById('btn-pendiente').addEventListener('click', () => cambiarEstado('pendiente'));
-
-/* MARCAR URGENTE */
-document.getElementById('btn-urgente').addEventListener('click', async () => {
-  if (!solicitudAbierta) return;
-  const nuevoValor = !solicitudAbierta.urgente;
-  const { error } = await supabaseClient
-    .from('solicitudes').update({ urgente: nuevoValor }).eq('id', solicitudAbierta.id);
-  if (error) { alert('Error: ' + error.message); return; }
-  solicitudAbierta.urgente = nuevoValor;
-  await cargarSolicitudes();
-  mostrarToast(nuevoValor ? '🚨 Marcado urgente' : '✅ Ya no es urgente', '', 'warning', 3000);
-});
 
 /* MARCAR COMO RETIRADO */
 document.getElementById('btn-retirado').addEventListener('click', async () => {
@@ -2973,21 +2968,6 @@ document.getElementById('btn-retirado').addEventListener('click', async () => {
   document.getElementById('detalle').style.display = 'none';
   await cargarSolicitudes();
   mostrarToast('📦 Certificado retirado', 'Ya no se va a eliminar automáticamente', 'success', 3500);
-});
-
-/* INVALIDAR UBICACIÓN MANUALMENTE */
-document.getElementById('btn-invalidar-ubicacion').addEventListener('click', async () => {
-  if (!solicitudAbierta) return;
-  const dni = obtenerDniSolicitud(solicitudAbierta);
-  if (!dni) { alert('Esta solicitud no tiene DNI asociado.'); return; }
-  if (!confirm(`¿Invalidar la ubicación guardada del DNI ${dni}?\n\nEl ciudadano tendrá que marcar de nuevo en el mapa la próxima vez.`)) return;
-  const motivo = prompt('Motivo de la invalidación (opcional):', '') || 'Invalidada manualmente por el personal';
-  const ok = await invalidarUbicacionCiudadano(dni, motivo);
-  if (ok) {
-    mostrarToast('⛔ Ubicación invalidada', `DNI ${dni} tendrá que marcar de nuevo`, 'warning', 4000);
-  } else {
-    mostrarToast('❌ Error', 'No se pudo invalidar la ubicación. ¿Existe la tabla en Supabase?', 'error', 5000);
-  }
 });
 
 /* IMPRIMIR */
