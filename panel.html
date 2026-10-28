@@ -1548,6 +1548,10 @@ function nombreComisaria(nombre) {
 
 let perfilActual = null;   // null = todavía no configurado en Supabase (modo anterior: se ve todo)
 
+// En el encabezado se muestra solo el grado (CABO, PRINCIPAL, AYUDANTE…), sin "OFICIAL" / "SUB-OFICIAL"
+function rangoSolo(j) {
+  return String(j || '').replace(/^\s*SUB-OFICIAL\s*/i, '').replace(/^\s*OFICIAL\s*/i, '').replace(/^SGTO\b/i, 'SARGENTO').trim();
+}
 async function cargarPerfil() {
   perfilActual = null;
   const caja = document.getElementById('perfil-personal');
@@ -1573,7 +1577,7 @@ async function cargarPerfil() {
     const esAdmin = data.rol === 'admin';
     if (!esAdmin && !(data.comisarias || []).length) aviso.classList.add('activo');
     const comis = esAdmin ? 'Administrador · todas las comisarías' : (data.comisarias || []).map(nombreComisaria).join(' · ') || 'Sin comisaría';
-    caja.innerHTML = `<span class="p-jerarquia">${escapeHtml(esAdmin && !data.jerarquia ? 'Administrador' : (data.jerarquia || ''))}</span><span class="p-nombre">${escapeHtml(data.nombre || data.email || usuarioActual || '')}</span>${escapeHtml(comis)}`;
+    caja.innerHTML = `<span class="p-jerarquia">${escapeHtml(esAdmin && !data.jerarquia ? 'Administrador' : rangoSolo(data.jerarquia))}</span><span class="p-nombre">${escapeHtml(data.nombre || data.email || usuarioActual || '')}</span>${escapeHtml(comis)}`;
     btnAud.style.display = esAdmin ? '' : 'none';
   } catch (e) { console.warn('Error cargando perfil', e); }
 }
