@@ -1880,6 +1880,13 @@ const etiquetasDetalle = {
   tipoDocumentoDNI: 'Tipo de documento',
   fechaEmisionDNI: 'Fecha de emisión del DNI',
   esDNINuevo: 'Escaneado con DNI electrónico (QR)',
+  versionDNI: 'Documento escaneado',
+  ejemplarDNI: 'Ejemplar del DNI',
+  dniSexo: 'Sexo (leído del DNI)',
+  dniVencimiento: 'Vencimiento del DNI',
+  dniCuil: 'CUIL (leído del DNI)',
+  dniDomicilio: 'Domicilio impreso en el DNI',
+  dniLugarNacimiento: 'Lugar de nacimiento (DNI)',
   foto_acompanante: 'Foto del DNI - Acompañante',
   foto_conviviente: 'Foto del DNI - Conviviente 1',
 };
@@ -2767,10 +2774,20 @@ async function mostrarDetalle(s) {
   if (zona) camposSol.push(['Zona', zona]);
 
   // Datos del DNI electrónico (si fue escaneado con QR)
-  if (d.esDNINuevo === 'true' || d.esDNINuevo === true) {
+  if (d.versionDNI || d.esDNINuevo === 'true' || d.esDNINuevo === true) {
+    if (d.versionDNI) camposSol.push([et.versionDNI, d.versionDNI, false, true]);
     if (d.nroTramiteDNI) camposSol.push([et.nroTramiteDNI, d.nroTramiteDNI, false, true]);
-    if (d.tipoDocumentoDNI) camposSol.push([et.tipoDocumentoDNI, d.tipoDocumentoDNI, false, true]);
+    if (d.ejemplarDNI) camposSol.push([et.ejemplarDNI, d.ejemplarDNI, false, true]);
+    if (d.tipoDocumentoDNI && !d.versionDNI) camposSol.push([et.tipoDocumentoDNI, d.tipoDocumentoDNI, false, true]);
     if (d.fechaEmisionDNI) camposSol.push([et.fechaEmisionDNI, d.fechaEmisionDNI, false, true]);
+    if (d.dniVencimiento) {
+      const vencido = new Date(d.dniVencimiento + 'T23:59:59') < new Date();
+      camposSol.push([et.dniVencimiento, d.dniVencimiento + (vencido ? '  ⚠️ VENCIDO' : ''), false, true]);
+    }
+    if (d.dniSexo) camposSol.push([et.dniSexo, d.dniSexo, false, true]);
+    if (d.dniCuil) camposSol.push([et.dniCuil, d.dniCuil, false, true]);
+    if (d.dniLugarNacimiento) camposSol.push([et.dniLugarNacimiento, d.dniLugarNacimiento, false, true]);
+    if (d.dniDomicilio) camposSol.push([et.dniDomicilio, d.dniDomicilio, false, true]);
   }
 
   if (s.codigo) camposSol.push(['🔐 Código único del trámite', s.codigo]);
