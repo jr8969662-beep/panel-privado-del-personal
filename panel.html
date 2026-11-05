@@ -1881,6 +1881,7 @@ const etiquetasDetalle = {
   fechaEmisionDNI: 'Fecha de emisión del DNI',
   esDNINuevo: 'Escaneado con DNI electrónico (QR)',
   versionDNI: 'Documento escaneado',
+  comisariaElegidaPorCiudadano: 'Comisaría elegida por el ciudadano',
   ejemplarDNI: 'Ejemplar del DNI',
   dniSexo: 'Sexo (leído del DNI)',
   dniVencimiento: 'Vencimiento del DNI',
@@ -2772,6 +2773,7 @@ async function mostrarDetalle(s) {
   } catch (e) {}
   const zona = (s.datos && s.datos.zona) || obtenerZona(s.comisaria_asignada);
   if (zona) camposSol.push(['Zona', zona]);
+  if (d.comisariaElegidaPorCiudadano) camposSol.push(['⚠️ Comisaría elegida por el ciudadano', 'No se pudo ubicar su domicilio en el mapa: verificar que corresponda (si no, derivar)']);
 
   // Datos del DNI electrónico (si fue escaneado con QR)
   if (d.versionDNI || d.esDNINuevo === 'true' || d.esDNINuevo === true) {
