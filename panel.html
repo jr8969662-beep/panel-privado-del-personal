@@ -1889,6 +1889,7 @@ const etiquetasDetalle = {
   dniDomicilio: 'Domicilio impreso en el DNI',
   dniLugarNacimiento: 'Lugar de nacimiento (DNI)',
   dniNacionalidad: 'Nacionalidad (DNI)',
+  confirmacionDatosDNI: 'Datos del DNI (foto)',
   foto_acompanante: 'Foto del DNI - Acompañante',
   foto_conviviente: 'Foto del DNI - Conviviente 1',
 };
@@ -2779,6 +2780,7 @@ async function mostrarDetalle(s) {
   // Datos del DNI electrónico (si fue escaneado con QR)
   if (d.versionDNI || d.esDNINuevo === 'true' || d.esDNINuevo === true) {
     if (d.versionDNI) camposSol.push([et.versionDNI, d.versionDNI, false, true]);
+    if (d.confirmacionDatosDNI) camposSol.push([et.confirmacionDatosDNI, d.confirmacionDatosDNI + (/Corregidos/.test(d.confirmacionDatosDNI) ? '  ⚠️ verificar con el DNI físico' : ''), false, true]);
     if (d.nroTramiteDNI) camposSol.push([et.nroTramiteDNI, d.nroTramiteDNI, false, true]);
     if (d.ejemplarDNI) camposSol.push([et.ejemplarDNI, d.ejemplarDNI, false, true]);
     if (d.tipoDocumentoDNI && !d.versionDNI) camposSol.push([et.tipoDocumentoDNI, d.tipoDocumentoDNI, false, true]);
