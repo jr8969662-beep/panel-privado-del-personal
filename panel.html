@@ -1888,6 +1888,7 @@ const etiquetasDetalle = {
   dniCuil: 'CUIL (leído del DNI)',
   dniDomicilio: 'Domicilio impreso en el DNI',
   dniLugarNacimiento: 'Lugar de nacimiento (DNI)',
+  dniNacionalidad: 'Nacionalidad (DNI)',
   foto_acompanante: 'Foto del DNI - Acompañante',
   foto_conviviente: 'Foto del DNI - Conviviente 1',
 };
@@ -2789,6 +2790,7 @@ async function mostrarDetalle(s) {
     if (d.dniSexo) camposSol.push([et.dniSexo, d.dniSexo, false, true]);
     if (d.dniCuil) camposSol.push([et.dniCuil, d.dniCuil, false, true]);
     if (d.dniLugarNacimiento) camposSol.push([et.dniLugarNacimiento, d.dniLugarNacimiento, false, true]);
+    if (d.dniNacionalidad) camposSol.push([et.dniNacionalidad, d.dniNacionalidad, false, true]);
     if (d.dniDomicilio) camposSol.push([et.dniDomicilio, d.dniDomicilio, false, true]);
   }
 
